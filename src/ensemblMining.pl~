@@ -36,7 +36,7 @@ sub get_variations_by_chromosome_so_terms {
 	my $transcript  = get_transcripts_by_chromosome( $chromosome );
 	my $trvs = $trv_adaptor->fetch_all_by_Transcripts($transcript);    #get ALL effects of Variations in the Transcript
 	print "Encontrados " . scalar @{$trvs} . " variaciones\n";
-	$trvs = filter_by_so_terms( $trvs, $so_terms );
+	$trvs = filter_by_so_terms( $trvs, \@so_terms );
 	print "Fltradas " . scalar @{$trvs} . " variaciones\n";
 
 	
