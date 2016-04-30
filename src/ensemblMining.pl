@@ -32,12 +32,11 @@ foreach my $chromosome (@chromosomes) {
 sub get_variations_by_chromosome_so_terms {
 	my $chromosome = $_[0];
 	my $so_terms = $_[1];
-	#my $trvs = $trv_adaptor->fetch_all_by_VariationFeatures_SO_terms([$transcript], [\@so_terms]);
+	
+	# Get all transcripts from chromosome
 	my $transcript  = get_transcripts_by_chromosome( $chromosome );
-	my $trvs = $trv_adaptor->fetch_all_by_Transcripts($transcript);    #get ALL effects of Variations in the Transcript
-	print "Encontrados " . scalar @{$trvs} . " variaciones\n";
-	$trvs = filter_by_so_terms( $trvs, $so_terms );
-	print "Fltradas " . scalar @{$trvs} . " variaciones\n";
+	# Get variation in transcripts with so terms
+	my $trvs = $trv_adaptor->fetch_all_by_Transcripts_SO_terms($transcript, \@so_terms);
 
 	
 	foreach my $tv ( @{$trvs} ) {
@@ -73,28 +72,6 @@ sub get_variations_by_chromosome_so_terms {
 		print "\n";
 	    }
 	}
-}
-
-# Receive a transcript variation object and SO terms list.
-# param 1 -> transcript variation object.
-# param 2 -> SO terms list reference.
-# return a new transcript object variation filtering so_terms in param 1.
-sub filter_by_so_terms {
-    my $trvs         = $_[0];
-    my $so_terms     = $_[1];
-    my @filteredList = ();
-    foreach my $tv ( @{$trvs} ) {
-        my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
-        foreach my $tva ( @{$tvas} ) {
-            my $ocs = $tva->get_all_OverlapConsequences();
-            foreach my $oc ( @{$ocs} ) {
-                if ( exists_in_list( $oc->SO_term, $so_terms ) ) {
-                    push @filteredList, $tv;
-                }
-            }
-        }
-    }
-    return \@filteredList;
 }
 
 # Checks if an element exists in the given list.
