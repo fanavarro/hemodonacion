@@ -36,7 +36,7 @@ sub get_variations_by_chromosome_so_terms {
 	# Get all transcripts from chromosome
 	my $transcript  = get_transcripts_by_chromosome( $chromosome );
 	# Get variation in transcripts with so terms
-	my $trvs = $trv_adaptor->fetch_all_by_Transcripts_SO_terms($transcript, \@so_terms);
+	my $trvs = $trv_adaptor->fetch_all_by_Transcripts_SO_terms($transcript, $so_terms);
 
 	
 	foreach my $tv ( @{$trvs} ) {
