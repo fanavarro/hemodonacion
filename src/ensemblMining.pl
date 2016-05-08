@@ -20,7 +20,7 @@ $registry->load_registry_from_db(
     -user => 'anonymous',
 );
 # Set the flag to make sure that the database connection is dropped if not being used on each database.
-$registry->set_disconnect_when_inactive();
+# $registry->set_disconnect_when_inactive();
 # Set the flag to make sure that the database connection is not lost before it's used. This is useful for long running jobs (over 8hrs).
 $registry->set_reconnect_when_lost();
 
