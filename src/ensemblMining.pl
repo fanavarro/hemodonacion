@@ -36,10 +36,12 @@ my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X 
 # Sequence Ontology terms
 my @so_terms = ('start_lost');
 
-
+# CSV separator character configuration
+my $csv_separator = ',';
+my $in_field_separator = '-';
 # Print csv header
 my @header = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID VARIATION_NAME MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE  CONSEQUENCE SO_TERM SIFT POLYPHEN);
-print $fh join(",", @header) . "\n";
+print $fh join($csv_separator, @header) . "\n";
 
 # For each chromosome, get its variations with specified so terms.
 foreach my $chromosome (@chromosomes) {
@@ -78,20 +80,20 @@ sub get_variations_by_chromosome_so_terms {
 		my $sift     = $tva->sift_prediction;
 		my $polyphen = $tva->polyphen_prediction;
 
-		print $fh $chromosome . "," . $tv->transcript->get_Gene->stable_id . "," . 
-		  $tv->transcript->get_Gene->external_name . "," . 
-		  $tv->transcript->display_id . "," .
-		  $tv->variation_feature->variation_name . "," .
-		  $minor_allele_frequency . "," .
-		  $tva->transcript_variation->get_reference_TranscriptVariationAllele->codon . "/" . $tva->codon . "," . $tva->pep_allele_string .
-		  "," . join( "-", @ensembl_consequences ) .
-		  "," . join( "-", @so_consequences );
+		print $fh $chromosome . $csv_separator . $tv->transcript->get_Gene->stable_id . $csv_separator . 
+		  $tv->transcript->get_Gene->external_name . $csv_separator . 
+		  $tv->transcript->display_id . $csv_separator .
+		  $tv->variation_feature->variation_name . $csv_separator .
+		  $minor_allele_frequency . $csv_separator .
+		  $tva->transcript_variation->get_reference_TranscriptVariationAllele->codon . "/" . $tva->codon . $csv_separator . $tva->pep_allele_string .
+		  $csv_separator . join( $in_field_separator, @ensembl_consequences ) .
+		  $csv_separator . join( $in_field_separator, @so_consequences );
 
-		print $fh ",";
+		print $fh $csv_separator;
 		if ( defined($sift) ) {
 		    print $fh "$sift";
 		}
-		print $fh ",";
+		print $fh $csv_separator;
 		if ( defined($polyphen) ) {
 		    print $fh "$polyphen";
 		}
