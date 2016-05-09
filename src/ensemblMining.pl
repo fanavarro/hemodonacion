@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Bio::EnsEMBL::Registry;
+use myUtils::CsvManager;
 
 #Get output file from input parameters
 my $output = "";
@@ -11,7 +12,18 @@ if (scalar @ARGV == 1){
 	exit;
 }
 open(my $fh, '>', $output) or die "Could not open file '$output' $!";
-print "Results will be printed in $output";
+print "Results will be printed in $output\n";
+
+# CSV file configuration
+my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID VARIATION_NAME MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE  CONSEQUENCE SO_TERM SIFT POLYPHEN);
+my $out_csv = myUtils::CsvManager->new (
+	fields    => \@fields,
+	csv_separator   => ',',
+	in_field_separator    => '-',
+	file_name => $output,
+	mode => '>'
+);
+$out_csv->myUtils::CsvManager::writeHeader();
 
 # Registry configuration
 my $registry = 'Bio::EnsEMBL::Registry';
@@ -31,31 +43,27 @@ my $slice_adaptor = $registry->get_adaptor( 'Human', 'Core', 'Slice' );
 my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcriptvariation' );
 
 # Chromosomes to be treated
-my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
+# my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
+my @chromosomes = qw(Y);
 
 # Sequence Ontology terms
 my @so_terms = ('start_lost');
 
-# CSV separator character configuration
-my $csv_separator = ',';
-my $in_field_separator = '-';
-# Print csv header
-my @header = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID VARIATION_NAME MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE  CONSEQUENCE SO_TERM SIFT POLYPHEN);
-print $fh join($csv_separator, @header) . "\n";
-
 # For each chromosome, get its variations with specified so terms.
 foreach my $chromosome (@chromosomes) {
-	get_variations_by_chromosome_so_terms($chromosome, \@so_terms);
+	get_variations_by_chromosome_so_terms($chromosome, \@so_terms, $out_csv);
 }
-close($fh);
+
+$out_csv->myUtils::CsvManager::close();
 
 # Get variations from chromosome (param 1) with the so term (param 2).
 # param 1 -> Chromosome name
 # param 2 -> SO term list
+# param 3 -> CsvManager object to print results.
 sub get_variations_by_chromosome_so_terms {
 	my $chromosome = $_[0];
 	my $so_terms = $_[1];
-	
+	my $out_csv = $_[2];
 	# Get all transcripts from chromosome
 	my $transcript  = get_transcripts_by_chromosome( $chromosome );
 	# Get variation in transcripts with so terms
@@ -67,7 +75,10 @@ sub get_variations_by_chromosome_so_terms {
 	    $count = $count + 1;
 	    my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
 	    my $minor_allele_frequency = $tv->variation_feature->minor_allele_frequency ? $tv->variation_feature->minor_allele_frequency : '-';
+	    
 	    foreach my $tva ( @{$tvas} ) {
+		my %entry;
+	    	
 		my @ensembl_consequences;
 		my @so_consequences;
 		my $ocs = $tva->get_all_OverlapConsequences();
@@ -79,26 +90,28 @@ sub get_variations_by_chromosome_so_terms {
 
 		my $sift     = $tva->sift_prediction;
 		my $polyphen = $tva->polyphen_prediction;
+		$entry{'CHROMOSOME'} = $chromosome;
+		$entry{'GENE_ID'} = $tv->transcript->get_Gene->stable_id;
+		$entry{'GENE_NAME'} = $tv->transcript->get_Gene->external_name;
+		$entry{'TRANSCRIPT_ID'} = $tv->transcript->display_id;
+		$entry{'VARIATION_NAME'} = $tv->variation_feature->variation_name;
+		$entry{'MINOR_ALLELE_FREQUENCY'} = $minor_allele_frequency;
+		$entry{'CODON_CHANGE'} = $tv->get_reference_TranscriptVariationAllele->codon . "/" . $tva->codon;
+		$entry{'AMINOACID_CHANGE'} = $tva->pep_allele_string;
+		$entry{'CONSEQUENCE'} = join( $out_csv->myUtils::CsvManager::in_field_separator(), @ensembl_consequences );
+		$entry{'SO_TERM'} = join( $out_csv->myUtils::CsvManager::in_field_separator(), @so_consequences );
+		$entry{'SIFT'} = '';
+		$entry{'POLYPHEN'} = '';
+		
 
-		print $fh $chromosome . $csv_separator . $tv->transcript->get_Gene->stable_id . $csv_separator . 
-		  $tv->transcript->get_Gene->external_name . $csv_separator . 
-		  $tv->transcript->display_id . $csv_separator .
-		  $tv->variation_feature->variation_name . $csv_separator .
-		  $minor_allele_frequency . $csv_separator .
-		  $tva->transcript_variation->get_reference_TranscriptVariationAllele->codon . "/" . $tva->codon . $csv_separator . $tva->pep_allele_string .
-		  $csv_separator . join( $in_field_separator, @ensembl_consequences ) .
-		  $csv_separator . join( $in_field_separator, @so_consequences );
-
-		print $fh $csv_separator;
 		if ( defined($sift) ) {
-		    print $fh "$sift";
+		    $entry{'SIFT'} = "$sift";
 		}
-		print $fh $csv_separator;
 		if ( defined($polyphen) ) {
-		    print $fh "$polyphen";
+		    $entry{'POLYPHEN'} = "$polyphen";
 		}
+		$out_csv->myUtils::CsvManager::writeEntry(%entry);
 
-		print $fh "\n";
 	    }
 	}
 }

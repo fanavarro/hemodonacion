@@ -10,13 +10,6 @@ sub new{
 	my $this = \%hash;
 	open(my $file_descriptor, $this->{mode}, $this->{file_name}) or die "Could not open file '$this->{file_name}' $!";
 	$this->{file_descriptor} = $file_descriptor;
-	
-	
-	print "csv separator " . $this->{csv_separator} . "\n";
-	print "in_field_separator " . $this->{in_field_separator} . "\n";
-	print "file_name " . $this->{file_name} . "\n";
-	print "fields " . $this->{fields} . "\n";
-	print "mode " . $this->{mode} . "\n";
 
 	bless($this, $class);
 
@@ -72,6 +65,19 @@ sub writeEntry{
 	chop ($string);
 	$string = $string . "\n";
 	print $fd $string;
+}
+sub in_field_separator {
+	my $this = shift;
+	my $in_field_separator = shift;
+	$this->{in_field_separator} = $in_field_separator if defined $in_field_separator;
+	return $this->{in_field_separator};
+}
+
+sub csv_separator {
+	my $this = shift;
+	my $csv_separator = shift;
+	$this->{csv_separator} = $csv_separator if defined $csv_separator;
+	return $this->{csv_separator};
 }
 
 1;
