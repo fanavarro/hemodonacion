@@ -1,6 +1,7 @@
 package myUtils::CsvManager;
 use strict;
 use warnings;
+use Fcntl qw(SEEK_SET);
 
 # Receives a map with parameters
 sub new{
@@ -34,11 +35,12 @@ sub readEntry{
 	$line = <$fd>;
 	
 	my %entry;
-
-	chomp $line;
-	my @splitted = split($this->{csv_separator}, $line);
-	for (my $i = 0; $i < scalar(@splitted); $i++){
-		$entry{$fieldsName[$i]} = $splitted[$i];
+	if ($line){
+		chomp $line;
+		my @splitted = split($this->{csv_separator}, $line);
+		for (my $i = 0; $i < scalar(@splitted); $i++){
+			$entry{$fieldsName[$i]} = $splitted[$i];
+		}
 	}
 	return %entry;
 }
@@ -80,4 +82,16 @@ sub csv_separator {
 	return $this->{csv_separator};
 }
 
+sub countEntries{
+	my $this = shift;
+	my $fd = $this->{file_descriptor};
+	my $current_pos = tell $fd;
+	seek($fd, 0, SEEK_SET);
+	my $lines = 0;
+	while (<$fd>){
+		$lines = $lines + 1;
+	}
+	seek($fd, $current_pos, SEEK_SET);
+	return $lines - 1; # Remove header.
+}
 1;
