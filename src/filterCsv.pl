@@ -33,7 +33,7 @@ $registry->set_reconnect_when_lost();
 # Get the adaptor to get the Transcript, slices and transcript variation from the database
 my $transcript_adaptor = $registry->get_adaptor( 'homo_sapiens', 'core', 'transcript' );
 
-my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID VARIATION_NAME MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE CONSEQUENCE SO_TERM SIFT POLYPHEN);
+my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_BIOTYPE PROTEIN_ID VARIATION_NAME MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE NEXT_MET CONSEQUENCE SO_TERM SIFT POLYPHEN);
 my $in_csv = myUtils::CsvManager->new (
 	fields    => \@fields,
 	csv_separator   => ',',

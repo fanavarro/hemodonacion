@@ -15,7 +15,7 @@ open(my $fh, '>', $output) or die "Could not open file '$output' $!";
 print "Results will be printed in $output\n";
 
 # CSV file configuration
-my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID VARIATION_NAME MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE  CONSEQUENCE SO_TERM SIFT POLYPHEN);
+my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE NEXT_MET CONSEQUENCE SO_TERM SIFT POLYPHEN);
 my $out_csv = myUtils::CsvManager->new (
 	fields    => \@fields,
 	csv_separator   => ',',
@@ -73,9 +73,11 @@ sub get_variations_by_chromosome_so_terms {
 	foreach my $tv ( @{$trvs} ) {
 	    print "Chromosome $chromosome\t Transcript Variation: $count/" . scalar @{$trvs} . "\n";
 	    $count = $count + 1;
-	    my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
-	    my $minor_allele_frequency = $tv->variation_feature->minor_allele_frequency ? $tv->variation_feature->minor_allele_frequency : '-';
 	    
+	    my $minor_allele_frequency = $tv->variation_feature->minor_allele_frequency ? $tv->variation_feature->minor_allele_frequency : '-';
+	    my $cds_errors = get_cds_errors($tv->transcript);
+
+	    my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
 	    foreach my $tva ( @{$tvas} ) {
 		my %entry;
 	    	
@@ -94,10 +96,15 @@ sub get_variations_by_chromosome_so_terms {
 		$entry{'GENE_ID'} = $tv->transcript->get_Gene->stable_id;
 		$entry{'GENE_NAME'} = $tv->transcript->get_Gene->external_name;
 		$entry{'TRANSCRIPT_ID'} = $tv->transcript->display_id;
+		$entry{'TRANSCRIPT_BIOTYPE'} = $tv->transcript->biotype;
+		$entry{'CDS_ERRORS'} = $cds_errors;
+		$entry{'PROTEIN_ID'} = $tv->transcript->translation->display_id;
 		$entry{'VARIATION_NAME'} = $tv->variation_feature->variation_name;
 		$entry{'MINOR_ALLELE_FREQUENCY'} = $minor_allele_frequency;
 		$entry{'CODON_CHANGE'} = $tv->get_reference_TranscriptVariationAllele->codon . "/" . $tva->codon;
 		$entry{'AMINOACID_CHANGE'} = $tva->pep_allele_string;
+		#get_next_met($tva);
+		$entry{'NEXT_MET'} = '-';
 		$entry{'CONSEQUENCE'} = join( $out_csv->myUtils::CsvManager::in_field_separator(), @ensembl_consequences );
 		$entry{'SO_TERM'} = join( $out_csv->myUtils::CsvManager::in_field_separator(), @so_consequences );
 		$entry{'SIFT'} = '';
@@ -153,3 +160,41 @@ sub get_transcripts_by_chromosome {
     my $transcripts = $transcript_adaptor->fetch_all_by_Slice($slice);
     return $transcripts;
 }
+
+# param 0 -> TranscriptVariationAllele object.
+# return -> Position of first Met found relative to peptide.
+sub get_next_met{
+    my $transcript_variation_allele = $_[0];
+    my $seq = length $transcript_variation_allele->feature_seq;
+    print $seq . "\n";
+}
+
+# param 0 -> Transcript object
+# param 1 -> Attribute code.
+# return -> Attribute name.
+sub get_attribute {
+    my ($transcript, $code) = @_;
+    my ($attr) = @{$transcript->get_all_Attributes($code)};
+    my $attribute_name;
+    if($attr) {
+      $attribute_name = $attr->name();
+    }
+    return $attribute_name;
+}
+
+sub get_cds_errors{
+    my $transcript = $_[0];
+    my $cds_errors="";
+    my $five_cds = get_attribute($transcript, 'cds_start_NF');
+    my $three_cds = get_attribute($transcript, 'cds_end_NF');
+    if ($five_cds){
+	$cds_errors = $cds_errors . $five_cds . '-';
+    }
+    if ($three_cds){
+	$cds_errors = $cds_errors . $three_cds . '-';
+    }
+    chop $cds_errors;
+    return $cds_errors;
+}
+
+
