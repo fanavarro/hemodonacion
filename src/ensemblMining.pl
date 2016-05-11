@@ -3,6 +3,10 @@ use warnings;
 use Bio::EnsEMBL::Registry;
 use myUtils::CsvManager;
 
+my $CODON_LENGTH = 3;
+my $START_CODON = 'ATG';
+my $STOP_CODONS = qw(TAG TAA TGA);
+
 #Get output file from input parameters
 my $output = "";
 if (scalar @ARGV == 1){
@@ -105,9 +109,7 @@ sub get_variations_by_chromosome_so_terms {
 		$entry{'MINOR_ALLELE_FREQUENCY'} = $minor_allele_frequency;
 		$entry{'CODON_CHANGE'} = $tva->display_codon_allele_string;
 		$entry{'AMINOACID_CHANGE'} = $tva->pep_allele_string;
-		#get_next_met($tva);
-		get_variation_seq($tva);
-		$entry{'NEXT_MET'} = '-';
+		$entry{'NEXT_MET'} = get_next_met($tva);
 		$entry{'CONSEQUENCE'} = join( $out_csv->myUtils::CsvManager::in_field_separator(), @ensembl_consequences );
 		$entry{'SO_TERM'} = join( $out_csv->myUtils::CsvManager::in_field_separator(), @so_consequences );
 		$entry{'SIFT'} = '';
@@ -165,22 +167,48 @@ sub get_transcripts_by_chromosome {
 }
 
 # param 0 -> TranscriptVariationAllele object.
-# return -> Position of first Met found relative to peptide.
+# return -> Position of first Met found relative to peptide. Empty string
+# if AUG is not found in the sequence.
 sub get_next_met{
-    my $transcript_variation_allele = $_[0];
-    my $seq = length $transcript_variation_allele->feature_seq;
-    print $seq . "\n";
+    my $tva = $_[0];
+    my $seq = get_variation_cds_seq($tva);
+    my $read_shift = 0;
+    for (my $i = 0; $i < length($seq) - ($CODON_LENGTH) + 1; $i++){
+	my $codon = substr($seq, $i, $CODON_LENGTH);
+        if ($codon eq 'ATG'){
+            return $i . " (shift +" . $i % $CODON_LENGTH . ")";
+        }
+    }
+    return "No MET found";
 }
 
-sub get_variation_seq{
+# param 0 -> TrancscriptVariationAllele object.
+# return the sequence of the transcript with the mutation, including 5' and 3'.
+sub get_variation_cdna_seq{
+    my $tva = $_[0];
+    # seq contains 5' and 3' regions.
+    my $seq = $tva->transcript->seq->seq;
+    # Variation position counting utr regions.
+    my $variation_start = $tva->transcript_variation->cdna_start - 1;
+    my $variation_end = $tva->transcript_variation->cdna_end - 1;
+    # If is a deletion, feature_seq is '-', so we will use '' instead
+    # to build the final sequence.
+    my $feature_seq = $tva->feature_seq eq "-" ? "" : $tva->feature_seq;
+    substr($seq, $variation_start, $variation_end - $variation_start + 1) = $feature_seq;
+    
+    return $seq;
+}
+
+# param 0 -> TrancscriptVariationAllele object.
+# return the coding sequence of the transcript with the mutation.
+sub get_variation_cds_seq{
     my $tva = $_[0];
     # translateable_seq returns the coding part of the transcript
     # (it removes introns and 5' and 3' utr)
-    # my $seq = $tva->transcript->translateable_seq;
-    # seq contains 5' and 3' regions.
-    my $seq = $tva->transcript->seq->seq;
-    my $variation_start = $tva->transcript_variation->cdna_start - 1;
-    my $variation_end = $tva->transcript_variation->cdna_end - 1;
+    my $seq = $tva->transcript->translateable_seq;
+    # Variation position starting at the begining of coding sequence.
+    my $variation_start = $tva->transcript_variation->cds_start - 1;
+    my $variation_end = $tva->transcript_variation->cds_end - 1;
     # If is a deletion, feature_seq is '-', so we will use '' instead
     # to build the final sequence.
     my $feature_seq = $tva->feature_seq eq "-" ? "" : $tva->feature_seq;
