@@ -47,6 +47,8 @@ my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcri
 my @chromosomes = qw(Y);
 
 # Sequence Ontology terms
+# start_lost -> a codon variant that changes
+# at least one base of the canonical start codon.
 my @so_terms = ('start_lost');
 
 # For each chromosome, get its variations with specified so terms.
@@ -101,9 +103,10 @@ sub get_variations_by_chromosome_so_terms {
 		$entry{'PROTEIN_ID'} = $tv->transcript->translation->display_id;
 		$entry{'VARIATION_NAME'} = $tv->variation_feature->variation_name;
 		$entry{'MINOR_ALLELE_FREQUENCY'} = $minor_allele_frequency;
-		$entry{'CODON_CHANGE'} = $tv->get_reference_TranscriptVariationAllele->codon . "/" . $tva->codon;
+		$entry{'CODON_CHANGE'} = $tva->display_codon_allele_string;
 		$entry{'AMINOACID_CHANGE'} = $tva->pep_allele_string;
 		#get_next_met($tva);
+		get_variation_seq($tva);
 		$entry{'NEXT_MET'} = '-';
 		$entry{'CONSEQUENCE'} = join( $out_csv->myUtils::CsvManager::in_field_separator(), @ensembl_consequences );
 		$entry{'SO_TERM'} = join( $out_csv->myUtils::CsvManager::in_field_separator(), @so_consequences );
@@ -167,6 +170,23 @@ sub get_next_met{
     my $transcript_variation_allele = $_[0];
     my $seq = length $transcript_variation_allele->feature_seq;
     print $seq . "\n";
+}
+
+sub get_variation_seq{
+    my $tva = $_[0];
+    # translateable_seq returns the coding part of the transcript
+    # (it removes introns and 5' and 3' utr)
+    # my $seq = $tva->transcript->translateable_seq;
+    # seq contains 5' and 3' regions.
+    my $seq = $tva->transcript->seq->seq;
+    my $variation_start = $tva->transcript_variation->cdna_start - 1;
+    my $variation_end = $tva->transcript_variation->cdna_end - 1;
+    # If is a deletion, feature_seq is '-', so we will use '' instead
+    # to build the final sequence.
+    my $feature_seq = $tva->feature_seq eq "-" ? "" : $tva->feature_seq;
+    substr($seq, $variation_start, $variation_end - $variation_start + 1) = $feature_seq;
+    
+    return $seq;
 }
 
 # param 0 -> Transcript object
