@@ -4,8 +4,9 @@ use Bio::EnsEMBL::Registry;
 use myUtils::CsvManager;
 
 my $CODON_LENGTH = 3;
-my $START_CODON = 'ATG';
-my $STOP_CODONS = qw(TAG TAA TGA);
+my $MET = 'ATG';
+my @STOP_CODONS = qw(TAG TAA TGA);
+
 
 #Get output file from input parameters
 my $output = "";
@@ -19,7 +20,7 @@ open(my $fh, '>', $output) or die "Could not open file '$output' $!";
 print "Results will be printed in $output\n";
 
 # CSV file configuration
-my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE NEXT_MET CONSEQUENCE SO_TERM SIFT POLYPHEN);
+my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS CONSEQUENCE SO_TERM SIFT POLYPHEN);
 my $out_csv = myUtils::CsvManager->new (
 	fields    => \@fields,
 	csv_separator   => ',',
@@ -98,6 +99,7 @@ sub get_variations_by_chromosome_so_terms {
 
 		my $sift     = $tva->sift_prediction;
 		my $polyphen = $tva->polyphen_prediction;
+		my $seq_info = get_sequence_info($tva);
 		$entry{'CHROMOSOME'} = $chromosome;
 		$entry{'GENE_ID'} = $tv->transcript->get_Gene->stable_id;
 		$entry{'GENE_NAME'} = $tv->transcript->get_Gene->external_name;
@@ -109,7 +111,10 @@ sub get_variations_by_chromosome_so_terms {
 		$entry{'MINOR_ALLELE_FREQUENCY'} = $minor_allele_frequency;
 		$entry{'CODON_CHANGE'} = $tva->display_codon_allele_string;
 		$entry{'AMINOACID_CHANGE'} = $tva->pep_allele_string;
-		$entry{'NEXT_MET'} = get_next_met($tva);
+		$entry{'FIRST_MET_POSITION'} = $seq_info->{'first_met_position'};
+		$entry{'STOP_CODON_POSITION'} = $seq_info->{'stop_codon_position'};
+		$entry{'MUTATED_SEQUENCE_LENGTH'} = $seq_info->{'seq_length'};
+		$entry{'READING_FRAME_STATUS'} = $seq_info->{'reading_frame'};
 		$entry{'CONSEQUENCE'} = join( $out_csv->myUtils::CsvManager::in_field_separator(), @ensembl_consequences );
 		$entry{'SO_TERM'} = join( $out_csv->myUtils::CsvManager::in_field_separator(), @so_consequences );
 		$entry{'SIFT'} = '';
@@ -166,20 +171,48 @@ sub get_transcripts_by_chromosome {
     return $transcripts;
 }
 
+# Extract information about variation sequence.
 # param 0 -> TranscriptVariationAllele object.
-# return -> Position of first Met found relative to peptide. Empty string
-# if AUG is not found in the sequence.
-sub get_next_met{
+# return -> Hash with the following keys:
+# 'first_met_position': position of first Met found relative to peptide.
+# 'reading_frame': Conserved or Lost.
+# 'seq_length': Length of the mutated sequence.
+sub get_sequence_info{
     my $tva = $_[0];
+    my $hash_seq_info = {};
+    $hash_seq_info->{'first_met_position'} = -1;
+    $hash_seq_info->{'reading_frame'} = ' ';
     my $seq = get_variation_cds_seq($tva);
-    my $read_shift = 0;
-    for (my $i = 0; $i < length($seq) - ($CODON_LENGTH) + 1; $i++){
-	my $codon = substr($seq, $i, $CODON_LENGTH);
-        if ($codon eq 'ATG'){
-            return $i . " (shift +" . $i % $CODON_LENGTH . ")";
+    $hash_seq_info->{'seq_length'} = length($seq);
+    my $first_met_pos = index($seq, $MET);
+    if ($first_met_pos != -1){
+        my $stop_codon_pos = get_stop_codon_position($seq);
+        my $cut_seq = substr($seq, $first_met_pos);
+	my $reading_frame = $first_met_pos % $CODON_LENGTH == 0 ? 'Conserved' : 'Lost';
+	$hash_seq_info->{'first_met_position'} = $first_met_pos;
+        $hash_seq_info->{'stop_codon_position'} = $stop_codon_pos != -1 ? $stop_codon_pos : 'No Stop';
+	$hash_seq_info->{'reading_frame'} = $reading_frame;
+    }
+    return $hash_seq_info;
+}
+
+# Get the position of the first stop codon following
+# the reading frame.
+# param 1: string with the sequence
+# return the position of the first stop codon found after
+# first MET keeping the reading frame.
+sub get_stop_codon_position{
+    my $seq = $_[0];
+    my $init_pos = index($seq, $MET);
+    if ($init_pos != -1){
+        for (my $i = $init_pos; $i < length($seq); $i = $i + $CODON_LENGTH){
+	    my $codon = substr($seq, $i, $CODON_LENGTH);
+	    if (exists_in_list($codon, \@STOP_CODONS)){
+	        return $i;
+            }
         }
     }
-    return "No MET found";
+    return -1;
 }
 
 # param 0 -> TrancscriptVariationAllele object.

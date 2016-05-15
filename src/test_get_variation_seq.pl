@@ -13,7 +13,7 @@ $registry->load_registry_from_db(
 my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcriptvariation' );
 my $transcript_adaptor  = $registry->get_adaptor('human', 'core', 'Transcript');
 
-my $transcript = $transcript_adaptor->fetch_by_stable_id('ENST00000338981');
+my $transcript = $transcript_adaptor->fetch_by_stable_id('ENST00000624491');
 my @transcripts = ($transcript);
 my @so_terms = ('start_lost');
 my $trvs = $trv_adaptor->fetch_all_by_Transcripts_SO_terms(\@transcripts, \@so_terms);
@@ -21,22 +21,21 @@ foreach my $tv ( @{$trvs} ) {
     my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
     foreach my $tva ( @{$tvas} ) {
 	#get_variation_coding_seq($tva);
-	my $next_met = get_next_met($tva);
+	my $next_met = get_first_met_info($tva);
 	print $next_met . "\n";
     }
 }
 
-sub get_next_met{
+sub get_first_met_info{
     my $tva = $_[0];
     my $seq = get_variation_cds_seq($tva);
-    my $read_shift = 0;
-    for (my $i = 0; $i < length($seq) - ($CODON_LENGTH) + 1; $i++){
-	my $codon = substr($seq, $i, $CODON_LENGTH);
-        if ($codon eq $START_CODON){
-            return $i . " (shift +" . $i % $CODON_LENGTH . ")";
-        }
+    my $first_met_pos = index($seq, 'ATG');
+    if ($first_met_pos != -1){
+        my $cut_seq = substr($seq, $first_met_pos);
+        return $first_met_pos . " (shift +" . length($cut_seq) % $CODON_LENGTH . ")";
+    } else{
+        return "No MET found";
     }
-    return "No MET found";
 }
 
 sub get_variation_cds_seq{
