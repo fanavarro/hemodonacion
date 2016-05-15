@@ -176,12 +176,14 @@ sub get_transcripts_by_chromosome {
 # return -> Hash with the following keys:
 # 'first_met_position': position of first Met found relative to peptide.
 # 'reading_frame': Conserved or Lost.
+# 'stop_codon_position': Position of the first stop codon (keeping reading frame).
 # 'seq_length': Length of the mutated sequence.
 sub get_sequence_info{
     my $tva = $_[0];
     my $hash_seq_info = {};
     $hash_seq_info->{'first_met_position'} = -1;
     $hash_seq_info->{'reading_frame'} = ' ';
+    $hash_seq_info->{'stop_codon_position'} = ' ';
     my $seq = get_variation_cds_seq($tva);
     $hash_seq_info->{'seq_length'} = length($seq);
     my $first_met_pos = index($seq, $MET);
@@ -203,8 +205,10 @@ sub get_sequence_info{
 # first MET keeping the reading frame.
 sub get_stop_codon_position{
     my $seq = $_[0];
+    # get the first met in the sequence
     my $init_pos = index($seq, $MET);
     if ($init_pos != -1){
+	# Search stop codons keeping the reading frame
         for (my $i = $init_pos; $i < length($seq); $i = $i + $CODON_LENGTH){
 	    my $codon = substr($seq, $i, $CODON_LENGTH);
 	    if (exists_in_list($codon, \@STOP_CODONS)){
