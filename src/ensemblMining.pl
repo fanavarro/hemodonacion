@@ -16,14 +16,14 @@ if (scalar @ARGV == 1){
 	print "Usage: perl ensemblMining.pl outputFile";
 	exit;
 }
-open(my $fh, '>', $output) or die "Could not open file '$output' $!";
+#open(my $fh, '>', $output) or die "Could not open file '$output' $!";
 print "Results will be printed in $output\n";
 
 # CSV file configuration
-my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS CONSEQUENCE SO_TERM SIFT POLYPHEN);
+my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
 my $out_csv = myUtils::CsvManager->new (
 	fields    => \@fields,
-	csv_separator   => ',',
+	csv_separator   => "\t",
 	in_field_separator    => '-',
 	file_name => $output,
 	mode => '>'
@@ -49,7 +49,7 @@ my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcri
 
 # Chromosomes to be treated
 # my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
-my @chromosomes = qw(Y);
+my @chromosomes = qw(1);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
@@ -81,9 +81,11 @@ sub get_variations_by_chromosome_so_terms {
 	    print "Chromosome $chromosome\t Transcript Variation: $count/" . scalar @{$trvs} . "\n";
 	    $count = $count + 1;
 	    
+            my $variation = $tv->variation_feature->variation;
 	    my $minor_allele_frequency = $tv->variation_feature->minor_allele_frequency ? $tv->variation_feature->minor_allele_frequency : '-';
 	    my $cds_errors = get_cds_errors($tv->transcript);
-
+	    my $phenotype_info = get_phenotype_info($variation);
+            my $publications_info = get_publications_info($variation);
 	    my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
 	    foreach my $tva ( @{$tvas} ) {
 		my %entry;
@@ -116,9 +118,11 @@ sub get_variations_by_chromosome_so_terms {
 		$entry{'MUTATED_SEQUENCE_LENGTH'} = $seq_info->{'seq_length'};
 		$entry{'READING_FRAME_STATUS'} = $seq_info->{'reading_frame'};
 		$entry{'CONSEQUENCE'} = join( $out_csv->myUtils::CsvManager::in_field_separator(), @ensembl_consequences );
+		$entry{'PHENOTYPE'} = $phenotype_info;
 		$entry{'SO_TERM'} = join( $out_csv->myUtils::CsvManager::in_field_separator(), @so_consequences );
 		$entry{'SIFT'} = '';
 		$entry{'POLYPHEN'} = '';
+		$entry{'PUBLICATIONS'} = $publications_info;
 		
 
 		if ( defined($sift) ) {
@@ -267,6 +271,10 @@ sub get_attribute {
     return $attribute_name;
 }
 
+# Receives a transcript object and extract information about
+# cds start and cds end errors.
+# param 0 -> Transcript object
+# returns a string with info about cds errors at 5' and 3'.
 sub get_cds_errors{
     my $transcript = $_[0];
     my $cds_errors="";
@@ -281,5 +289,40 @@ sub get_cds_errors{
     chop $cds_errors;
     return $cds_errors;
 }
+
+# Receives a Variation object and returns a string with the following format:
+# phenotype description 1 (source 1) - phenotype description 2 (source 2) ...
+# param 0 -> Variation object.
+# returns a string with info about phenotype of the variation.
+sub get_phenotype_info{
+    my $variation = $_[0];
+    my $pf_list = $variation->get_all_PhenotypeFeatures;
+    my $pf_formatted = '';
+    foreach my $pf (@{$pf_list}){
+        $pf_formatted = $pf_formatted . $pf->phenotype->description . '(' . $pf->source_name . ')-';
+    }
+    chop($pf_formatted);
+    return $pf_formatted;
+}
+
+sub get_publications_info{
+    my $variation = $_[0];
+    my $publication_list = $variation->get_all_Publications;
+    my $publication_info = '';
+    print scalar @{$publication_list} . " publicaciones\n";
+    foreach my $publication (@{$publication_list}){
+        $publication_info = $publication_info . "doi:" . $publication->doi . "; " if ($publication->doi);
+        $publication_info = $publication_info . "authors:" . $publication->authors . "; " if ($publication->authors);
+        $publication_info = $publication_info . "title:" . $publication->title . "; " if ($publication->title);
+        $publication_info = $publication_info . "pmcid:" . $publication->pmcid . "; " if ($publication->pmcid);
+        $publication_info = $publication_info . "pmid:" . $publication->pmid . "; " if ($publication->pmid);
+        $publication_info = $publication_info . "ucsc_id:" . $publication->ucsc_id . "; " if ($publication->ucsc_id);
+    }
+    chop($publication_info);
+    return $publication_info;
+}
+
+
+
 
 
