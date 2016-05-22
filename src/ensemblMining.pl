@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use Bio::EnsEMBL::Registry;
 use myUtils::CsvManager;
+use myUtils::Publication;
 
 my $CODON_LENGTH = 3;
 my $MET = 'ATG';
@@ -305,22 +306,46 @@ sub get_phenotype_info{
     return $pf_formatted;
 }
 
+# Build a string with publications about a variation and its links
+# param 0-> Variation object.
+# returns a string with format title1 -> link1 title2 -> link2...
 sub get_publications_info{
     my $variation = $_[0];
     my $publication_list = $variation->get_all_Publications;
     my $publication_info = '';
-    print scalar @{$publication_list} . " publicaciones\n";
     foreach my $publication (@{$publication_list}){
-        $publication_info = $publication_info . "doi:" . $publication->doi . "; " if ($publication->doi);
-        $publication_info = $publication_info . "authors:" . $publication->authors . "; " if ($publication->authors);
-        $publication_info = $publication_info . "title:" . $publication->title . "; " if ($publication->title);
-        $publication_info = $publication_info . "pmcid:" . $publication->pmcid . "; " if ($publication->pmcid);
-        $publication_info = $publication_info . "pmid:" . $publication->pmid . "; " if ($publication->pmid);
-        $publication_info = $publication_info . "ucsc_id:" . $publication->ucsc_id . "; " if ($publication->ucsc_id);
+        $publication_info = $publication_info . get_publication_info($publication) . ' ';
     }
-    chop($publication_info);
     return $publication_info;
 }
+
+# Receives a publication object and obtains its url.
+# param 0 -> Publication object.
+# returns a string with format title -> link.
+sub get_publication_info{
+    my $publication = $_[0];
+    my $publication_info = '';
+    my $publication_url;
+    if ($publication->title){
+        $publication_info = $publication->title;
+    } else {
+        $publication_info = "Title not provided"
+    }
+    $publication_info = $publication_info . " -> ";
+    $publication_url = myUtils::Publication::find_link_by_doi($publication->doi) if ($publication->doi);
+    $publication_url = myUtils::Publication::find_link_by_pmid($publication->pmid) if (!$publication_url && $publication->pmid);
+    $publication_url = myUtils::Publication::find_link_by_pmcid($publication->pmcid) if (!$publication_url && $publication->pmcid);
+    $publication_url = 'url not provided' if (!$publication_url);
+
+    $publication_info = $publication_info . $publication_url;
+    return $publication_info;
+}
+
+
+
+
+
+
 
 
 
