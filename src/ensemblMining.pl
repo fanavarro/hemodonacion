@@ -3,6 +3,7 @@ use warnings;
 use Bio::EnsEMBL::Registry;
 use myUtils::CsvManager;
 use myUtils::Publication;
+use File::Path qw(make_path);
 
 my $CODON_LENGTH = 3;
 my $MET = 'ATG';
@@ -175,7 +176,7 @@ sub get_transcripts_by_chromosome {
     my $slice = $slice_adaptor->fetch_by_region( 'chromosome', $chromosome );
     my $transcripts = $transcript_adaptor->fetch_all_by_Slice($slice);
 # test borrar
-    $transcripts = $transcript_adaptor->fetch_all_by_stable_id_list(["ENST00000414219"]);
+#    $transcripts = $transcript_adaptor->fetch_all_by_stable_id_list(["ENST00000414219"]);
     return $transcripts;
 }
 
@@ -202,6 +203,12 @@ sub get_sequence_info{
 	$hash_seq_info->{'first_met_position'} = $first_met_pos;
         $hash_seq_info->{'stop_codon_position'} = $stop_codon_pos != -1 ? $stop_codon_pos : 'No Stop';
 	$hash_seq_info->{'reading_frame'} = $reading_frame;
+
+        # if an ORF exists into the seq, seq file is generated.
+        if($stop_codon_pos != -1){
+            my $orf = substr($seq, $first_met_pos, $stop_codon_pos - $first_met_pos + 3);
+            generate_variation_seq_files($tva, $orf);
+        }
     }
     return $hash_seq_info;
 }
@@ -260,6 +267,25 @@ sub get_variation_cds_seq{
     substr($seq, $variation_start, $variation_end - $variation_start + 1) = $feature_seq;
     
     return $seq;
+}
+
+# Generates the final ORF sequence of the mutated transcript.
+# This sequence is stored by the following path:
+# data/transcript id/variation id/alleleid.txt
+# param 0 -> TranscriptVariationObject needed to build the path.
+# param 1 -> The ORF final sequence.
+sub generate_variation_seq_files{
+    my $tva = $_[0];
+    my $seq = $_[1];
+    my $transcript_id = $tva->transcript->display_id;
+    my $variation_id = $tva->transcript_variation->variation_feature->variation_name;
+    my $transcript_variation_allele_id = $tva->dbID;
+    my $path = '../data/sequences/' . $transcript_id . '/' . $variation_id . '/' ;
+    make_path($path);
+    my $file_path = $path . $transcript_variation_allele_id . '.txt';
+    open(my $fd, '>', $file_path) or die "Could not open file '$file_path' $!";
+    print $fd $seq;
+    close($fd);
 }
 
 # param 0 -> Transcript object
