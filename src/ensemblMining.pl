@@ -21,7 +21,7 @@ if (scalar @ARGV == 1){
 print "Results will be printed in $output\n";
 
 # CSV file configuration
-my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
+my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
 my $out_csv = myUtils::CsvManager->new (
 	fields    => \@fields,
 	csv_separator   => "\t",
@@ -111,6 +111,7 @@ sub get_variations_by_chromosome_so_terms {
 		$entry{'CDS_ERRORS'} = $cds_errors;
 		$entry{'PROTEIN_ID'} = $tv->transcript->translation->display_id;
 		$entry{'VARIATION_NAME'} = $tv->variation_feature->variation_name;
+		$entry{'TRANSCRIPT_VARIATION_ALLELE_DBID'} = $tva->dbID;
 		$entry{'MINOR_ALLELE_FREQUENCY'} = $minor_allele_frequency;
 		$entry{'CODON_CHANGE'} = $tva->display_codon_allele_string;
 		$entry{'AMINOACID_CHANGE'} = $tva->pep_allele_string;
@@ -173,6 +174,8 @@ sub get_transcripts_by_chromosome {
     my $chromosome = $_[0];
     my $slice = $slice_adaptor->fetch_by_region( 'chromosome', $chromosome );
     my $transcripts = $transcript_adaptor->fetch_all_by_Slice($slice);
+# test borrar
+    $transcripts = $transcript_adaptor->fetch_all_by_stable_id_list(["ENST00000414219"]);
     return $transcripts;
 }
 
