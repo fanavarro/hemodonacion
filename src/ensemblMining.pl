@@ -52,17 +52,18 @@ my $slice_adaptor = $registry->get_adaptor( 'Human', 'Core', 'Slice' );
 my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcriptvariation' );
 
 # Chromosomes to be treated
-my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
-# my @chromosomes = qw(1);
+#my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
+my @chromosomes = qw(Y);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
 # at least one base of the canonical start codon.
 my @so_terms = ('start_lost');
-
+my $variation_pos_at_peptide = 1;
 # For each chromosome, get its variations with specified so terms.
 foreach my $chromosome (@chromosomes) {
-	get_variations_by_chromosome_so_terms($chromosome, \@so_terms, $out_csv);
+	#get_variations_by_chromosome_so_terms($chromosome, \@so_terms, $out_csv);
+	get_variations_by_chromosome_peptide_position($chromosome, $variation_pos_at_peptide, $out_csv);
 }
 
 $out_csv->myUtils::CsvManager::close();
@@ -80,66 +81,94 @@ sub get_variations_by_chromosome_so_terms {
 	# Get variation in transcripts with so terms
 	my $trvs = $trv_adaptor->fetch_all_by_Transcripts_SO_terms($transcript, $so_terms);
 
-	my $count = 1;
-	foreach my $tv ( @{$trvs} ) {
-	    print "Chromosome $chromosome\t Transcript Variation: $count/" . scalar @{$trvs} . "\n";
-	    $count = $count + 1;
-	    
-            my $variation = $tv->variation_feature->variation;
-	    my $minor_allele_frequency = $tv->variation_feature->minor_allele_frequency ? $tv->variation_feature->minor_allele_frequency : '-';
-	    my $cds_errors = get_cds_errors($tv->transcript);
-	    my $phenotype_info = get_phenotype_info($variation);
-            my $publications_info = get_publications_info($variation);
-	    my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
-	    foreach my $tva ( @{$tvas} ) {
-		my %entry;
+	fill_csv($chromosome, $trvs, $out_csv);
+}
+# Get variations from chromosome (param 1) at the peptide position (param 2).
+# param 1 -> Chromosome name
+# param 2 -> Peptide position
+# param 3 -> CsvManager object to print results.
+sub get_variations_by_chromosome_peptide_position {
+	my $chromosome = $_[0];
+	my $peptide_position = $_[1];
+	my $out_csv = $_[2];
+	# Get all transcripts from chromosome
+	my $transcript  = get_transcripts_by_chromosome( $chromosome );
+
+	# Get variation in transcripts adding the position constraint
+        my $constraint = "(translation_start=$peptide_position or translation_end=$peptide_position)";
+	my $trvs = $trv_adaptor->fetch_all_by_Transcripts_with_constraint($transcript, $constraint);
+
+	fill_csv($chromosome, $trvs, $out_csv);
+}
+
+# Write info about TranscriptVariation list into csv file.
+# param 0 -> Chromosome
+# param 1 -> TranscriptVariation ref list object.
+# param 2 -> CsvManager object.
+sub fill_csv{
+    my $chromosome = $_[0];
+    my $trvs = $_[1];
+    my $out_csv = $_[2];
+
+    my $count = 1;
+    foreach my $tv ( @{$trvs} ) {
+	print "Chromosome $chromosome\t Transcript Variation: $count/" . scalar @{$trvs} . "\n";
+	$count = $count + 1;
+	
+	my $variation = $tv->variation_feature->variation;
+	my $minor_allele_frequency = $tv->variation_feature->minor_allele_frequency ? $tv->variation_feature->minor_allele_frequency : '-';
+	my $cds_errors = get_cds_errors($tv->transcript);
+	my $phenotype_info = get_phenotype_info($variation);
+	my $publications_info = get_publications_info($variation);
+	my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
+	foreach my $tva ( @{$tvas} ) {
+            my %entry;
 	    	
-		my @ensembl_consequences;
-		my @so_consequences;
-		my $ocs = $tva->get_all_OverlapConsequences();
+            my @ensembl_consequences;
+            my @so_consequences;
+            my $ocs = $tva->get_all_OverlapConsequences();
 
-		foreach my $oc ( @{$ocs} ) {
-		    push @ensembl_consequences, $oc->display_term;
-		    push @so_consequences,      $oc->SO_term;
-		}
+            foreach my $oc ( @{$ocs} ) {
+                push @ensembl_consequences, $oc->display_term;
+                push @so_consequences,      $oc->SO_term;
+            }
 
-		my $sift     = $tva->sift_prediction;
-		my $polyphen = $tva->polyphen_prediction;
-		my $seq_info = get_sequence_info($tva);
-		$entry{'CHROMOSOME'} = $chromosome;
-		$entry{'GENE_ID'} = $tv->transcript->get_Gene->stable_id;
-		$entry{'GENE_NAME'} = $tv->transcript->get_Gene->external_name;
-		$entry{'TRANSCRIPT_ID'} = $tv->transcript->display_id;
-		$entry{'TRANSCRIPT_BIOTYPE'} = $tv->transcript->biotype;
-		$entry{'CDS_ERRORS'} = $cds_errors;
-		$entry{'PROTEIN_ID'} = $tv->transcript->translation->display_id;
-		$entry{'VARIATION_NAME'} = $tv->variation_feature->variation_name;
-		$entry{'TRANSCRIPT_VARIATION_ALLELE_DBID'} = $tva->dbID;
-		$entry{'MINOR_ALLELE_FREQUENCY'} = $minor_allele_frequency;
-		$entry{'CODON_CHANGE'} = $tva->display_codon_allele_string;
-		$entry{'AMINOACID_CHANGE'} = $tva->pep_allele_string;
-		$entry{'FIRST_MET_POSITION'} = $seq_info->{'first_met_position'};
-		$entry{'STOP_CODON_POSITION'} = $seq_info->{'stop_codon_position'};
-		$entry{'MUTATED_SEQUENCE_LENGTH'} = $seq_info->{'seq_length'};
-		$entry{'READING_FRAME_STATUS'} = $seq_info->{'reading_frame'};
-		$entry{'CONSEQUENCE'} = join( $out_csv->myUtils::CsvManager::in_field_separator(), @ensembl_consequences );
-		$entry{'PHENOTYPE'} = $phenotype_info;
-		$entry{'SO_TERM'} = join( $out_csv->myUtils::CsvManager::in_field_separator(), @so_consequences );
-		$entry{'SIFT'} = '';
-		$entry{'POLYPHEN'} = '';
-		$entry{'PUBLICATIONS'} = $publications_info;
-		
+            my $sift     = $tva->sift_prediction;
+            my $polyphen = $tva->polyphen_prediction;
+            my $seq_info = get_sequence_info($tva);
+            $entry{'CHROMOSOME'} = $chromosome;
+            $entry{'GENE_ID'} = $tv->transcript->get_Gene->stable_id;
+            $entry{'GENE_NAME'} = $tv->transcript->get_Gene->external_name;
+            $entry{'TRANSCRIPT_ID'} = $tv->transcript->display_id;
+            $entry{'TRANSCRIPT_BIOTYPE'} = $tv->transcript->biotype;
+            $entry{'CDS_ERRORS'} = $cds_errors;
+            $entry{'PROTEIN_ID'} = $tv->transcript->translation->display_id;
+            $entry{'VARIATION_NAME'} = $tv->variation_feature->variation_name;
+            $entry{'TRANSCRIPT_VARIATION_ALLELE_DBID'} = $tva->dbID;
+            $entry{'MINOR_ALLELE_FREQUENCY'} = $minor_allele_frequency;
+            $entry{'CODON_CHANGE'} = $tva->display_codon_allele_string;
+            $entry{'AMINOACID_CHANGE'} = $tva->pep_allele_string;
+            $entry{'FIRST_MET_POSITION'} = $seq_info->{'first_met_position'};
+            $entry{'STOP_CODON_POSITION'} = $seq_info->{'stop_codon_position'};
+            $entry{'MUTATED_SEQUENCE_LENGTH'} = $seq_info->{'seq_length'};
+            $entry{'READING_FRAME_STATUS'} = $seq_info->{'reading_frame'};
+            $entry{'CONSEQUENCE'} = join( '-', @ensembl_consequences );
+            $entry{'PHENOTYPE'} = $phenotype_info;
+            $entry{'SO_TERM'} = join( '-', @so_consequences );
+            $entry{'SIFT'} = '';
+            $entry{'POLYPHEN'} = '';
+            $entry{'PUBLICATIONS'} = $publications_info;
+	
 
-		if ( defined($sift) ) {
-		    $entry{'SIFT'} = "$sift";
-		}
-		if ( defined($polyphen) ) {
-		    $entry{'POLYPHEN'} = "$polyphen";
-		}
-		$out_csv->myUtils::CsvManager::writeEntry(%entry);
-
-	    }
-	}
+            if ( defined($sift) ) {
+                $entry{'SIFT'} = "$sift";
+            }
+            if ( defined($polyphen) ) {
+                $entry{'POLYPHEN'} = "$polyphen";
+            }
+            $out_csv->myUtils::CsvManager::writeEntry(%entry);
+        }
+    }   
 }
 
 # Checks if an element exists in the given list.
