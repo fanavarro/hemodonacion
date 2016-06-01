@@ -24,7 +24,7 @@ if (scalar @ARGV == 1){
 print "Results will be printed in $output\n";
 
 # CSV file configuration
-my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
+my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
 my $out_csv = myUtils::CsvManager->new (
 	fields    => \@fields,
 	csv_separator   => "\t",
@@ -144,10 +144,11 @@ sub fill_csv{
             $entry{'CDS_ERRORS'} = $cds_errors;
             $entry{'PROTEIN_ID'} = $tv->transcript->translation->display_id;
             $entry{'VARIATION_NAME'} = $tv->variation_feature->variation_name;
+            $entry{'SOURCE'} = $variation->source_name;
             $entry{'TRANSCRIPT_VARIATION_ALLELE_DBID'} = $tva->dbID;
             $entry{'MINOR_ALLELE_FREQUENCY'} = $minor_allele_frequency;
-            $entry{'CODON_CHANGE'} = $tva->display_codon_allele_string;
-            $entry{'AMINOACID_CHANGE'} = $tva->pep_allele_string;
+            $entry{'CODON_CHANGE'} = defined($tva->display_codon_allele_string) ? $tva->display_codon_allele_string : ' ';
+            $entry{'AMINOACID_CHANGE'} = defined($tva->pep_allele_string) ? $tva->pep_allele_string : ' ';
             $entry{'FIRST_MET_POSITION'} = $seq_info->{'first_met_position'};
             $entry{'STOP_CODON_POSITION'} = $seq_info->{'stop_codon_position'};
             $entry{'MUTATED_SEQUENCE_LENGTH'} = $seq_info->{'seq_length'};
@@ -221,24 +222,28 @@ sub get_transcripts_by_chromosome {
 sub get_sequence_info{
     my $tva = $_[0];
     my $hash_seq_info = {};
-    $hash_seq_info->{'first_met_position'} = -1;
+    $hash_seq_info->{'first_met_position'} = ' ';
     $hash_seq_info->{'reading_frame'} = ' ';
     $hash_seq_info->{'stop_codon_position'} = ' ';
-    my $seq = get_variation_cds_seq($tva);
-    $hash_seq_info->{'seq_length'} = length($seq);
-    my $first_met_pos = index($seq, $MET);
-    if ($first_met_pos != -1){
-        my $stop_codon_pos = get_stop_codon_position($seq);
-        my $cut_seq = substr($seq, $first_met_pos);
-	my $reading_frame = $first_met_pos % $CODON_LENGTH == 0 ? 'Conserved' : 'Lost';
-	$hash_seq_info->{'first_met_position'} = $first_met_pos;
-        $hash_seq_info->{'stop_codon_position'} = $stop_codon_pos != -1 ? $stop_codon_pos : 'No Stop';
-	$hash_seq_info->{'reading_frame'} = $reading_frame;
+    $hash_seq_info->{'seq_length'} = ' ';
+    my $source = $tva->variation_feature->variation->source;
+    if (defined($source) && $source->name eq 'dbSNP'){
+        my $seq = get_variation_cds_seq($tva);
+        $hash_seq_info->{'seq_length'} = length($seq);
+        my $first_met_pos = index($seq, $MET);
+        if ($first_met_pos != -1){
+            my $stop_codon_pos = get_stop_codon_position($seq);
+            my $cut_seq = substr($seq, $first_met_pos);
+	    my $reading_frame = $first_met_pos % $CODON_LENGTH == 0 ? 'Conserved' : 'Lost';
+	    $hash_seq_info->{'first_met_position'} = $first_met_pos;
+            $hash_seq_info->{'stop_codon_position'} = $stop_codon_pos != -1 ? $stop_codon_pos : 'No Stop';
+	    $hash_seq_info->{'reading_frame'} = $reading_frame;
 
-        # if an ORF exists into the seq, seq file is generated.
-        if($stop_codon_pos != -1){
-            my $orf = substr($seq, $first_met_pos, $stop_codon_pos - $first_met_pos + 3);
-            generate_variation_seq_files($tva, $orf);
+            # if an ORF exists into the seq, seq file is generated.
+            if($stop_codon_pos != -1){
+                my $orf = substr($seq, $first_met_pos, $stop_codon_pos - $first_met_pos + 3);
+                generate_variation_seq_files($tva, $orf);
+            }
         }
     }
     return $hash_seq_info;
