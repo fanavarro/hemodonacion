@@ -94,4 +94,77 @@ sub countEntries{
 	seek($fd, $current_pos, SEEK_SET);
 	return $lines - 1; # Remove header.
 }
+
+# Compare this csv with other csv. Returns hash reference
+# with two keys: 'this' contains exclusive csv entries from
+# this csv. 'other' contains exclusive csv entries from other
+# csv.
+sub compareCsv{
+	my $this = shift;
+	my $other = shift;
+	my $fd1 = $this->{file_descriptor};
+	my $current_pos1 = tell $fd1;
+	my $fd2 = $this->{file_descriptor};
+	my $current_pos2 = tell $fd2;
+
+	my $refhash = {};
+	$refhash->{'this'} = ();
+	$refhash->{'other'} = ();
+
+	seek($fd1, 0, SEEK_SET);
+	while(my %entry = $this->readEntry()){
+		if(! $other->existsEntry(\%entry)){
+			push @{$refhash->{'this'}}, \%entry;
+		}
+	}
+
+	seek($fd2, 0, SEEK_SET);
+	while(my %entry = $other->readEntry()){
+		if(! $this->existsEntry(\%entry)){
+			push @{$refhash->{'other'}}, \%entry;
+		}
+	}
+
+	seek($fd1, $current_pos1, SEEK_SET);
+	seek($fd2, $current_pos2, SEEK_SET);
+	return $refhash;
+}
+
+# Return true if entry exists
+# into the csv.
+sub existsEntry{
+	my $this = shift;
+	my $entry = shift;
+	my $fd = $this->{file_descriptor};
+	my $current_pos = tell $fd;
+	seek($fd, 0, SEEK_SET);
+	while (my %csvEntry = $this->readEntry()){
+		if (equalsEntry(\%csvEntry, $entry)){
+			seek($fd, $current_pos, SEEK_SET);
+			return 1;
+		}
+	}
+	seek($fd, $current_pos, SEEK_SET);
+	return 0;
+}
+
+sub equalsEntry{
+	my $entry1 = shift;
+	my $entry2 = shift;
+	if (keys %$entry1 ne keys %$entry2){
+		return 0;
+	}
+
+	foreach my $key (keys %$entry1){
+		if ($entry1->{$key} ne $entry2->{$key}){
+			return 0;
+		}
+	}
+	return 1;
+}
 1;
+
+
+
+
+
