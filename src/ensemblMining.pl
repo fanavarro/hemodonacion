@@ -53,7 +53,7 @@ my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcri
 
 # Chromosomes to be treated
 # my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
- my @chromosomes = qw(17 18 19 20 21 22 X Y);
+ my @chromosomes = qw(Y);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
@@ -62,8 +62,8 @@ my @so_terms = ('start_lost');
 my $variation_pos_at_peptide = 1;
 # For each chromosome, get its variations with specified so terms.
 foreach my $chromosome (@chromosomes) {
-	get_variations_by_chromosome_so_terms($chromosome, \@so_terms, $out_csv);
-	#get_variations_by_chromosome_peptide_position($chromosome, $variation_pos_at_peptide, $out_csv);
+	#get_variations_by_chromosome_so_terms($chromosome, \@so_terms, $out_csv);
+	get_variations_by_chromosome_peptide_position($chromosome, $variation_pos_at_peptide, $out_csv);
 }
 
 $out_csv->myUtils::CsvManager::close();

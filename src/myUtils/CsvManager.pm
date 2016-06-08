@@ -99,7 +99,7 @@ sub countEntries{
 # with two keys: 'this' contains exclusive csv entries from
 # this csv. 'other' contains exclusive csv entries from other
 # csv.
-sub compareCsv{
+sub diffCsv{
 	my $this = shift;
 	my $other = shift;
 	my $fd1 = $this->{file_descriptor};
@@ -108,8 +108,8 @@ sub compareCsv{
 	my $current_pos2 = tell $fd2;
 
 	my $refhash = {};
-	$refhash->{'this'} = ();
-	$refhash->{'other'} = ();
+	$refhash->{'this'} = [];
+	$refhash->{'other'} = [];
 
 	seek($fd1, 0, SEEK_SET);
 	while(my %entry = $this->readEntry()){
