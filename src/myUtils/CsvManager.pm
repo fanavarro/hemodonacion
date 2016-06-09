@@ -12,9 +12,27 @@ sub new{
 	open(my $file_descriptor, $this->{mode}, $this->{file_name}) or die "Could not open file '$this->{file_name}' $!";
 	$this->{file_descriptor} = $file_descriptor;
 
+	# If fields are not in params, we extract it from file.
+	if (!$this->{fields}){
+		$this->{fields} = _getFieldsFromFile($file_descriptor, $this->{csv_separator});
+	}
+
 	bless($this, $class);
 
 	return $this;
+}
+
+# Extracts fields from file header.
+sub _getFieldsFromFile{
+	my $fd = $_[0];
+	my $separator = $_[1];
+	my $currentPos = tell $fd;
+	seek($fd, 0, SEEK_SET);
+	my $line = <$fd>;
+	chomp($line);
+	my @fields = split($separator, $line);
+	seek($fd, $currentPos, SEEK_SET);
+	return \@fields;
 }
 
 sub close{
@@ -82,6 +100,13 @@ sub csv_separator {
 	return $this->{csv_separator};
 }
 
+sub fields {
+	my $this = shift;
+	my @fields = @_;
+	$this->{fields} = \@fields if scalar(@fields) > 0;
+	return $this->{fields};
+}
+
 sub countEntries{
 	my $this = shift;
 	my $fd = $this->{file_descriptor};
@@ -95,6 +120,24 @@ sub countEntries{
 	return $lines - 1; # Remove header.
 }
 
+# Reads a csv file and saves it into
+# a list of hashes, where each item
+# on the list is a row and each key
+# of the hash is a column.
+# param 0 -> this
+# return list of hashes
+sub readCsv{
+	my $this = shift;
+	my $fd = $this->{file_descriptor};
+	my $rows = [];
+	my $currentPos = tell $fd;
+	seek($fd, 0, SEEK_SET);
+	while(my %entry = $this->readEntry()){
+		push @{$rows}, \%entry;
+	}
+	seek($fd, $currentPos, SEEK_SET);
+	return $rows;
+}
 # Compare this csv with other csv. Returns hash reference
 # with two keys: 'this' contains exclusive csv entries from
 # this csv. 'other' contains exclusive csv entries from other
@@ -102,49 +145,47 @@ sub countEntries{
 sub diffCsv{
 	my $this = shift;
 	my $other = shift;
-	my $fd1 = $this->{file_descriptor};
-	my $current_pos1 = tell $fd1;
-	my $fd2 = $this->{file_descriptor};
-	my $current_pos2 = tell $fd2;
 
 	my $refhash = {};
 	$refhash->{'this'} = [];
 	$refhash->{'other'} = [];
+	
+	my $entries1 = $this->readCsv();
+	my $entries2 = $other->readCsv();
 
-	seek($fd1, 0, SEEK_SET);
-	while(my %entry = $this->readEntry()){
-		if(! $other->existsEntry(\%entry)){
-			push @{$refhash->{'this'}}, \%entry;
+	my $count = 1;
+	my $total = scalar @{$entries1} + scalar @{$entries2};
+
+	foreach my $entry (@{$entries1}){
+		print $count . "/" . $total . "\n";
+		$count = $count + 1;
+		if(! _existsEntry($entries2, $entry)){
+			push @{$refhash->{'this'}}, $entry;
 		}
 	}
 
-	seek($fd2, 0, SEEK_SET);
-	while(my %entry = $other->readEntry()){
-		if(! $this->existsEntry(\%entry)){
-			push @{$refhash->{'other'}}, \%entry;
+	foreach my $entry (@{$entries2}){
+		print $count . "/" . $total . "\n";
+		$count = $count + 1;
+		if(! _existsEntry($entries1, $entry)){
+			push @{$refhash->{'other'}}, $entry;
 		}
 	}
 
-	seek($fd1, $current_pos1, SEEK_SET);
-	seek($fd2, $current_pos2, SEEK_SET);
+
 	return $refhash;
 }
 
 # Return true if entry exists
 # into the csv.
-sub existsEntry{
-	my $this = shift;
+sub _existsEntry{
+	my $entries = shift;
 	my $entry = shift;
-	my $fd = $this->{file_descriptor};
-	my $current_pos = tell $fd;
-	seek($fd, 0, SEEK_SET);
-	while (my %csvEntry = $this->readEntry()){
-		if (equalsEntry(\%csvEntry, $entry)){
-			seek($fd, $current_pos, SEEK_SET);
+	foreach my $csvEntry (@{$entries}){
+		if (equalsEntry($csvEntry, $entry)){
 			return 1;
 		}
 	}
-	seek($fd, $current_pos, SEEK_SET);
 	return 0;
 }
 
