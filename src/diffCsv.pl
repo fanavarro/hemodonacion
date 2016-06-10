@@ -2,6 +2,9 @@ use myUtils::CsvManager;
 use strict;
 use warnings;
 
+# Needed to write to nohup.out in real time
+STDOUT->autoflush(1);
+
 ##############
 my $file_name1;
 my $file_name2;
