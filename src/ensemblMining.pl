@@ -24,7 +24,7 @@ if (scalar @ARGV == 1){
 print "Results will be printed in $output\n";
 
 # CSV file configuration
-my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
+my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_NAME TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
 my $out_csv = myUtils::CsvManager->new (
 	fields    => \@fields,
 	csv_separator   => "\t",
@@ -140,6 +140,7 @@ sub fill_csv{
             $entry{'GENE_ID'} = $tv->transcript->get_Gene->stable_id;
             $entry{'GENE_NAME'} = $tv->transcript->get_Gene->external_name;
             $entry{'TRANSCRIPT_ID'} = $tv->transcript->display_id;
+            $entry{'TRANSCRIPT_NAME'} = $tv->transcript->external_name;
             $entry{'TRANSCRIPT_BIOTYPE'} = $tv->transcript->biotype;
             $entry{'CDS_ERRORS'} = $cds_errors;
             $entry{'PROTEIN_ID'} = $tv->transcript->translation->display_id;

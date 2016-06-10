@@ -33,17 +33,17 @@ $registry->set_reconnect_when_lost();
 # Get the adaptor to get the Transcript, slices and transcript variation from the database
 my $transcript_adaptor = $registry->get_adaptor( 'homo_sapiens', 'core', 'transcript' );
 
-my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_BIOTYPE PROTEIN_ID VARIATION_NAME MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE NEXT_MET CONSEQUENCE SO_TERM SIFT POLYPHEN);
+my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_NAME TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
 my $in_csv = myUtils::CsvManager->new (
 	fields    => \@fields,
-	csv_separator   => ',',
+	csv_separator   => "\t",
 	in_field_separator    => '-',
 	file_name => $input,
 	mode => '<'
 );
 my $out_csv = myUtils::CsvManager->new (
 	fields    => \@fields,
-	csv_separator   => ',',
+	csv_separator   => "\t",
 	in_field_separator    => '-',
 	file_name => $output,
 	mode => '>'
@@ -55,21 +55,37 @@ while ((my %entry = $in_csv->myUtils::CsvManager::readEntry())){
 	print $count . "/" . $total_entries . "\n";
 	$count = $count + 1;
 	my $transcript_stable_id = $entry{'TRANSCRIPT_ID'};
-	if (has_translation($transcript_stable_id)){
+	if (apply_filter($transcript_stable_id)){
 		$out_csv->myUtils::CsvManager::writeEntry(%entry);
-		print "$transcript_stable_id has translation\n";
+		print "$transcript_stable_id pass the filter\n";
 	} else {
-		print "$transcript_stable_id do not have translation\n";
+		print "$transcript_stable_id do not pass the filter\n";
 	}
 }
 
 $in_csv->myUtils::CsvManager::close();
 $out_csv->myUtils::CsvManager::close();
 
-# usar $transcript->translation();
-# fetch_all_by_stable_id_list(["ENSG00001","ENSG00002", ...]);
-sub has_translation{
+# Functions that receives a transcript identifier
+# and returns if it pass the filter or not.
+sub apply_filter{
 	my $transcript_stable_id = $_[0];
 	my $transcript = $transcript_adaptor->fetch_by_stable_id($transcript_stable_id);
+	return (is_canonical($transcript) &&
+		is_known($transcript) &&
+		has_translation($transcript));
+}
+
+sub is_canonical{
+	my $transcript = $_[0];
+	return $transcript->is_canonical;
+}
+sub is_known{
+	my $transcript = $_[0];
+	return $transcript->is_known;
+}
+
+sub has_translation{
+	my $transcript = $_[0];
 	return $transcript->translation();
 }
