@@ -2,6 +2,8 @@ use strict;
 use warnings;
 use Bio::EnsEMBL::Registry;
 use myUtils::CsvManager;
+
+STDOUT->autoflush(1);
 #Get input and output file from input parameters
 my $output;
 my $input;
