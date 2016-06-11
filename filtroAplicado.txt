@@ -11,3 +11,9 @@ Se procede por lo tanto al filtrado del csv obtenido mediante el metodo 2 de la 
 	2- Eliminación manual de las entradas que tengan los siguientes valores en la columna TRANSCRIPT_BIOTYPE:
 		- nonsense_mediated_decay: indicates that the transcript undergoes nonsense mediated decay, a process which detects nonsense mutations and prevents the expression of truncated or erroneous proteins. This type of transcript is annotated by VEGA/Havana.
 		- non_stop_decay:  Transcripts that have polyA features (including signal) without a prior stop codon in the CDS, i.e. a non-genomic polyA tail attached directly to the CDS without 3' UTR. These transcripts are subject to degradation.
+	3- Eliminación automática de aquellas mutaciones descritas en transcritos que no cumplan alguna de las siguientes condiciones:
+		- El transcrito es el canónico (el más largo para el gen).
+		- El transcrito llega a traducirse produciendo una proteína.
+		- El transcrito tiene un estado de "conocido".
+
+Finalmente tenemos un fichero csv con 12298 entradas.

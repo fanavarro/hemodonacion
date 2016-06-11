@@ -19,33 +19,27 @@ $registry->load_registry_from_db(
 
 my $transcript_adaptor = $registry->get_adaptor( 'homo_sapiens', 'core', 'transcript' );
 # my $slice_adaptor = $registry->get_adaptor( 'Human', 'Core', 'Slice' );
-my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcriptvariation' );
+# my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcriptvariation' );
 # my $var_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'variation' );
 # my $vfa = $registry->get_adaptor( 'homo_sapiens', 'variation', 'variationfeature' );
 
 # $var = $var_adaptor->fetch_by_name('CM034685');
 
-my @so_terms = ('start_lost');
 my $transcript = $transcript_adaptor->fetch_by_stable_id($transcript_id);
 
-# my $trvs = $trv_adaptor->fetch_all_by_Transcripts_SO_terms([$transcript], \@so_terms);
-my $trvs = $trv_adaptor->fetch_all_by_Transcripts([$transcript], \@so_terms);
+print "Display Id -> " . $transcript->display_id() . "\n";
+print "Description -> " . $transcript->description() . "\n";
+print "External name -> " . $transcript->external_name() . "\n";
 
-foreach my $trv (@{$trvs}){
-	#print $trv->transcript_stable_id() . "\n";
-	print $trv->variation_feature->variation->name . "\n";
+
+foreach my $dbentry ( @{$transcript->get_all_DBEntries('RefSeq_mRNA')} ){
+	print "\tDatabase ->" . $dbentry->database . "\n";
+	print "\tDB display name ->" . $dbentry->db_display_name . "\n";
+	print "\tDB ID ->" . $dbentry->dbID . "\n";
+	print "\tDB name ->" . $dbentry->dbname . "\n";
+	print "\tDescription ->" . $dbentry->description . "\n";
+	print "\tDisplay id ->" . $dbentry->display_id . "\n";
+	print "\tPrimary id ->" . $dbentry->primary_id . "\n";
+	print "\tOptional id ->" . $dbentry->optional_id . "\n";
+	print "\n";
 }
-
-#ENST00000487183
-#CM034685
-#ENST00000367698
-#CM034685
-#ENST00000494024
-#CM034685
-#ENST00000516422
-#CM034685
-#LRG_577t1
-#CM034685
-#ENST00000617423
-#CM034685
-
