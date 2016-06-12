@@ -50,7 +50,7 @@ my $out_csv = myUtils::CsvManager->new (
 	file_name => $output,
 	mode => '>'
 );
-
+$out_csv->myUtils::CsvManager::writeHeader();
 my $total_entries = $in_csv->myUtils::CsvManager::countEntries();
 my $count = 1;
 while ((my %entry = $in_csv->myUtils::CsvManager::readEntry())){
