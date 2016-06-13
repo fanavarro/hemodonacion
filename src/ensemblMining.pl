@@ -24,7 +24,7 @@ if (scalar @ARGV == 1){
 print "Results will be printed in $output\n";
 
 # CSV file configuration
-my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_NAME TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
+my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
 my $out_csv = myUtils::CsvManager->new (
 	fields    => \@fields,
 	csv_separator   => "\t",
@@ -53,7 +53,7 @@ my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcri
 
 # Chromosomes to be treated
 # my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
- my @chromosomes = qw(Y);
+my @chromosomes = qw(Y);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
@@ -116,10 +116,12 @@ sub fill_csv{
 	$count = $count + 1;
 	
 	my $variation = $tv->variation_feature->variation;
+        my $transcript = $tv->transcript;
 	my $minor_allele_frequency = $tv->variation_feature->minor_allele_frequency ? $tv->variation_feature->minor_allele_frequency : '-';
-	my $cds_errors = get_cds_errors($tv->transcript);
+	my $cds_errors = get_cds_errors($transcript);
 	my $phenotype_info = get_phenotype_info($variation);
 	my $publications_info = get_publications_info($variation);
+        my $ref_seq_mrna_ids = get_ref_seq_mrna_ids($transcript);
 	my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
 	foreach my $tva ( @{$tvas} ) {
             my %entry;
@@ -137,13 +139,13 @@ sub fill_csv{
             my $polyphen = $tva->polyphen_prediction;
             my $seq_info = get_sequence_info($tva);
             $entry{'CHROMOSOME'} = $chromosome;
-            $entry{'GENE_ID'} = $tv->transcript->get_Gene->stable_id;
-            $entry{'GENE_NAME'} = $tv->transcript->get_Gene->external_name;
-            $entry{'TRANSCRIPT_ID'} = $tv->transcript->display_id;
-            $entry{'TRANSCRIPT_NAME'} = $tv->transcript->external_name;
+            $entry{'GENE_ID'} = $transcript->get_Gene->stable_id;
+            $entry{'GENE_NAME'} = $transcript->get_Gene->external_name;
+            $entry{'TRANSCRIPT_ID'} = $transcript->display_id;
+            $entry{'TRANSCRIPT_REFSEQ_ID'} = $ref_seq_mrna_ids;
             $entry{'TRANSCRIPT_BIOTYPE'} = $tv->transcript->biotype;
             $entry{'CDS_ERRORS'} = $cds_errors;
-            $entry{'PROTEIN_ID'} = $tv->transcript->translation->display_id;
+            $entry{'PROTEIN_ID'} = $transcript->translation->display_id;
             $entry{'VARIATION_NAME'} = $tv->variation_feature->variation_name;
             $entry{'SOURCE'} = $variation->source_name;
             $entry{'TRANSCRIPT_VARIATION_ALLELE_DBID'} = $tva->dbID;
@@ -208,8 +210,6 @@ sub get_transcripts_by_chromosome {
     my $chromosome = $_[0];
     my $slice = $slice_adaptor->fetch_by_region( 'chromosome', $chromosome );
     my $transcripts = $transcript_adaptor->fetch_all_by_Slice($slice);
-# test borrar
-#    $transcripts = $transcript_adaptor->fetch_all_by_stable_id_list(["ENST00000414219"]);
     return $transcripts;
 }
 
@@ -228,26 +228,95 @@ sub get_sequence_info{
     $hash_seq_info->{'stop_codon_position'} = ' ';
     $hash_seq_info->{'seq_length'} = ' ';
     my $source = $tva->variation_feature->variation->source;
-    if (defined($source) && $source->name eq 'dbSNP'){
-        my $seq = get_variation_cds_seq($tva);
-        $hash_seq_info->{'seq_length'} = length($seq);
-        my $first_met_pos = index($seq, $MET);
-        if ($first_met_pos != -1){
-            my $stop_codon_pos = get_stop_codon_position($seq);
-            my $cut_seq = substr($seq, $first_met_pos);
-	    my $reading_frame = $first_met_pos % $CODON_LENGTH == 0 ? 'Conserved' : 'Lost';
-	    $hash_seq_info->{'first_met_position'} = $first_met_pos;
-            $hash_seq_info->{'stop_codon_position'} = $stop_codon_pos != -1 ? $stop_codon_pos : 'No Stop';
-	    $hash_seq_info->{'reading_frame'} = $reading_frame;
-
-            # if an ORF exists into the seq, seq file is generated.
-            if($stop_codon_pos != -1){
-                my $orf = substr($seq, $first_met_pos, $stop_codon_pos - $first_met_pos + 3);
-                generate_variation_seq_files($tva, $orf);
-            }
+    if (defined($source)){
+        if ($source->name eq 'dbSNP'){
+            $hash_seq_info = get_sequence_info_dbsnp($tva);
+        } else {
+            $hash_seq_info = get_sequence_info_default($tva);
         }
     }
     return $hash_seq_info;
+}
+
+
+# Extract information about variation sequence
+# when we have not information about alleles, that it is
+# to say, when the source is not from the tva is dbsnp.
+# param 0 -> TranscriptVariationAllele object.
+# return -> Hash with the following keys:
+# 'first_met_position': position of first Met found relative to peptide.
+# 'reading_frame': Conserved or Lost.
+# 'stop_codon_position': Position of the first stop codon (keeping reading frame).
+# 'seq_length': Length of the mutated sequence.
+sub get_sequence_info_default{
+    my $tva = $_[0];
+    my $hash_seq_info = {};
+    $hash_seq_info->{'first_met_position'} = ' ';
+    $hash_seq_info->{'reading_frame'} = ' ';
+    $hash_seq_info->{'stop_codon_position'} = ' ';
+    $hash_seq_info->{'seq_length'} = ' ';
+
+    # Get the transcript cds.
+    my $seq = $tva->transcript->translateable_seq;
+    $hash_seq_info->{'seq_length'} = length($seq);
+
+    # Simulate that first met is lost
+    $seq = substr($seq, $CODON_LENGTH, length($seq));
+    my $first_met_pos = index($seq, $MET);
+    if ($first_met_pos != -1){
+        my $stop_codon_pos = get_stop_codon_position($seq);
+        my $cut_seq = substr($seq, $first_met_pos);
+        my $reading_frame = $first_met_pos % $CODON_LENGTH == 0 ? 'Conserved' : 'Lost';
+        $hash_seq_info->{'first_met_position'} = $first_met_pos . '*';
+        $hash_seq_info->{'stop_codon_position'} = $stop_codon_pos != -1 ? $stop_codon_pos : 'No Stop';
+        $hash_seq_info->{'reading_frame'} = $reading_frame;
+
+        # if an ORF exists into the seq, seq file is generated.
+        if($stop_codon_pos != -1){
+            my $orf = substr($seq, $first_met_pos, $stop_codon_pos - $first_met_pos + 3);
+            generate_variation_seq_files($tva, $orf);
+        }
+    }
+    return $hash_seq_info;
+}
+
+
+# Extract information about variation sequence
+# when we have information about alleles, that it is
+# to say, when the source from the tva is dbsnp.
+# param 0 -> TranscriptVariationAllele object.
+# return -> Hash with the following keys:
+# 'first_met_position': position of first Met found relative to peptide.
+# 'reading_frame': Conserved or Lost.
+# 'stop_codon_position': Position of the first stop codon (keeping reading frame).
+# 'seq_length': Length of the mutated sequence.
+sub get_sequence_info_dbsnp{
+    my $tva = $_[0];
+    my $hash_seq_info = {};
+    $hash_seq_info->{'first_met_position'} = ' ';
+    $hash_seq_info->{'reading_frame'} = ' ';
+    $hash_seq_info->{'stop_codon_position'} = ' ';
+    $hash_seq_info->{'seq_length'} = ' ';
+
+    my $seq = get_variation_cds_seq($tva);
+    $hash_seq_info->{'seq_length'} = length($seq);
+    my $first_met_pos = index($seq, $MET);
+    if ($first_met_pos != -1){
+        my $stop_codon_pos = get_stop_codon_position($seq);
+        my $cut_seq = substr($seq, $first_met_pos);
+        my $reading_frame = $first_met_pos % $CODON_LENGTH == 0 ? 'Conserved' : 'Lost';
+        $hash_seq_info->{'first_met_position'} = $first_met_pos;
+        $hash_seq_info->{'stop_codon_position'} = $stop_codon_pos != -1 ? $stop_codon_pos : 'No Stop';
+        $hash_seq_info->{'reading_frame'} = $reading_frame;
+
+        # if an ORF exists into the seq, seq file is generated.
+        if($stop_codon_pos != -1){
+            my $orf = substr($seq, $first_met_pos, $stop_codon_pos - $first_met_pos + 3);
+            generate_variation_seq_files($tva, $orf);
+        }
+    }
+    return $hash_seq_info;
+
 }
 
 # Get the position of the first stop codon following
@@ -408,12 +477,20 @@ sub get_publication_info{
 }
 
 
-
-
-
-
-
-
-
-
-
+# Return the ref seq mrna identifiers
+# from a transcript. If there are several ids,
+# they will be separated by '-'.
+# param 0 -> Transcript object.
+# return string with ref seq mrna identifiers.
+sub get_ref_seq_mrna_ids{
+    my $transcript = $_[0];
+    my @db_entries = @{$transcript->get_all_DBEntries('RefSeq_mRNA')};
+    my $transcript_refseq_id = '';
+    foreach my $dbentry ( @db_entries ){
+        if ($dbentry->display_id){
+            $transcript_refseq_id = $transcript_refseq_id . $dbentry->display_id . '-';
+        }
+    }
+    chop($transcript_refseq_id);
+    return $transcript_refseq_id;
+}
