@@ -1,0 +1,5 @@
+setwd("/home/fabad/hemodonacion/src")
+common=read.table('hist_common.dat')
+no_common=read.table('hist_no_common.dat')
+plot(common, type='h', xlim=c(0,1000), xlab="Posicion de la primera metionina en la secuencia mutada", ylab="Numero de casos", main="MAF mayor al 1%")
+plot(no_common, type='h', xlab="Posicion de la primera metionina en la secuencia mutada", ylab="Numero de casos", main="MAF menor al 1%")
