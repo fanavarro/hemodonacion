@@ -14,7 +14,7 @@ $registry->load_registry_from_db(
 my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcriptvariation' );
 my $transcript_adaptor  = $registry->get_adaptor('human', 'core', 'Transcript');
 
-my $transcript = $transcript_adaptor->fetch_by_stable_id('ENST00000624491');
+my $transcript = $transcript_adaptor->fetch_by_stable_id('ENST00000368801');
 my @transcripts = ($transcript);
 my $constraint = "(translation_start=1 or translation_end=1)";
 my $trvs = $trv_adaptor->fetch_all_by_Transcripts_with_constraint(\@transcripts, $constraint);
@@ -51,6 +51,7 @@ sub get_kozak_info{
     my $kozak_service = myUtils::KozakService->instance();
     my $original_kozak = $kozak_service->myUtils::KozakService::get_kozak_info($original_seq);
     my $variation_kozak = $kozak_service->myUtils::KozakService::get_kozak_info($variation_seq);
+    if (0){
     foreach my $hash_ref ( @{$original_kozak} ){
         print "---------------------------------------------------------------\n";
         foreach my $key (keys %{$hash_ref}){
@@ -63,6 +64,7 @@ sub get_kozak_info{
         foreach my $key (keys %{$hash_ref}){
             print $key . "\t-> " . $hash_ref->{$key} . "\n";
         }
+    }
     }
 }
 sub get_variation_cds_seq{
