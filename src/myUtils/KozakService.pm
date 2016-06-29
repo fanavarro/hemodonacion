@@ -33,13 +33,15 @@ sub get_kozak_info{
 
 	my $hash_ref_list = [];
 	my @header = qw(PREVIOUS_ATGS RELIABILITY FRAME KOZAK_IDENTITY START FINISH ORF_AMINOACID_LENGTH STOP_CODON PROTEIN_SEQUENCE);
-	# Examine all matching tables
+	# Examine first matching tables
 	my $ts = ($te->tables)[0];
 	my @rows = $ts->rows;
 	foreach my $row (@rows[1 .. scalar(@rows) - 1]) {
 		my $hash_ref;
 		for (my $i = 0; $i<scalar(@header); $i++){
-			$hash_ref->{$header[$i]} = @{$row}[$i];
+			my $trim_value = @{$row}[$i];
+			$trim_value =~ s/^\s+|\s+$//g;
+			$hash_ref->{$header[$i]} = $trim_value;
 		}
 		push(@{$hash_ref_list}, $hash_ref);
 	}

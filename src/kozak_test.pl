@@ -9,8 +9,8 @@ my $kozak_service = myUtils::KozakService->instance();
 my $hash_ref_list = $kozak_service->myUtils::KozakService::get_kozak_info($sequence);
 
 foreach my $hash_ref ( @{$hash_ref_list} ){
-		print "---------------------------------------------------------------\n";
-		foreach my $key (keys %{$hash_ref}){
-			print $key . "\t-> " . $hash_ref->{$key} . "\n";
-		}
+    print "---------------------------------------------------------------\n";
+    foreach my $key (keys %{$hash_ref}){
+        print $key . "\t-> " . $hash_ref->{$key} . "\n";
+    }
 }
