@@ -262,10 +262,10 @@ sub get_sequence_info{
 sub get_sequence_info_default{
     my $tva = $_[0];
     my $hash_seq_info = {};
-    $hash_seq_info->{'first_met_position'} = ' ';
-    $hash_seq_info->{'reading_frame'} = ' ';
-    $hash_seq_info->{'stop_codon_position'} = ' ';
-    $hash_seq_info->{'seq_length'} = ' ';
+    $hash_seq_info->{'first_met_position'} = '';
+    $hash_seq_info->{'reading_frame'} = '';
+    $hash_seq_info->{'stop_codon_position'} = '';
+    $hash_seq_info->{'seq_length'} = '';
 
     # Get the transcript cds.
     my $seq = $tva->transcript->translateable_seq;
@@ -304,10 +304,10 @@ sub get_sequence_info_default{
 sub get_sequence_info_dbsnp{
     my $tva = $_[0];
     my $hash_seq_info = {};
-    $hash_seq_info->{'first_met_position'} = ' ';
-    $hash_seq_info->{'reading_frame'} = ' ';
-    $hash_seq_info->{'stop_codon_position'} = ' ';
-    $hash_seq_info->{'seq_length'} = ' ';
+    $hash_seq_info->{'first_met_position'} = '';
+    $hash_seq_info->{'reading_frame'} = '';
+    $hash_seq_info->{'stop_codon_position'} = '';
+    $hash_seq_info->{'seq_length'} = '';
 
     my $seq = get_variation_cds_seq($tva);
     $hash_seq_info->{'seq_length'} = length($seq);
@@ -357,6 +357,9 @@ sub get_variation_cdna_seq{
     my $tva = $_[0];
     # seq contains 5' and 3' regions.
     my $seq = $tva->transcript->seq->seq;
+    if (!defined($tva->transcript_variation->cdna_start) || !defined($tva->transcript_variation->cdna_end)){
+        print "ERROR" . $tva->transcript_variation->variation_feature->variation_name . " " . $tva->transcript->display_id . "\n";
+    }
     # Variation position counting utr regions.
     my $variation_start = $tva->transcript_variation->cdna_start - 1;
     my $variation_end = $tva->transcript_variation->cdna_end - 1;
@@ -375,6 +378,9 @@ sub get_variation_cds_seq{
     # translateable_seq returns the coding part of the transcript
     # (it removes introns and 5' and 3' utr)
     my $seq = $tva->transcript->translateable_seq;
+    if (!defined($tva->transcript_variation->cds_start) || !defined($tva->transcript_variation->cds_end)){
+        print "ERROR" . $tva->transcript_variation->variation_feature->variation_name . " " . $tva->transcript->display_id . "\n";
+    }
     # Variation position starting at the begining of coding sequence.
     my $variation_start = $tva->transcript_variation->cds_start - 1;
     my $variation_end = $tva->transcript_variation->cds_end - 1;
@@ -544,8 +550,8 @@ sub get_kozak_info{
     my $first_original_kozak = $original_kozak->[0];
     my $first_mutated_kozak = $mutated_kozak->[0];
     
-    
-    if ($first_original_kozak->{'FRAME'} != $first_mutated_kozak->{'FRAME'}){
+    # I use ne operator to avoid errors when kozak service returns empty string.
+    if ($first_original_kozak->{'FRAME'} ne $first_mutated_kozak->{'FRAME'}){
         $hash_kozak_info->{'FRAMESHIFT'} = 'Lost';
     } else {
         $hash_kozak_info->{'FRAMESHIFT'} = 'Conserved';

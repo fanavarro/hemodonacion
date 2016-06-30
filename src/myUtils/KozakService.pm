@@ -43,8 +43,8 @@ sub get_kozak_info{
 	# Examine first matching table
 	my $ts = ($te->tables)[0];
 
-	# If ts is defined, construct result by retrieving table information
-	if (defined ($ts)){
+	# If there are results, construct result by retrieving table information
+	if (defined ($ts) && defined($ts->rows) && scalar($ts->rows) > 0){
 		my @rows = $ts->rows;
 		foreach my $row (@rows[1 .. scalar(@rows) - 1]) {
 			my $hash_ref;
