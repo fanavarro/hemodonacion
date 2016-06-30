@@ -39,8 +39,9 @@ sub get_kozak_info{
 	foreach my $row (@rows[1 .. scalar(@rows) - 1]) {
 		my $hash_ref;
 		for (my $i = 0; $i<scalar(@header); $i++){
+			# Delete \n from the value.
 			my $trim_value = @{$row}[$i];
-			$trim_value =~ s/^\s+|\s+$//g;
+			$trim_value =~ tr/\n//d;
 			$hash_ref->{$header[$i]} = $trim_value;
 		}
 		push(@{$hash_ref_list}, $hash_ref);

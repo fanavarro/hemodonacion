@@ -3,6 +3,7 @@ use warnings;
 use Bio::EnsEMBL::Registry;
 use myUtils::CsvManager;
 use myUtils::Publication;
+use myUtils::KozakService;
 use File::Path qw(make_path);
 
 my $CODON_LENGTH = 3;
@@ -20,11 +21,12 @@ if (scalar @ARGV == 1){
 	print "Usage: perl ensemblMining.pl outputFile";
 	exit;
 }
-#open(my $fh, '>', $output) or die "Could not open file '$output' $!";
+
+
 print "Results will be printed in $output\n";
 
 # CSV file configuration
-my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
+my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS KOZAK_START KOZAK_END KOZAK_ORF_AA_LENGTH KOZAK_IDENTITY KOZAK_RELIABILITY KOZAK_READING_FRAME_STATUS KOZAK_PROTEIN_SEQ CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
 my $out_csv = myUtils::CsvManager->new (
 	fields    => \@fields,
 	csv_separator   => "\t",
@@ -53,7 +55,7 @@ my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcri
 
 # Chromosomes to be treated
 # my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
-my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11);
+my @chromosomes = qw(Y);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
@@ -117,7 +119,7 @@ sub fill_csv{
 	
 	my $variation = $tv->variation_feature->variation;
         my $transcript = $tv->transcript;
-	my $minor_allele_frequency = $tv->variation_feature->minor_allele_frequency ? $tv->variation_feature->minor_allele_frequency : '-';
+	my $minor_allele_frequency = $tv->variation_feature->minor_allele_frequency ? $tv->variation_feature->minor_allele_frequency : '';
 	my $cds_errors = get_cds_errors($transcript);
 	my $phenotype_info = get_phenotype_info($variation);
 	my $publications_info = get_publications_info($variation);
@@ -138,6 +140,7 @@ sub fill_csv{
             my $sift     = $tva->sift_prediction;
             my $polyphen = $tva->polyphen_prediction;
             my $seq_info = get_sequence_info($tva);
+            my $kozak_info = get_kozak_info($tva);
             $entry{'CHROMOSOME'} = $chromosome;
             $entry{'GENE_ID'} = $transcript->get_Gene->stable_id;
             $entry{'GENE_NAME'} = $transcript->get_Gene->external_name;
@@ -156,6 +159,13 @@ sub fill_csv{
             $entry{'STOP_CODON_POSITION'} = $seq_info->{'stop_codon_position'};
             $entry{'MUTATED_SEQUENCE_LENGTH'} = $seq_info->{'seq_length'};
             $entry{'READING_FRAME_STATUS'} = $seq_info->{'reading_frame'};
+            $entry{'KOZAK_START'} = $kozak_info->{'START'};
+            $entry{'KOZAK_END'} = $kozak_info->{'FINISH'};
+            $entry{'KOZAK_ORF_AA_LENGTH'} = $kozak_info->{'ORF_AMINOACID_LENGTH'};
+            $entry{'KOZAK_IDENTITY'} = $kozak_info->{'KOZAK_IDENTITY'};
+            $entry{'KOZAK_RELIABILITY'} = $kozak_info->{'RELIABILITY'};
+            $entry{'KOZAK_PROTEIN_SEQ'} = $kozak_info->{'PROTEIN_SEQUENCE'};
+            $entry{'KOZAK_READING_FRAME_STATUS'} = $kozak_info->{'FRAMESHIFT'};
             $entry{'CONSEQUENCE'} = join( '-', @ensembl_consequences );
             $entry{'PHENOTYPE'} = $phenotype_info;
             $entry{'SO_TERM'} = join( '-', @so_consequences );
@@ -223,17 +233,18 @@ sub get_transcripts_by_chromosome {
 sub get_sequence_info{
     my $tva = $_[0];
     my $hash_seq_info = {};
-    $hash_seq_info->{'first_met_position'} = ' ';
-    $hash_seq_info->{'reading_frame'} = ' ';
-    $hash_seq_info->{'stop_codon_position'} = ' ';
-    $hash_seq_info->{'seq_length'} = ' ';
+    $hash_seq_info->{'first_met_position'} = '';
+    $hash_seq_info->{'reading_frame'} = '';
+    $hash_seq_info->{'stop_codon_position'} = '';
+    $hash_seq_info->{'seq_length'} = '';
     my $source = $tva->variation_feature->variation->source;
     if (defined($source)){
         if ($source->name eq 'dbSNP'){
             $hash_seq_info = get_sequence_info_dbsnp($tva);
-        } else {
-            $hash_seq_info = get_sequence_info_default($tva);
         }
+        #else {
+        #    $hash_seq_info = get_sequence_info_default($tva);
+        #}
     }
     return $hash_seq_info;
 }
@@ -241,7 +252,7 @@ sub get_sequence_info{
 
 # Extract information about variation sequence
 # when we have not information about alleles, that it is
-# to say, when the source is not from the tva is dbsnp.
+# to say, when the tva source is not from dbsnp.
 # param 0 -> TranscriptVariationAllele object.
 # return -> Hash with the following keys:
 # 'first_met_position': position of first Met found relative to peptide.
@@ -272,10 +283,10 @@ sub get_sequence_info_default{
         $hash_seq_info->{'reading_frame'} = $reading_frame;
 
         # if an ORF exists into the seq, seq file is generated.
-        if($stop_codon_pos != -1){
-            my $orf = substr($seq, $first_met_pos, $stop_codon_pos - $first_met_pos + 3);
-            generate_variation_seq_files($tva, $orf);
-        }
+        #if($stop_codon_pos != -1){
+        #    my $orf = substr($seq, $first_met_pos, $stop_codon_pos - $first_met_pos + 3);
+        #    generate_variation_seq_files($tva, $orf);
+        #}
     }
     return $hash_seq_info;
 }
@@ -493,4 +504,60 @@ sub get_ref_seq_mrna_ids{
     }
     chop($transcript_refseq_id);
     return $transcript_refseq_id;
+}
+
+# Get the first kozak sequence in the
+# original transcript and in the mutated
+# transcript. This information is used
+# to determine if the mutated transcript
+# has lost the frameshift.
+# param 0 -> TranscriptVariationAllele object
+# return -> Hash with kozak sequence info in
+# the mutated transcript.
+sub get_kozak_info{
+    my $tva = $_[0];
+    my $source = $tva->variation_feature->variation->source;
+    my $hash_kozak_info = {};
+    if (defined($source)){
+        if ($source->name ne 'dbSNP'){
+             $hash_kozak_info->{'FRAMESHIFT'} = '';
+             $hash_kozak_info->{'PREVIOUS_ATGS'} = '';
+             $hash_kozak_info->{'RELIABILITY'} = '';
+             $hash_kozak_info->{'KOZAK_IDENTITY'} = '';
+             $hash_kozak_info->{'START'} = '';
+             $hash_kozak_info->{'FINISH'} = '';
+             $hash_kozak_info->{'ORF_AMINOACID_LENGTH'} = '';
+             $hash_kozak_info->{'STOP_CODON'} = '';
+             $hash_kozak_info->{'PROTEIN_SEQUENCE'} = '';
+             return $hash_kozak_info;
+        }
+    }
+    my $original_seq = $tva->transcript->seq->seq;
+    my $mutated_seq = get_variation_cdna_seq($tva);
+    
+    # Singleton instance for kozak_service to retrieve
+    # kozak information at http://atgpr.dbcls.jp/
+    my $kozak_service = myUtils::KozakService->instance();
+
+    my $original_kozak =  $kozak_service->myUtils::KozakService::get_kozak_info($original_seq);
+    my $mutated_kozak =  $kozak_service->myUtils::KozakService::get_kozak_info($mutated_seq);
+    my $first_original_kozak = $original_kozak->[0];
+    my $first_mutated_kozak = $mutated_kozak->[0];
+    
+    
+    if ($first_original_kozak->{'FRAME'} != $first_mutated_kozak->{'FRAME'}){
+        $hash_kozak_info->{'FRAMESHIFT'} = 'Lost';
+    } else {
+        $hash_kozak_info->{'FRAMESHIFT'} = 'Conserved';
+    }
+    
+     $hash_kozak_info->{'PREVIOUS_ATGS'} = $first_mutated_kozak->{'PREVIOUS_ATGS'};
+     $hash_kozak_info->{'RELIABILITY'} = $first_mutated_kozak->{'RELIABILITY'};
+     $hash_kozak_info->{'KOZAK_IDENTITY'} = $first_mutated_kozak->{'KOZAK_IDENTITY'};
+     $hash_kozak_info->{'START'} = $first_mutated_kozak->{'START'};
+     $hash_kozak_info->{'FINISH'} = $first_mutated_kozak->{'FINISH'};
+     $hash_kozak_info->{'ORF_AMINOACID_LENGTH'} = $first_mutated_kozak->{'ORF_AMINOACID_LENGTH'};
+     $hash_kozak_info->{'STOP_CODON'} = $first_mutated_kozak->{'STOP_CODON'};
+     $hash_kozak_info->{'PROTEIN_SEQUENCE'} = $first_mutated_kozak->{'PROTEIN_SEQUENCE'};
+     return $hash_kozak_info;
 }

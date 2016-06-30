@@ -51,7 +51,7 @@ sub get_kozak_info{
     my $kozak_service = myUtils::KozakService->instance();
     my $original_kozak = $kozak_service->myUtils::KozakService::get_kozak_info($original_seq);
     my $variation_kozak = $kozak_service->myUtils::KozakService::get_kozak_info($variation_seq);
-    if (0){
+
     foreach my $hash_ref ( @{$original_kozak} ){
         print "---------------------------------------------------------------\n";
         foreach my $key (keys %{$hash_ref}){
@@ -65,7 +65,7 @@ sub get_kozak_info{
             print $key . "\t-> " . $hash_ref->{$key} . "\n";
         }
     }
-    }
+    
 }
 sub get_variation_cds_seq{
     my $tva = $_[0];
