@@ -17,3 +17,7 @@ Se procede por lo tanto al filtrado del csv obtenido mediante el metodo 2 de la 
 		- El transcrito tiene un estado de "conocido".
 
 Finalmente tenemos un fichero csv con 12298 entradas.
+
+
+Notas:
+ENST00000338981 -> Secuencia kozak con mayor score no es la descrita como la de inicio de traducción. La mutación se da en el codón de inicio que está en la posición 956 del transcrito, pero existe una secuencia kozak con mayor score en la posicion 2002.

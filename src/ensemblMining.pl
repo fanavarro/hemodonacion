@@ -26,7 +26,7 @@ if (scalar @ARGV == 1){
 print "Results will be printed in $output\n";
 
 # CSV file configuration
-my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS KOZAK_START KOZAK_END KOZAK_ORF_AA_LENGTH KOZAK_IDENTITY KOZAK_RELIABILITY KOZAK_READING_FRAME_STATUS KOZAK_PROTEIN_SEQ CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
+my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS KOZAK_START KOZAK_END KOZAK_STOP_CODON KOZAK_ORF_AA_LENGTH KOZAK_IDENTITY KOZAK_RELIABILITY KOZAK_READING_FRAME_STATUS KOZAK_PROTEIN_SEQ CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
 my $out_csv = myUtils::CsvManager->new (
 	fields    => \@fields,
 	csv_separator   => "\t",
@@ -161,6 +161,7 @@ sub fill_csv{
             $entry{'READING_FRAME_STATUS'} = $seq_info->{'reading_frame'};
             $entry{'KOZAK_START'} = $kozak_info->{'START'};
             $entry{'KOZAK_END'} = $kozak_info->{'FINISH'};
+            $entry{'KOZAK_STOP_CODON'} = $kozak_info->{'STOP_CODON'};
             $entry{'KOZAK_ORF_AA_LENGTH'} = $kozak_info->{'ORF_AMINOACID_LENGTH'};
             $entry{'KOZAK_IDENTITY'} = $kozak_info->{'KOZAK_IDENTITY'};
             $entry{'KOZAK_RELIABILITY'} = $kozak_info->{'RELIABILITY'};
@@ -560,10 +561,17 @@ sub get_kozak_info{
      $hash_kozak_info->{'PREVIOUS_ATGS'} = $first_mutated_kozak->{'PREVIOUS_ATGS'};
      $hash_kozak_info->{'RELIABILITY'} = $first_mutated_kozak->{'RELIABILITY'};
      $hash_kozak_info->{'KOZAK_IDENTITY'} = $first_mutated_kozak->{'KOZAK_IDENTITY'};
-     $hash_kozak_info->{'START'} = $first_mutated_kozak->{'START'};
-     $hash_kozak_info->{'FINISH'} = $first_mutated_kozak->{'FINISH'};
+     # We perform the substraction to get the position in cds sequence
+     $hash_kozak_info->{'START'} = $first_mutated_kozak->{'START'} - $first_original_kozak->{'START'};
+     # We add +1 to point at the first base of the stop codon
+     $hash_kozak_info->{'FINISH'} = $first_mutated_kozak->{'FINISH'} - $first_original_kozak->{'START'} + 1;
      $hash_kozak_info->{'ORF_AMINOACID_LENGTH'} = $first_mutated_kozak->{'ORF_AMINOACID_LENGTH'};
      $hash_kozak_info->{'STOP_CODON'} = $first_mutated_kozak->{'STOP_CODON'};
      $hash_kozak_info->{'PROTEIN_SEQUENCE'} = $first_mutated_kozak->{'PROTEIN_SEQUENCE'};
+#     if ($tva->transcript->display_id eq 'ENST00000338981'){
+#         print "Original: $original_seq\n";
+#         print "Mutation: $mutated_seq\n";
+#         print $first_mutated_kozak->{'START'} . " - " . $first_original_kozak->{'START'} . " = " . $hash_kozak_info->{'START'} . "\n";
+#     }
      return $hash_kozak_info;
 }
