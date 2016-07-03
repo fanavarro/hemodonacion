@@ -1,41 +1,49 @@
 setwd("/home/fabad/hemodonacion/src")
-common=read.table('hist_common.dat')
-no_common=read.table('hist_no_common.dat')
-plot(common, type='h', xlim=c(0,1000), xlab="Posicion de la primera metionina en la secuencia mutada", ylab="Numero de casos", main="MAF mayor al 1%")
-plot(no_common, type='h', xlab="Posicion de la primera metionina en la secuencia mutada", ylab="Numero de casos", main="MAF menor al 1%")
 
+# Leer el csv sin filtros
+csv = read.csv("kozak.csv", sep="\t",stringsAsFactors=FALSE)
 
-csv = read.csv("by_pos_manual_filter.csv", sep="\t",stringsAsFactors=FALSE)
-csvWithMaf = csv[csv$MINOR_ALLELE_FREQUENCY != "-",]
+# Eliminar los casos en los que hay errores en las regiones 5' o 3'
+csv = csv[csv$CDS_ERRORS == '',]
 
-# Eliminar el * en los casos donde se ha obtenido la secuencia
-# mutada sin tener informacion del alelo, eliminando directamente
-# la primera metionina.
-csvWithMaf$FIRST_MET_POSITION = gsub("\\*$", "", csvWithMaf$FIRST_MET_POSITION, perl=TRUE)
+# Eliminar los casos en los que el biotipo es "non_stop_decay" o "nonsense_mediated_decay"
+csv = csv[csv$TRANSCRIPT_BIOTYPE != 'non_stop_decay' & csv$TRANSCRIPT_BIOTYPE != 'nonsense_mediated_decay',]
 
+# Obtener un conjunto en el que existe MAF definida y otro en el que no.
+csvWithMaf = csv[!is.na(csv$MINOR_ALLELE_FREQUENCY),]
+csvNoMaf = csv[is.na(csv$MINOR_ALLELE_FREQUENCY),]
+
+# Dividir el subconjunto con MAF definida en MAF alta y baja
 highMaf = csvWithMaf[csvWithMaf$MINOR_ALLELE_FREQUENCY >= 0.01,]
 lowMaf = csvWithMaf[csvWithMaf$MINOR_ALLELE_FREQUENCY < 0.01,]
-noMaf = csv[csv$MINOR_ALLELE_FREQUENCY == "-",]
 
-
-highMaf$FIRST_MET_POSITION = as.numeric(highMaf$FIRST_MET_POSITION)
-lowMaf$FIRST_MET_POSITION = as.numeric(lowMaf$FIRST_MET_POSITION)
-mean(highMaf$FIRST_MET_POSITION, na.rm=TRUE)
-mean(lowMaf$FIRST_MET_POSITION, na.rm=TRUE)
+# Resumen de cada subconjunto de datos segun la maf
 summary(lowMaf)
 summary(highMaf)
 
+# Histogramas de la posición de la primera metionina
 hist(highMaf$FIRST_MET_POSITION)
 hist(lowMaf$FIRST_MET_POSITION)
-highMaf$FIRST_MET_POSITION[1] + highMaf$FIRST_MET_POSITION[2]
+
+# Histogramas de la posición de la metionina de la primera secuencia Kozak
+hist(highMaf$KOZAK_START)
+hist(lowMaf$KOZAK_START)
 
 # Comprobar homogeneidad de varianzas
-var.test(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION)
+var.test(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION) # Varianzas distintas
+var.test(highMaf$KOZAK_START, lowMaf$KOZAK_START) # Varianzas iguales
 
 #Test de normalidad
-shapiro.test(highMaf$FIRST_MET_POSITION)
-shapiro.test(lowMaf$FIRST_MET_POSITION)
-# Test de wilcoxon para comparar medias
-wilcox.test(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, paired = F, conf.level = 0.95)
+shapiro.test(highMaf$FIRST_MET_POSITION) # No normal
+shapiro.test(lowMaf$FIRST_MET_POSITION) # No normal
+shapiro.test(highMaf$KOZAK_START) # No normal
+shapiro.test(lowMaf$KOZAK_START) # No normal
 
+# Test de wilcoxon para comparar medias
+wilcox.test(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, paired = F, conf.level = 0.95) # Distribuciones diferentes
+wilcox.test(highMaf$KOZAK_START, lowMaf$KOZAK_START, paired = F, conf.level = 0.95) # Distribuciones iguales
+
+# Boxplots
 boxplot(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION)
+boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START)
+
