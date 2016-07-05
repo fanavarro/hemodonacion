@@ -54,8 +54,8 @@ my $slice_adaptor = $registry->get_adaptor( 'Human', 'Core', 'Slice' );
 my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcriptvariation' );
 
 # Chromosomes to be treated
-# my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
-my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12);
+my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
+#my @chromosomes = qw(13 14 15 16 17 18 19 20 21 22 X Y);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
