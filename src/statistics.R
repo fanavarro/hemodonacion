@@ -2,12 +2,20 @@ setwd("/home/fabad/hemodonacion/src")
 
 # Leer el csv sin filtros
 csv = read.csv("kozak.csv", sep="\t",stringsAsFactors=FALSE)
+csv$READING_FRAME_STATUS = factor(csv$READING_FRAME_STATUS)
+csv$KOZAK_READING_FRAME_STATUS = factor(csv$KOZAK_READING_FRAME_STATUS)
+csv$KOZAK_STOP_CODON = factor(csv$KOZAK_STOP_CODON)
+csv$STOP_CODON_POSITION = factor(csv$STOP_CODON_POSITION)
+csv$GENE_NAME = factor(csv$GENE_NAME)
 
 # Eliminar los casos en los que hay errores en las regiones 5' o 3'
 csv = csv[csv$CDS_ERRORS == '',]
 
 # Eliminar los casos en los que el biotipo es "non_stop_decay" o "nonsense_mediated_decay"
 csv = csv[csv$TRANSCRIPT_BIOTYPE != 'non_stop_decay' & csv$TRANSCRIPT_BIOTYPE != 'nonsense_mediated_decay',]
+
+# Numero de genes con mutaciones afectando en el codon de inicio
+length(unique(csv$GENE_NAME))
 
 # Obtener un conjunto en el que existe MAF definida y otro en el que no.
 csvWithMaf = csv[!is.na(csv$MINOR_ALLELE_FREQUENCY),]
