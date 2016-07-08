@@ -24,9 +24,10 @@ sub _new_instance {
 sub get_kozak_info{
 	my $this = shift;
 	my $sequence = shift;
+	my $n_results = shift;
 
 	my $url = 'http://atgpr.dbcls.jp/cgi-bin/atgpr.cgi';
-	my $response = $this->{BROWSER}->post( $url, { 'seq' => $sequence } );
+	my $response = $this->{BROWSER}->post( $url, { 'seq' => $sequence, 'number' => $n_results } );
 
 	my $te = HTML::TableExtract->new( );
 	$te->parse($response->decoded_content());

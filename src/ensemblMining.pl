@@ -3,12 +3,13 @@ use warnings;
 use Bio::EnsEMBL::Registry;
 use myUtils::CsvManager;
 use myUtils::Publication;
-use myUtils::KozakService;
+use myUtils::KozakUtils;
 use File::Path qw(make_path);
 
 my $CODON_LENGTH = 3;
 my $MET = 'ATG';
 my @STOP_CODONS = qw(TAG TAA TGA);
+my $MAX_KOZAK_RESULTS = 50000;
 
 # Needed to write to nohup.out in real time
 STDOUT->autoflush(1);
@@ -54,8 +55,8 @@ my $slice_adaptor = $registry->get_adaptor( 'Human', 'Core', 'Slice' );
 my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcriptvariation' );
 
 # Chromosomes to be treated
-my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
-#my @chromosomes = qw(13 14 15 16 17 18 19 20 21 22 X Y);
+# my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
+my @chromosomes = qw(1);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
@@ -140,7 +141,7 @@ sub fill_csv{
             my $sift     = $tva->sift_prediction;
             my $polyphen = $tva->polyphen_prediction;
             my $seq_info = get_sequence_info($tva);
-            my $kozak_info = get_kozak_info($tva);
+            my $kozak_info = get_kozak_info2($tva);
             $entry{'CHROMOSOME'} = $chromosome;
             $entry{'GENE_ID'} = $transcript->get_Gene->stable_id;
             $entry{'GENE_NAME'} = $transcript->get_Gene->external_name;
@@ -359,7 +360,7 @@ sub get_variation_cdna_seq{
     # seq contains 5' and 3' regions.
     my $seq = $tva->transcript->seq->seq;
     if (!defined($tva->transcript_variation->cdna_start) || !defined($tva->transcript_variation->cdna_end)){
-        print "ERROR" . $tva->transcript_variation->variation_feature->variation_name . " " . $tva->transcript->display_id . "\n";
+        print "ERROR CDNA variation without start or end " . $tva->transcript_variation->variation_feature->variation_name . " " . $tva->transcript->display_id . "\n";
     }
     # Variation position counting utr regions.
     my $variation_start = $tva->transcript_variation->cdna_start - 1;
@@ -379,8 +380,14 @@ sub get_variation_cds_seq{
     # translateable_seq returns the coding part of the transcript
     # (it removes introns and 5' and 3' utr)
     my $seq = $tva->transcript->translateable_seq;
-    if (!defined($tva->transcript_variation->cds_start) || !defined($tva->transcript_variation->cds_end)){
+    if (!defined($tva->transcript_variation->cds_end)){
         print "ERROR" . $tva->transcript_variation->variation_feature->variation_name . " " . $tva->transcript->display_id . "\n";
+    }
+    # If the variation overlaps 5' region, cds_start is not defined
+    # so we use the function that check the complete transcript to
+    # extract the slice
+    if (!defined($tva->transcript_variation->cds_start)){
+        return get_variation_cds_seq_upstream($tva);
     }
     # Variation position starting at the begining of coding sequence.
     my $variation_start = $tva->transcript_variation->cds_start - 1;
@@ -391,6 +398,24 @@ sub get_variation_cds_seq{
     substr($seq, $variation_start, $variation_end - $variation_start + 1) = $feature_seq;
     
     return $seq;
+}
+
+sub get_variation_cds_seq_upstream{
+    my $tva = $_[0];
+    my $variation_start = $tva->transcript_variation->cdna_start - $tva->transcript_variation->cds_end - 1;
+    my $variation_end = $tva->transcript_variation->cdna_end - 1;
+    my $cdna_mutated_seq = get_variation_cdna_seq($tva);
+    my $three_prime_utr_seq = undef;
+    my $cds_end = undef;
+    my $cds_start = $variation_start;
+    if (defined($tva->transcript->three_prime_utr)){
+        $three_prime_utr_seq = $tva->transcript->three_prime_utr->seq;
+        $cds_end = index($cdna_mutated_seq, $three_prime_utr_seq);
+    } else {
+        $cds_end = length($cdna_mutated_seq) - 1;
+    }
+    my $final_seq = substr($cdna_mutated_seq, $cds_start, $cds_end - $cds_start);
+    return $final_seq
 }
 
 # Generates the final ORF sequence of the mutated transcript.
@@ -573,5 +598,83 @@ sub get_kozak_info{
 #         print "Mutation: $mutated_seq\n";
 #         print $first_mutated_kozak->{'START'} . " - " . $first_original_kozak->{'START'} . " = " . $hash_kozak_info->{'START'} . "\n";
 #     }
+     return $hash_kozak_info;
+}
+
+# Get the first kozak sequence in the
+# original transcript and in the mutated
+# transcript. This information is used
+# to determine if the mutated transcript
+# has lost the frameshift.
+# param 0 -> TranscriptVariationAllele object
+# return -> Hash with kozak sequence info in
+# the mutated transcript.
+sub get_kozak_info2{
+    my $tva = $_[0];
+    my $source = $tva->variation_feature->variation->source;
+    my $hash_kozak_info = {};
+    if (defined($source)){
+        if ($source->name ne 'dbSNP'){
+             $hash_kozak_info->{'FRAMESHIFT'} = '';
+             $hash_kozak_info->{'PREVIOUS_ATGS'} = '';
+             $hash_kozak_info->{'RELIABILITY'} = '';
+             $hash_kozak_info->{'KOZAK_IDENTITY'} = '';
+             $hash_kozak_info->{'START'} = '';
+             $hash_kozak_info->{'FINISH'} = '';
+             $hash_kozak_info->{'ORF_AMINOACID_LENGTH'} = '';
+             $hash_kozak_info->{'STOP_CODON'} = '';
+             $hash_kozak_info->{'PROTEIN_SEQUENCE'} = '';
+             return $hash_kozak_info;
+        }
+    }
+    my $original_cdna_seq = $tva->transcript->seq->seq;
+    my $original_cds_seq = $tva->transcript->translateable_seq;
+    my $mutated_cdna_seq = get_variation_cdna_seq($tva);
+    my $mutated_cds_seq = get_variation_cds_seq($tva);
+    # Find the position in which coding region starts at cdna sequence.
+    my $default_kozak_pos = index($mutated_cdna_seq, $mutated_cds_seq);
+    
+    my $mutated_kozaks =  myUtils::KozakUtils::get_kozak_info($mutated_cdna_seq, $MAX_KOZAK_RESULTS);
+    my $original_kozaks =  myUtils::KozakUtils::get_kozak_info($original_cdna_seq, $MAX_KOZAK_RESULTS);
+    
+    # Look for the first kozak after default kozak in mutated.
+    my $first_mutated_kozak = ();
+    foreach my $mutated_kozak (@{$mutated_kozaks}){
+        if ($mutated_kozak->{'START'} >= $default_kozak_pos){
+            $first_mutated_kozak = $mutated_kozak;
+            last;
+        }
+    }
+
+    # Look for the natural kozak
+    my $natural_kozak = ();
+    foreach my $original_kozak (@{$original_kozaks}){
+        if ($original_kozak->{'START'} == $default_kozak_pos){
+            $natural_kozak = $original_kozak;
+            last;
+        }
+    }
+    if (!defined($natural_kozak->{'START'}) || !defined($first_mutated_kozak->{'START'})){
+        print "Error kozak" . $tva->transcript->display_id . " " . $tva->transcript_variation->variation_feature->variation_name . "\n";
+        return $hash_kozak_info;
+    }
+    # I use ne operator to avoid errors when kozak service returns empty string.
+    if ($natural_kozak->{'FRAME'} ne $first_mutated_kozak->{'FRAME'}){
+        $hash_kozak_info->{'FRAMESHIFT'} = 'Lost';
+    } else {
+        $hash_kozak_info->{'FRAMESHIFT'} = 'Conserved';
+    }
+    
+     $hash_kozak_info->{'PREVIOUS_ATGS'} = $first_mutated_kozak->{'PREVIOUS_ATGS'};
+     $hash_kozak_info->{'RELIABILITY'} = $first_mutated_kozak->{'RELIABILITY'};
+     $hash_kozak_info->{'KOZAK_IDENTITY'} = $first_mutated_kozak->{'KOZAK_IDENTITY'};
+     # We perform the substraction to get the position in cds sequence
+     $hash_kozak_info->{'START'} = $first_mutated_kozak->{'START'} - $natural_kozak->{'START'};
+     # We add +1 to point at the first base of the stop codon
+     $hash_kozak_info->{'FINISH'} = $first_mutated_kozak->{'FINISH'} - $natural_kozak->{'START'} + 1;
+     $hash_kozak_info->{'ORF_AMINOACID_LENGTH'} = $first_mutated_kozak->{'ORF_AMINOACID_LENGTH'};
+     $hash_kozak_info->{'STOP_CODON'} = $first_mutated_kozak->{'STOP_CODON'};
+     $hash_kozak_info->{'PROTEIN_SEQUENCE'} = $first_mutated_kozak->{'PROTEIN_SEQUENCE'};
+
      return $hash_kozak_info;
 }
