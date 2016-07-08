@@ -632,19 +632,12 @@ sub get_kozak_info2{
     my $mutated_cdna_seq = get_variation_cdna_seq($tva);
     my $mutated_cds_seq = get_variation_cds_seq($tva);
     # Find the position in which coding region starts at cdna sequence.
-    my $default_kozak_pos = index($mutated_cdna_seq, $mutated_cds_seq);
-    
+    my $default_kozak_pos = index($original_cdna_seq, $original_cds_seq);
+    say "Inicio kozak = " . $default_kozak_pos;
     my $mutated_kozaks =  myUtils::KozakUtils::get_kozak_info($mutated_cdna_seq, $MAX_KOZAK_RESULTS);
     my $original_kozaks =  myUtils::KozakUtils::get_kozak_info($original_cdna_seq, $MAX_KOZAK_RESULTS);
     
-    # Look for the first kozak after default kozak in mutated.
-    my $first_mutated_kozak = ();
-    foreach my $mutated_kozak (@{$mutated_kozaks}){
-        if ($mutated_kozak->{'START'} >= $default_kozak_pos){
-            $first_mutated_kozak = $mutated_kozak;
-            last;
-        }
-    }
+
 
     # Look for the natural kozak
     my $natural_kozak = ();
@@ -654,6 +647,17 @@ sub get_kozak_info2{
             last;
         }
     }
+
+    # Look for the first kozak after default kozak in mutated.
+    my $first_mutated_kozak = ();
+    foreach my $mutated_kozak (@{$mutated_kozaks}){
+        if ($mutated_kozak->{'START'} >= $default_kozak_pos){
+        #if ($mutated_kozak->{'START'} == index($mutated_cdna_seq, $mutated_cds_seq)){
+            $first_mutated_kozak = $mutated_kozak;
+            last;
+        }
+    }
+
     if (!defined($natural_kozak->{'START'}) || !defined($first_mutated_kozak->{'START'})){
         print "Error kozak" . $tva->transcript->display_id . " " . $tva->transcript_variation->variation_feature->variation_name . "\n";
         return $hash_kozak_info;
@@ -675,6 +679,8 @@ sub get_kozak_info2{
      $hash_kozak_info->{'ORF_AMINOACID_LENGTH'} = $first_mutated_kozak->{'ORF_AMINOACID_LENGTH'};
      $hash_kozak_info->{'STOP_CODON'} = $first_mutated_kozak->{'STOP_CODON'};
      $hash_kozak_info->{'PROTEIN_SEQUENCE'} = $first_mutated_kozak->{'PROTEIN_SEQUENCE'};
-
+     say "Inicio kozak original = " . $natural_kozak->{'START'};
+     say "Inicio kozak mutada = " . $first_mutated_kozak->{'START'};
+     say "Inicio kozak mutada con respecto a cds = " . $hash_kozak_info->{'START'};
      return $hash_kozak_info;
 }
