@@ -55,8 +55,8 @@ my $slice_adaptor = $registry->get_adaptor( 'Human', 'Core', 'Slice' );
 my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcriptvariation' );
 
 # Chromosomes to be treated
-# my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
-my @chromosomes = qw(1);
+my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
+# my @chromosomes = qw(1);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
@@ -633,7 +633,6 @@ sub get_kozak_info2{
     my $mutated_cds_seq = get_variation_cds_seq($tva);
     # Find the position in which coding region starts at cdna sequence.
     my $default_kozak_pos = index($original_cdna_seq, $original_cds_seq);
-    say "Inicio kozak = " . $default_kozak_pos;
     my $mutated_kozaks =  myUtils::KozakUtils::get_kozak_info($mutated_cdna_seq, $MAX_KOZAK_RESULTS);
     my $original_kozaks =  myUtils::KozakUtils::get_kozak_info($original_cdna_seq, $MAX_KOZAK_RESULTS);
     
@@ -651,7 +650,7 @@ sub get_kozak_info2{
     # Look for the first kozak after default kozak in mutated.
     my $first_mutated_kozak = ();
     foreach my $mutated_kozak (@{$mutated_kozaks}){
-        if ($mutated_kozak->{'START'} >= $default_kozak_pos){
+        if ($mutated_kozak->{'START'} >= $default_kozak_pos && $mutated_kozak->{'RELIABILITY'} >= 0.25){
         #if ($mutated_kozak->{'START'} == index($mutated_cdna_seq, $mutated_cds_seq)){
             $first_mutated_kozak = $mutated_kozak;
             last;
@@ -679,8 +678,5 @@ sub get_kozak_info2{
      $hash_kozak_info->{'ORF_AMINOACID_LENGTH'} = $first_mutated_kozak->{'ORF_AMINOACID_LENGTH'};
      $hash_kozak_info->{'STOP_CODON'} = $first_mutated_kozak->{'STOP_CODON'};
      $hash_kozak_info->{'PROTEIN_SEQUENCE'} = $first_mutated_kozak->{'PROTEIN_SEQUENCE'};
-     say "Inicio kozak original = " . $natural_kozak->{'START'};
-     say "Inicio kozak mutada = " . $first_mutated_kozak->{'START'};
-     say "Inicio kozak mutada con respecto a cds = " . $hash_kozak_info->{'START'};
      return $hash_kozak_info;
 }
