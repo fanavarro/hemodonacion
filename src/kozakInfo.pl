@@ -22,8 +22,10 @@ package MyFrame;
 use Wx qw[:everything];
 use base qw(Wx::Frame);
 use strict;
-
 use Wx::Locale gettext => '_T';
+
+my $MAX_KOZAK_RESULTS = 50000;
+my $LENGTH_PER_LINE = 50;
 sub new {
     my( $self, $parent, $id, $title, $pos, $size, $style, $name ) = @_;
     $parent = undef              unless defined $parent;
@@ -97,6 +99,7 @@ sub button_handler {
     if (scalar (@genes) > 0){
         my $gene = $genes[0];
         my @transcripts = @{$self->{transcript_adaptor}->fetch_all_by_Gene($gene)};
+        # Find canonical transcript
         my $transcript = undef;
         for (my $i = 0; $i < scalar(@transcripts); $i++){
             if($transcripts[$i]->is_canonical()){
@@ -108,8 +111,24 @@ sub button_handler {
             $cdna = $transcript->seq->seq;
             my $cds = $transcript->translateable_seq;
             my $protein_start_pos = index($cdna, $cds);
-            $self->{results}->SetValue( $cdna);
-             $self->{results}->SetStyle($protein_start_pos , $protein_start_pos + 3, Wx::TextAttr->new( Wx::Colour->new( 255, 15, 255 ),Wx::Colour->new( 1, 15, 100 ) ));
+            $protein_start_pos += (int($protein_start_pos/($LENGTH_PER_LINE - 1 )));
+            my $kozak_positions = myUtils::KozakUtils::get_kozak_info($cdna, $MAX_KOZAK_RESULTS);
+            
+            # set sequence in textctrl
+            $self->{results}->SetValue( format_sequence($cdna));
+            
+            # Paint the ATG that indicates the start of translation.
+            $self->{results}->SetStyle($protein_start_pos , $protein_start_pos + 3, Wx::TextAttr->new( Wx::Colour->new( 255, 15, 255 ),Wx::Colour->new( 1, 15, 100 ) ));
+            
+            # Paint kozak positions
+            foreach my $kozak_position (@{$kozak_positions}){
+                my $kozak_start = $kozak_position->{START};
+                $kozak_start = $kozak_start + (int($kozak_start/($LENGTH_PER_LINE - 1)));
+                if ($kozak_start != $protein_start_pos){
+                    my $kozak_reliability = $kozak_position->{RELIABILITY};
+                    $self->{results}->SetStyle( $kozak_start ,  $kozak_start + 3, Wx::TextAttr->new( Wx::Colour->new( 255, 15, 255 ),Wx::Colour->new( POSIX::floor($kozak_reliability * 255),0, 0 ) ));
+                }
+            }
         }
     } else{
         $self->{results}->SetValue( "Gene $geneName not found");
@@ -125,7 +144,14 @@ sub results_handler{
     print "($row,$col)\n";
 }
 
-
+sub format_sequence{
+    my $seq = shift;
+    
+    for(my $i = $LENGTH_PER_LINE - 1; $i < length($seq); $i = $i + $LENGTH_PER_LINE){
+        substr($seq, $i, 0) = "\n";
+    }
+    return $seq;
+}
 # end of class MyFrame
 
 1;
