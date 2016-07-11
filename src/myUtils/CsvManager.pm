@@ -81,7 +81,7 @@ sub writeEntry{
 	for (my $i = 0; $i < scalar  keys  %entry; $i++){
 		my $fieldName = $fieldNames[$i];
 		my $value = defined($entry{$fieldName}) ? $entry{$fieldName} : '';
-		$string = $string . $entry{$fieldName} . $csv_separator;
+		$string = $string . $value . $csv_separator;
 	}
 	chop ($string);
 	$string = $string . "\n";
