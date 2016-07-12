@@ -11,6 +11,91 @@ use warnings;
 use myUtils::KozakUtils;
 use Bio::EnsEMBL::Registry;
 
+#####popup#####
+package KozakPopup;
+use strict ;
+use Wx qw[:everything];
+use base qw(Wx::Dialog);
+
+sub new{
+    my( $self, $parent, $id, $title, $pos, $size, $style, $name, $kozak_info ) = @_;
+    $parent = undef              unless defined $parent;
+    $id     = -1                 unless defined $id;
+    $title  = ""                 unless defined $title;
+    $pos    = wxDefaultPosition  unless defined $pos;
+    $size   = wxDefaultSize      unless defined $size;
+    $name   = ""                 unless defined $name;
+    $style = wxDEFAULT_FRAME_STYLE 
+        unless defined $style;
+        
+     $self = $self->SUPER::new( $parent, $id, $title, $pos, $size, $style, $name );
+     $self->{kozak_info} = $kozak_info;
+     
+     $self->{label_start} = Wx::StaticText->new($self, -1, "Start position:",);
+     $self->{start_pos} = Wx::StaticText->new($self, -1, $kozak_info->{START},);
+     
+     $self->{label_end} = Wx::StaticText->new($self, -1, "End position:",);
+     $self->{end_pos} = Wx::StaticText->new($self, -1, $kozak_info->{FINISH},);
+     
+     $self->{label_stop_codon} = Wx::StaticText->new($self, -1, "Stop codon found:",);
+     $self->{stop_codon} = Wx::StaticText->new($self, -1, $kozak_info->{STOP_CODON},);
+     
+     $self->{label_frame} = Wx::StaticText->new($self, -1, "Frame:",);
+     $self->{frame} = Wx::StaticText->new($self, -1, $kozak_info->{FRAME},);
+     
+     $self->{label_aa_length} = Wx::StaticText->new($self, -1, "Aminoacid length:",);
+     $self->{aa_length} = Wx::StaticText->new($self, -1, $kozak_info->{ORF_AMINOACID_LENGTH},);
+     
+     $self->{label_reliability} = Wx::StaticText->new($self, -1, "Reliability:",);
+     $self->{reliability} = Wx::StaticText->new($self, -1, $kozak_info->{RELIABILITY},);
+     
+     $self->{label_identity} = Wx::StaticText->new($self, -1, "Kozak identity:",);
+     $self->{identity} = Wx::StaticText->new($self, -1, $kozak_info->{KOZAK_IDENTITY},);
+     
+    $self->__set_properties();
+    $self->__do_layout();
+     
+     return $self;
+}
+
+sub __set_properties {
+    my $self = shift;
+    # begin wxGlade: MyFrame::__set_properties
+    $self->SetTitle("Kozak Properties");
+    $self->SetSize(Wx::Size->new(300, 300));
+    # end wxGlade
+}
+
+sub __do_layout{
+    my $self = shift;
+    $self->{gridsizer} = Wx::GridSizer->new( 7, 2, 5, 5 );
+    
+    $self->{gridsizer}->Add($self->{label_start}, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL );
+    $self->{gridsizer}->Add($self->{start_pos}, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL );
+    
+    $self->{gridsizer}->Add($self->{label_end}, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL );
+    $self->{gridsizer}->Add($self->{end_pos}, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL );
+    
+    $self->{gridsizer}->Add($self->{label_stop_codon}, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL );
+    $self->{gridsizer}->Add($self->{stop_codon}, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL );
+    
+    $self->{gridsizer}->Add($self->{label_frame}, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL );
+    $self->{gridsizer}->Add($self->{frame}, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL );
+    
+    $self->{gridsizer}->Add($self->{label_aa_length}, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL );
+    $self->{gridsizer}->Add($self->{aa_length}, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL );
+    
+    $self->{gridsizer}->Add($self->{label_reliability}, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL );
+    $self->{gridsizer}->Add($self->{reliability}, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL );
+    
+    $self->{gridsizer}->Add($self->{label_identity}, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL );
+    $self->{gridsizer}->Add($self->{identity}, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL );
+    
+    $self->SetSizer($self->{gridsizer});
+    $self->Layout();
+}
+##############
+
 # begin wxGlade: dependencies
 # end wxGlade
 
@@ -113,12 +198,14 @@ sub button_handler {
             my $protein_start_pos = index($cdna, $cds);
             $protein_start_pos += (int($protein_start_pos/($LENGTH_PER_LINE - 1 )));
             my $kozak_positions = myUtils::KozakUtils::get_kozak_info($cdna, $MAX_KOZAK_RESULTS);
+            # Store kozak positions in the object
+            $self->{kozak_positions} = $kozak_positions;
             
             # set sequence in textctrl
             $self->{results}->SetValue( format_sequence($cdna));
             
             # Paint the ATG that indicates the start of translation.
-            $self->{results}->SetStyle($protein_start_pos , $protein_start_pos + 3, Wx::TextAttr->new( Wx::Colour->new( 255, 15, 255 ),Wx::Colour->new( 1, 15, 100 ) ));
+            $self->{results}->SetStyle($protein_start_pos , $protein_start_pos + 3, Wx::TextAttr->new( Wx::Colour->new( 255, 15, 255 ),Wx::Colour->new( 0, 255, 0 ) ));
             
             # Paint kozak positions
             foreach my $kozak_position (@{$kozak_positions}){
@@ -138,10 +225,26 @@ sub button_handler {
 
 sub results_handler{
     my ($self, $event) = @_;
+    my $parent = $self->GetParent();
     my $position = $event->GetPosition();
     my ($res, $col, $row) = $self->HitTest($position);
-    #my ($col, $line) = $self->{results}->PositionToXY($hitpos);
+    # Print row and col position
     print "($row,$col)\n";
+    # Calc linear position
+    my $click_pos = ($row * ($LENGTH_PER_LINE - 1)) + $col;
+    print $click_pos ."\n";
+    
+    # Check if a kozak position has been clicked
+    my $kozak_positions = $parent->{kozak_positions};
+    foreach my $kozak_position (@{$kozak_positions}){
+        my $kozak_position_start = $kozak_position->{START};
+        my $kozak_position_end= $kozak_position->{START} + 3;
+        if ($click_pos >= $kozak_position_start && $click_pos <= $kozak_position_end){
+            print "Kozak Clicked!!\n";
+            my $popup = KozakPopup->new($parent, -1, undef, undef, undef, undef, undef, $kozak_position);
+            $popup->Show(1);
+        }
+    }
 }
 
 sub format_sequence{
@@ -161,7 +264,7 @@ sub format_sequence{
 package main;
 
 unless(caller){
-    my $local = Wx::Locale->new("English", "en", "en"); # replace with ??
+    my $local = Wx::Locale->new("C", "C", "C"); # replace with ??
     $local->AddCatalog("app"); # replace with the appropriate catalog name
 
     local *Wx::App::OnInit = sub{1};
