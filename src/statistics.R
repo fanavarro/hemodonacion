@@ -26,12 +26,12 @@ highMaf = csvWithMaf[csvWithMaf$MINOR_ALLELE_FREQUENCY >= 0.01,]
 lowMaf = csvWithMaf[csvWithMaf$MINOR_ALLELE_FREQUENCY < 0.01,]
 
 # Resumen de cada subconjunto de datos segun la maf
-summary(lowMaf)
-summary(highMaf)
+summary(lowMaf$FIRST_MET_POSITION)
+summary(highMaf$FIRST_MET_POSITION)
 
 # Histogramas de la posición de la primera metionina
-hist(highMaf$FIRST_MET_POSITION)
-hist(lowMaf$FIRST_MET_POSITION)
+hist(highMaf$FIRST_MET_POSITION, xlim = c(0,400))
+hist(lowMaf$FIRST_MET_POSITION, xlim = c(0,400))
 
 # Histogramas de la posición de la metionina de la primera secuencia Kozak
 hist(highMaf$KOZAK_START)
@@ -52,6 +52,6 @@ wilcox.test(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, paired = F, c
 wilcox.test(highMaf$KOZAK_START, lowMaf$KOZAK_START, paired = F, conf.level = 0.95) # Distribuciones iguales
 
 # Boxplots
-boxplot(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION)
-boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START)
+boxplot(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, ylim=c(0,3000))
+boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START, ylim=c(0,1500))
 
