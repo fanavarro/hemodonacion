@@ -1,7 +1,7 @@
 package myUtils::SeqUtils;
 use strict;
 use warnings;
-my $codon_length = 3;
+my $CODON_LENGTH = 3;
 my $MET = 'ATG';
 my @STOP_CODONS = qw(TAG TAA TGA);
 my %codon_translation = (
@@ -32,10 +32,10 @@ sub get_translation{
     $orf = uc($orf); # to uppercase
     
     my $aa_seq = "";
-    for (my $i = 0; $i < length($orf); $i += $codon_length){
-        my $codon = substr($orf, $i, $codon_length);
+    for (my $i = 0; $i < length($orf); $i += $CODON_LENGTH){
+        my $codon = substr($orf, $i, $CODON_LENGTH);
         # print "$codon \n";
-        $aa_seq = $aa_seq . $codon_translation{$codon}
+        $aa_seq = $aa_seq . $codon_translation{$codon} if defined $codon_translation{$codon};
     }
     return $aa_seq;
 }
@@ -78,8 +78,11 @@ sub get_orf{
     # complete de orf until stop codon or the end of seq
     if ($pos_met != -1){
         $orf = '';
-        for(my $i = $pos_met; $i < length($seq); $i += $codon_length){
-            my $codon = substr($seq, $i, $codon_length);
+        for(my $i = $pos_met; $i < length($seq); $i += $CODON_LENGTH){
+            my $codon = substr($seq, $i, $CODON_LENGTH);
+            if (exists_in_list($codon, \@STOP_CODONS)){
+                last;
+            }
             $orf = $orf . $codon;
         }
     }
@@ -87,4 +90,51 @@ sub get_orf{
     return $orf;
 }
 
+# Return the position in which the translation
+# starts in the cdna sequence.
+# param0 -> the cdna sequence (transcript including 5' and 3')
+# param1 -> the cds sequence (transcript with only coding sequence)
+sub get_translation_start_pos{
+    my $cdna = shift;
+    my $cds = shift;
+    return index($cdna, $cds);
+}
+
+
+# Get the position of the first stop codon following
+# the reading frame with start position.
+# param 0: string with the sequence
+# param 1: start search position
+# return the position of the first stop codon found after
+# first MET keeping the reading frame.
+sub get_stop_codon_position{
+    my $seq = $_[0];
+    # get the first met in the sequence
+    my $init_pos = $_[1];
+    if ($init_pos != -1){
+	# Search stop codons keeping the reading frame
+        for (my $i = $init_pos; $i < length($seq); $i = $i + $CODON_LENGTH){
+	    my $codon = substr($seq, $i, $CODON_LENGTH);
+	    if (exists_in_list($codon, \@STOP_CODONS)){
+	        return $i;
+            }
+        }
+    }
+    return -1;
+}
+
+# Checks if an element exists in the given list.
+# param 0 -> Element to check.
+# param 1 -> List reference.
+# returns true if elements exists inside the list and false if not.
+sub exists_in_list {
+    my $check = $_[0];
+    my $list  = $_[1];
+    foreach my $element ( @{$list} ) {
+        if ( $check eq $element ) {
+            return 1;
+        }
+    }
+    return 0;
+}
 1;

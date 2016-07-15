@@ -4,7 +4,9 @@ use Bio::EnsEMBL::Registry;
 use myUtils::CsvManager;
 use myUtils::Publication;
 use myUtils::KozakUtils;
+use myUtils::SeqUtils;
 use File::Path qw(make_path);
+use List::Util qw[min max];
 
 my $CODON_LENGTH = 3;
 my $MET = 'ATG';
@@ -56,7 +58,7 @@ my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcri
 
 # Chromosomes to be treated
 # my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
- my @chromosomes = qw(Y);
+ my @chromosomes = qw(1);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
@@ -300,9 +302,12 @@ sub get_sequence_info_default{
 # param 0 -> TranscriptVariationAllele object.
 # return -> Hash with the following keys:
 # 'first_met_position': position of first Met found relative to peptide.
+# If there is a deletion, initial affected codon is filled with 5' intron
+# for example AAAA|C(A)T|GATTAGCACC -> AA(A)AGATTAGCACC where () indicate
+# reference to count positions.
 # 'reading_frame': Conserved or Lost.
 # 'stop_codon_position': Position of the first stop codon (keeping reading frame).
-# 'seq_length': Length of the mutated sequence.
+# 'seq_length': Percentage of the orf found in the mutated sequence size according to original orf.
 sub get_sequence_info_dbsnp{
     my $tva = $_[0];
     my $hash_seq_info = {};
@@ -311,22 +316,39 @@ sub get_sequence_info_dbsnp{
     $hash_seq_info->{'stop_codon_position'} = '';
     $hash_seq_info->{'seq_length'} = '';
 
-    my $seq = get_variation_cds_seq($tva);
-    $hash_seq_info->{'seq_length'} = length($seq);
-    my $first_met_pos = index($seq, $MET);
+    my $mutated_cdna = get_variation_cdna_seq($tva);
+    my $cdna = $tva->transcript->seq->seq;
+    my $cds = $tva->transcript->translateable_seq;
+    my $translation_start_pos = myUtils::SeqUtils::get_translation_start_pos($cdna, $cds);
+
+    # We start counting positions from reference
+    my $reference;
+
+    # If deletion, we move reference
+    if(length($cdna) > length($mutated_cdna)){
+        $reference = max($translation_start_pos - (length($cdna) - length($mutated_cdna)), 0);
+    } else {
+        $reference = $translation_start_pos;
+    }
+
+
+
+    
+    my $first_met_pos = index($mutated_cdna, $MET, $reference);
     if ($first_met_pos != -1){
-        my $stop_codon_pos = get_stop_codon_position($seq);
-        my $cut_seq = substr($seq, $first_met_pos);
-        my $reading_frame = $first_met_pos % $CODON_LENGTH == 0 ? 'Conserved' : 'Lost';
-        $hash_seq_info->{'first_met_position'} = $first_met_pos;
-        $hash_seq_info->{'stop_codon_position'} = $stop_codon_pos != -1 ? $stop_codon_pos : 'No Stop';
+        my $stop_codon_pos = get_stop_codon_position($mutated_cdna, $first_met_pos);
+        my $mutated_orf = myUtils::SeqUtils::get_orf($mutated_cdna, $first_met_pos);
+        my $reading_frame = myUtils::SeqUtils::is_in_frame($mutated_orf, $cds) ? 'Conserved' : 'Lost';
+        $hash_seq_info->{'first_met_position'} = $first_met_pos - $reference;
+        $hash_seq_info->{'stop_codon_position'} = $stop_codon_pos != -1 ? $stop_codon_pos - $reference : 'No Stop';
         $hash_seq_info->{'reading_frame'} = $reading_frame;
+        $hash_seq_info->{'seq_length'} = (length($mutated_orf) * 100 / length($cds)) . '%';
 
         # if an ORF exists into the seq, seq file is generated.
-        if($stop_codon_pos != -1){
-            my $orf = substr($seq, $first_met_pos, $stop_codon_pos - $first_met_pos + 3);
-            generate_variation_seq_files($tva, $orf);
-        }
+        # if($stop_codon_pos != -1){
+        #    my $orf = substr($seq, $first_met_pos, $stop_codon_pos - $first_met_pos + 3);
+        #    generate_variation_seq_files($tva, $orf);
+        # }
     }
     return $hash_seq_info;
 
@@ -340,7 +362,7 @@ sub get_sequence_info_dbsnp{
 sub get_stop_codon_position{
     my $seq = $_[0];
     # get the first met in the sequence
-    my $init_pos = index($seq, $MET);
+    my $init_pos = $_[1];
     if ($init_pos != -1){
 	# Search stop codons keeping the reading frame
         for (my $i = $init_pos; $i < length($seq); $i = $i + $CODON_LENGTH){
@@ -636,7 +658,15 @@ sub get_kozak_info2{
     my $mutated_kozaks =  myUtils::KozakUtils::get_kozak_info($mutated_cdna_seq, $MAX_KOZAK_RESULTS);
     my $original_kozaks =  myUtils::KozakUtils::get_kozak_info($original_cdna_seq, $MAX_KOZAK_RESULTS);
     
+    # We start counting positions from reference
+    my $reference;
 
+    # If deletion, we move reference
+    if(length($original_cdna_seq) > length($mutated_cdna_seq)){
+        $reference = max($default_kozak_pos - (length($original_cdna_seq) - length($mutated_cdna_seq)), 0);
+    } else {
+        $reference = $default_kozak_pos;
+    }
 
     # Look for the natural kozak
     my $natural_kozak = ();
@@ -650,33 +680,29 @@ sub get_kozak_info2{
     # Look for the first kozak after default kozak in mutated.
     my $first_mutated_kozak = ();
     foreach my $mutated_kozak (@{$mutated_kozaks}){
-        if ($mutated_kozak->{'START'} >= $default_kozak_pos && $mutated_kozak->{'RELIABILITY'} >= 0.25){
-        #if ($mutated_kozak->{'START'} == index($mutated_cdna_seq, $mutated_cds_seq)){
+        if ($mutated_kozak->{'START'} >= $reference && $mutated_kozak->{'RELIABILITY'} >= 0.25){
             $first_mutated_kozak = $mutated_kozak;
             last;
         }
     }
 
     if (!defined($natural_kozak->{'START'}) || !defined($first_mutated_kozak->{'START'})){
-        print "Error kozak" . $tva->transcript->display_id . " " . $tva->transcript_variation->variation_feature->variation_name . "\n";
+        print "Kozak not found for " . $tva->transcript->display_id . " " . $tva->transcript_variation->variation_feature->variation_name . "\n";
         return $hash_kozak_info;
     }
-    # I use ne operator to avoid errors when kozak service returns empty string.
-    if ($natural_kozak->{'FRAME'} ne $first_mutated_kozak->{'FRAME'}){
-        $hash_kozak_info->{'FRAMESHIFT'} = 'Lost';
-    } else {
-        $hash_kozak_info->{'FRAMESHIFT'} = 'Conserved';
-    }
-    
-     $hash_kozak_info->{'PREVIOUS_ATGS'} = $first_mutated_kozak->{'PREVIOUS_ATGS'};
-     $hash_kozak_info->{'RELIABILITY'} = $first_mutated_kozak->{'RELIABILITY'};
-     $hash_kozak_info->{'KOZAK_IDENTITY'} = $first_mutated_kozak->{'KOZAK_IDENTITY'};
-     # We perform the substraction to get the position in cds sequence
-     $hash_kozak_info->{'START'} = $first_mutated_kozak->{'START'} - $natural_kozak->{'START'};
-     # We add +1 to point at the first base of the stop codon
-     $hash_kozak_info->{'FINISH'} = $first_mutated_kozak->{'FINISH'} - $natural_kozak->{'START'} + 1;
-     $hash_kozak_info->{'ORF_AMINOACID_LENGTH'} = $first_mutated_kozak->{'ORF_AMINOACID_LENGTH'};
-     $hash_kozak_info->{'STOP_CODON'} = $first_mutated_kozak->{'STOP_CODON'};
-     $hash_kozak_info->{'PROTEIN_SEQUENCE'} = $first_mutated_kozak->{'PROTEIN_SEQUENCE'};
-     return $hash_kozak_info;
+    # Calculate frameshift with SeqUtils
+    my $mutated_orf = myUtils::SeqUtils::get_orf($mutated_cdna_seq, $first_mutated_kozak->{'START'});   
+    $hash_kozak_info->{'FRAMESHIFT'} = myUtils::SeqUtils::is_in_frame($mutated_orf, $original_cds_seq) ? 'Conserved' : 'Lost';
+
+    $hash_kozak_info->{'PREVIOUS_ATGS'} = $first_mutated_kozak->{'PREVIOUS_ATGS'};
+    $hash_kozak_info->{'RELIABILITY'} = $first_mutated_kozak->{'RELIABILITY'};
+    $hash_kozak_info->{'KOZAK_IDENTITY'} = $first_mutated_kozak->{'KOZAK_IDENTITY'};
+    # We perform the substraction to get the position in cds sequence
+    $hash_kozak_info->{'START'} = $first_mutated_kozak->{'START'} - $reference;
+    # We add +1 to point at the first base of the stop codon
+    $hash_kozak_info->{'FINISH'} = $first_mutated_kozak->{'FINISH'} - $reference + 1;
+    $hash_kozak_info->{'ORF_AMINOACID_LENGTH'} = $first_mutated_kozak->{'ORF_AMINOACID_LENGTH'};
+    $hash_kozak_info->{'STOP_CODON'} = $first_mutated_kozak->{'STOP_CODON'};
+    $hash_kozak_info->{'PROTEIN_SEQUENCE'} = $first_mutated_kozak->{'PROTEIN_SEQUENCE'};
+    return $hash_kozak_info;
 }
