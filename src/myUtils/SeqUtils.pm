@@ -80,10 +80,10 @@ sub get_orf{
         $orf = '';
         for(my $i = $pos_met; $i < length($seq); $i += $CODON_LENGTH){
             my $codon = substr($seq, $i, $CODON_LENGTH);
+            $orf = $orf . $codon;
             if (exists_in_list($codon, \@STOP_CODONS)){
                 last;
             }
-            $orf = $orf . $codon;
         }
     }
 

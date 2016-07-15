@@ -324,8 +324,8 @@ sub get_sequence_info_dbsnp{
     # We start counting positions from reference
     my $reference;
 
-    # If deletion, we move reference
-    if(length($cdna) > length($mutated_cdna)){
+    # If deletion affecting 5' region, we move reference
+    if(length($cdna) > length($mutated_cdna) && !defined($tva->transcript_variation->cds_start)){
         $reference = max($translation_start_pos - (length($cdna) - length($mutated_cdna)), 0);
     } else {
         $reference = $translation_start_pos;
@@ -661,8 +661,8 @@ sub get_kozak_info2{
     # We start counting positions from reference
     my $reference;
 
-    # If deletion, we move reference
-    if(length($original_cdna_seq) > length($mutated_cdna_seq)){
+    # If deletion affecting 5' region, we move reference
+    if(length($original_cdna_seq) > length($mutated_cdna_seq) && !defined($tva->transcript_variation->cds_start)){
         $reference = max($default_kozak_pos - (length($original_cdna_seq) - length($mutated_cdna_seq)), 0);
     } else {
         $reference = $default_kozak_pos;

@@ -55,3 +55,10 @@ wilcox.test(highMaf$KOZAK_START, lowMaf$KOZAK_START, paired = F, conf.level = 0.
 boxplot(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, ylim=c(0,3000))
 boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START, ylim=c(0,1500))
 
+
+
+###
+  #borrar
+# select variables v1, v2, v3
+myvars <- c("TRANSCRIPT_ID", "VARIATION_NAME", "CODON_CHANGE", "FIRST_MET_POSITION", "STOP_CODON_POSITION", "READING_FRAME_STATUS", "KOZAK_START", "KOZAK_END", "KOZAK_STOP_CODON", "KOZAK_READING_FRAME_STATUS")
+View(csv[myvars])
