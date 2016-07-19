@@ -28,12 +28,15 @@ lowMaf = csvWithMaf[csvWithMaf$MINOR_ALLELE_FREQUENCY < 0.01,]
 # Resumen de cada subconjunto de datos segun la maf
 summary(lowMaf$FIRST_MET_POSITION)
 summary(highMaf$FIRST_MET_POSITION)
+summary(lowMaf$KOZAK_START)
+summary(highMaf$KOZAK_START)
 
 # Histogramas de la posición de la primera metionina
-hist(highMaf$FIRST_MET_POSITION, xlim = c(0,400))
-hist(lowMaf$FIRST_MET_POSITION, xlim = c(0,400))
+hist(highMaf$FIRST_MET_POSITION, xlim = c(0,1000))
+hist(lowMaf$FIRST_MET_POSITION, xlim = c(0,1000))
 
 # Histogramas de la posición de la metionina de la primera secuencia Kozak
+# con puntuacion mayor a 25%
 hist(highMaf$KOZAK_START)
 hist(lowMaf$KOZAK_START)
 
@@ -54,6 +57,10 @@ wilcox.test(highMaf$KOZAK_START, lowMaf$KOZAK_START, paired = F, conf.level = 0.
 # Boxplots
 boxplot(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, ylim=c(0,3000))
 boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START, ylim=c(0,1500))
+boxplot(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, 
+        main="Comparación de la posición de la primera metionina alternativa\nentre los grupos de muestras con MAF alta y MAF baja")
+boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START,
+        main="Comparación de la posición de la primera Kozak alternativa\nentre los grupos de muestras con MAF alta y MAF baja")
 
 
 
