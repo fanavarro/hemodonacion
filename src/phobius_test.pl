@@ -13,6 +13,10 @@ my %secuencias2 = (
 		);
 
 #print myUtils::PhobiusService::hash_to_fasta(\%secuencias);
-myUtils::PhobiusService::get_info_signal_peptide(\%secuencias);
-myUtils::PhobiusService::get_info_signal_peptide(\%secuencias1);
-myUtils::PhobiusService::get_info_signal_peptide(\%secuencias2);
+my %results = myUtils::PhobiusService::get_info_signal_peptide(\%secuencias);
+# myUtils::PhobiusService::get_info_signal_peptide(\%secuencias1);
+# myUtils::PhobiusService::get_info_signal_peptide(\%secuencias2);
+
+foreach my $feature (@{$results{'ins'}}){
+	print $feature->{'TYPE'} . " " . $feature->{'START'} . " " . $feature->{'END'} . " " . $feature->{'LOCATION'} . "\n";
+}
