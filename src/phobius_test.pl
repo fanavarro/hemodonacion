@@ -13,7 +13,7 @@ my %secuencias2 = (
 		);
 
 #print myUtils::PhobiusService::hash_to_fasta(\%secuencias);
-my %results = myUtils::PhobiusService::get_info_signal_peptide(\%secuencias);
+my %results = %{myUtils::PhobiusService::get_info_signal_peptide(\%secuencias)};
 # myUtils::PhobiusService::get_info_signal_peptide(\%secuencias1);
 # myUtils::PhobiusService::get_info_signal_peptide(\%secuencias2);
 

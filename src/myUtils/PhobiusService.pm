@@ -21,7 +21,7 @@ sub get_info_signal_peptide{
 	my %seqs = %{shift()};
 	my $fasta = hash_to_fasta(\%seqs);
 	my $job_id = http_post($URL_RUN, {email => $EMAIL, format => 'long', stype => 'protein', sequence => $fasta});
-	print "Job id = $job_id\n";
+	# print "Job id = $job_id\n";
 
 	# Wait until job ends.
 	my $job_status = http_get($URL_STATUS . $job_id);
@@ -47,7 +47,6 @@ sub get_info_signal_peptide{
 	my $result_type_id = 'out';
 	my $result_text = http_get($URL_RESULT . $job_id . '/' . $result_type_id);
 	chomp($result_text );
-	print "\n$result_text\n";
 
 	return text_result_to_hash($result_text);
 }
@@ -71,24 +70,33 @@ sub hash_to_fasta{
 sub text_result_to_hash{
 	my $result_text = shift;
 	my %result_hash = ();
-	# Iterate over each sequence results
-	foreach my $seq_text (split($RESULT_SEP, $result_text)){
-		my @lines = split("\n", $seq_text);
-		my $id = (split " ", $lines[0])[1];
-		my @feature_list = ();
-		# Iterate over each feature of the current sequence
-		for(my $i = 1; $i < scalar(@lines); $i++){
-			my %entry;
-			# Separate line in words separated by two or more whitespaces.
-			my @splitted_line = split (/\s{2,}/, $lines[$i]);
-			$entry{'TYPE'} = $splitted_line[1];
-			$entry{'START'} = $splitted_line[2];
-			$entry{'END'} = $splitted_line[3];
-			$entry{'LOCATION'} = $splitted_line[4];
-			push (@feature_list, \%entry);
+	if (defined($result_text)){
+		# Iterate over each sequence results
+		foreach my $seq_text (split($RESULT_SEP, $result_text)){
+			my @lines = split("\n", $seq_text);
+			my $id = (split " ", $lines[0])[1];
+			my @feature_list = ();
+			# Iterate over each feature of the current sequence
+			for(my $i = 1; $i < scalar(@lines); $i++){
+				my %entry;
+				# Separate line in words separated by two or more whitespaces.
+				my @splitted_line = split (/\s{2,}/, $lines[$i]);
+				$entry{'TYPE'} = $splitted_line[1];
+				$entry{'START'} = $splitted_line[2];
+				$entry{'END'} = $splitted_line[3];
+				$entry{'LOCATION'} = $splitted_line[4];
+				push (@feature_list, \%entry);
+			}
+			$result_hash{$id} = \@feature_list;
 		}
-		$result_hash{$id} = \@feature_list;
 	}
-	return %result_hash;
+
+	if (%result_hash){
+		return \%result_hash;
+	}
+	else {
+		return undef;
+	}
+	
 }
 1;
