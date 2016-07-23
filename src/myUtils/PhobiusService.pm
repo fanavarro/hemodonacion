@@ -46,7 +46,8 @@ sub get_info_signal_peptide{
 	# }
 	my $result_type_id = 'out';
 	my $result_text = http_get($URL_RESULT . $job_id . '/' . $result_type_id);
-	print $result_text . "\n";
+	chomp($result_text );
+	print "\n$result_text\n";
 
 	return text_result_to_hash($result_text);
 }
@@ -73,16 +74,17 @@ sub text_result_to_hash{
 	# Iterate over each sequence results
 	foreach my $seq_text (split($RESULT_SEP, $result_text)){
 		my @lines = split("\n", $seq_text);
-		print join(",", @lines);
-		my $id = (split "\t", $lines[0])[1];
+		my $id = (split " ", $lines[0])[1];
 		my @feature_list = ();
 		# Iterate over each feature of the current sequence
 		for(my $i = 1; $i < scalar(@lines); $i++){
 			my %entry;
-			$entry{'TYPE'} = (split "\t", $lines[$i])[1];
-			$entry{'START'} = (split "\t", $lines[$i])[2];
-			$entry{'END'} = (split "\t", $lines[$i])[3];
-			$entry{'LOCATION'} = (split "\t", $lines[$i])[4];
+			# Separate line in words separated by two or more whitespaces.
+			my @splitted_line = split (/\s{2,}/, $lines[$i]);
+			$entry{'TYPE'} = $splitted_line[1];
+			$entry{'START'} = $splitted_line[2];
+			$entry{'END'} = $splitted_line[3];
+			$entry{'LOCATION'} = $splitted_line[4];
 			push (@feature_list, \%entry);
 		}
 		$result_hash{$id} = \@feature_list;
