@@ -4,20 +4,23 @@ use warnings;
 use LWP::Simple::REST qw/http_post http_get/;
 use XML::LibXML;
 
+# REST api constants
 my $EMAIL = 'francisco.abad@um.es';
-
 my $URL_BASE = 'http://www.ebi.ac.uk/Tools/services/rest/phobius/';
 my $URL_RUN = $URL_BASE . 'run/';
 my $URL_STATUS = $URL_BASE . 'status/';
 my $URL_RESULT_TYPES = $URL_BASE . 'resulttypes/';
 my $URL_RESULT = $URL_BASE . 'result/';
 
+# Standalone application constants
+my $PHOBIUS_LOCAL_DIR = 'myUtils/phobius/phobius.pl';
+
 my $RESULT_SEP = '//';
 
 # Receives a hash with seq_id -> seq
 # and returns info about signal peptide
-# in these sequences.
-sub get_info_signal_peptide{
+# in these sequences using phobius rest service.
+sub get_info_signal_peptide_rest{
 	my %seqs = %{shift()};
 	my $fasta = hash_to_fasta(\%seqs);
 	my $job_id = http_post($URL_RUN, {email => $EMAIL, format => 'long', stype => 'protein', sequence => $fasta});
@@ -51,6 +54,20 @@ sub get_info_signal_peptide{
 	return text_result_to_hash($result_text);
 }
 
+# Receives a hash with seq_id -> seq
+# and returns info about signal peptide
+# in these sequences using local phobius.
+sub get_info_signal_peptide_local{
+	my %seqs = %{shift()};
+	my $fasta = hash_to_fasta(\%seqs);
+	
+	# use qx to call local phobius program.
+	my $phobius_output = qx(echo "$fasta" |  $PHOBIUS_LOCAL_DIR -long);
+	chomp($phobius_output );
+
+	return text_result_to_hash($phobius_output);
+}
+
 # Convert a hash of type id_seq -> seq
 # to a fasta string.
 # param0 -> Hash whose key is a seq id and whose value is the seq.
@@ -73,6 +90,9 @@ sub text_result_to_hash{
 	if (defined($result_text)){
 		# Iterate over each sequence results
 		foreach my $seq_text (split($RESULT_SEP, $result_text)){
+			# Remove newlines from the beginning and the ending
+			chomp($seq_text);
+			$seq_text =~ s/^\n//; 
 			my @lines = split("\n", $seq_text);
 			my $id = (split " ", $lines[0])[1];
 			my @feature_list = ();

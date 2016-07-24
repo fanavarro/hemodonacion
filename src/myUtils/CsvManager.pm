@@ -87,6 +87,14 @@ sub writeEntry{
 	$string = $string . "\n";
 	print $fd $string;
 }
+sub writeEntries{
+	my $this = shift;
+	my $entry_list = shift;
+
+	foreach my $entry (@{$entry_list}){
+		$this->writeEntry(%{$entry});
+	}
+}
 sub in_field_separator {
 	my $this = shift;
 	my $in_field_separator = shift;

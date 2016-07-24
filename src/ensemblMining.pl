@@ -59,7 +59,7 @@ my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcri
 
 # Chromosomes to be treated
 # my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
- my @chromosomes = qw(1);
+ my @chromosomes = qw(Y);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
@@ -69,7 +69,8 @@ my $variation_pos_at_peptide = 1;
 # For each chromosome, get its variations with specified so terms.
 foreach my $chromosome (@chromosomes) {
 	#get_variations_by_chromosome_so_terms($chromosome, \@so_terms, $out_csv);
-	get_variations_by_chromosome_peptide_position($chromosome, $variation_pos_at_peptide, $out_csv);
+	my $result_list = get_variations_by_chromosome_peptide_position($chromosome, $variation_pos_at_peptide, $out_csv);
+        $out_csv->myUtils::CsvManager::writeEntries($result_list);
 }
 
 $out_csv->myUtils::CsvManager::close();
@@ -77,26 +78,24 @@ $out_csv->myUtils::CsvManager::close();
 # Get variations from chromosome (param 1) with the so term (param 2).
 # param 1 -> Chromosome name
 # param 2 -> SO term list
-# param 3 -> CsvManager object to print results.
+# return a list ref of hashes with information about transcript variation objects in param 1.
 sub get_variations_by_chromosome_so_terms {
 	my $chromosome = $_[0];
 	my $so_terms = $_[1];
-	my $out_csv = $_[2];
 	# Get all transcripts from chromosome
 	my $transcript  = get_transcripts_by_chromosome( $chromosome );
 	# Get variation in transcripts with so terms
 	my $trvs = $trv_adaptor->fetch_all_by_Transcripts_SO_terms($transcript, $so_terms);
 
-	fill_csv($chromosome, $trvs, $out_csv);
+	return get_transcript_variation_info($chromosome, $trvs);
 }
 # Get variations from chromosome (param 1) at the peptide position (param 2).
 # param 1 -> Chromosome name
 # param 2 -> Peptide position
-# param 3 -> CsvManager object to print results.
+# return a list ref of hashes with information about transcript variation objects in param 1.
 sub get_variations_by_chromosome_peptide_position {
 	my $chromosome = $_[0];
 	my $peptide_position = $_[1];
-	my $out_csv = $_[2];
 	# Get all transcripts from chromosome
 	my $transcript  = get_transcripts_by_chromosome( $chromosome );
 
@@ -104,17 +103,19 @@ sub get_variations_by_chromosome_peptide_position {
         my $constraint = "(translation_start=$peptide_position or translation_end=$peptide_position)";
 	my $trvs = $trv_adaptor->fetch_all_by_Transcripts_with_constraint($transcript, $constraint);
 
-	fill_csv($chromosome, $trvs, $out_csv);
+	return get_transcript_variation_info($chromosome, $trvs);
 }
 
-# Write info about TranscriptVariation list into csv file.
+# Get info about TranscriptVariation list.
 # param 0 -> Chromosome
 # param 1 -> TranscriptVariation ref list object.
-# param 2 -> CsvManager object.
-sub fill_csv{
+# return a list ref of hashes with information about transcript variation objects in param 1.
+sub get_transcript_variation_info{
     my $chromosome = $_[0];
     my $trvs = $_[1];
-    my $out_csv = $_[2];
+
+    # List where we are adding all the info about the transcript variation allele objects.
+    my @result_list;
 
     my $count = 1;
     foreach my $tv ( @{$trvs} ) {
@@ -152,7 +153,7 @@ sub fill_csv{
             $entry{'GENE_NAME'} = $transcript->get_Gene->external_name;
             $entry{'TRANSCRIPT_ID'} = $transcript->display_id;
             $entry{'TRANSCRIPT_REFSEQ_ID'} = $ref_seq_mrna_ids;
-            $entry{'TRANSCRIPT_BIOTYPE'} = $tv->transcript->biotype;
+            $entry{'TRANSCRIPT_BIOTYPE'} = $transcript->biotype;
             $entry{'CDS_ERRORS'} = $cds_errors;
             $entry{'PROTEIN_ID'} = $transcript->translation->display_id;
             $entry{'VARIATION_NAME'} = $tv->variation_feature->variation_name;
@@ -189,9 +190,11 @@ sub fill_csv{
             if ( defined($polyphen) ) {
                 $entry{'POLYPHEN'} = "$polyphen";
             }
-            $out_csv->myUtils::CsvManager::writeEntry(%entry);
+            # $out_csv->myUtils::CsvManager::writeEntry(%entry);
+            push(@result_list, \%entry);
         }
-    }   
+    }
+    return \@result_list;
 }
 
 # Checks if an element exists in the given list.
@@ -661,7 +664,7 @@ sub get_signal_peptide_info{
     my $protein_seq = $transcript->translate;
     if (defined($protein_seq)){
         my %phobius_input = ($transcript->display_id => $protein_seq->seq);
-        my $phobius_output = myUtils::PhobiusService::get_info_signal_peptide(\%phobius_input);
+        my $phobius_output = myUtils::PhobiusService::get_info_signal_peptide_local(\%phobius_input);
         if (defined($phobius_output)){
             my $feature_list = $phobius_output->{$transcript->display_id};
             foreach my $feature (@{$feature_list}){
