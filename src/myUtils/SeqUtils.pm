@@ -1,6 +1,7 @@
 package myUtils::SeqUtils;
 use strict;
 use warnings;
+use List::Util qw[min max];
 my $CODON_LENGTH = 3;
 my $MET = 'ATG';
 my @STOP_CODONS = qw(TAG TAA TGA);
@@ -136,5 +137,73 @@ sub exists_in_list {
         }
     }
     return 0;
+}
+
+# Receives the original cdna and cdssequences, the mutated
+# affecting initiation codon cdna sequence, and a value indicating
+# if the mutation are affecting to the five prime utr. The function
+# returns a hash with the following keys:
+# 'first_met_position' shows the position of the first met found
+# in the mutated sequence, but in coordinates of the original cds
+# sequence.
+# 'reading_frame' shows if the reading frame is conserved or lost.
+# 'stop_codon_position' indicates the position of the first stop codon found
+# following the reading frame with 'first_met_pos'-
+# 'seq_length' Percentage of the protein that is conserved. For example,
+# if a protein has 50 aminoacid and the mutation causes the loss of 25
+# aminoacids, this value will be 50%.
+sub get_met_mutation_info{
+    my $hash_seq_info = {};
+    $hash_seq_info->{'first_met_position'} = '';
+    $hash_seq_info->{'reading_frame'} = '';
+    $hash_seq_info->{'stop_codon_position'} = '';
+    $hash_seq_info->{'seq_length'} = '';
+
+    
+    my $cdna = $_[0];
+    my $cds = $_[1];
+    my $mutated_cdna = $_[2];
+    my $five_affected = $_[3];
+    my $translation_start_pos = get_translation_start_pos($cdna, $cds);
+
+    # We start to count positions from reference
+    my $reference;
+
+    # If deletion, we move reference
+    if(length($cdna) > length($mutated_cdna) && $five_affected){
+        $reference = max($translation_start_pos - (length($cdna) - length($mutated_cdna)), $five_affected);
+    } else {
+        $reference = $translation_start_pos;
+    }
+
+    # Correction in order to point to the original sequence position.
+    # If muation is a insertion, we have to add values to reference.
+    my $position_correction = 0;
+    if (length($mutated_cdna) > length($cdna)){
+        $position_correction = -(length($mutated_cdna) - length($cdna));
+     } 
+     if (length($mutated_cdna) < length($cdna) && !$five_affected){
+        $position_correction = (length($cdna) - length($mutated_cdna));
+     } 
+
+    
+    my $first_met_pos = index($mutated_cdna, $MET, $reference);
+    if ($first_met_pos != -1){
+        my $stop_codon_pos = get_stop_codon_position($mutated_cdna, $first_met_pos);
+        my $mutated_orf = get_orf($mutated_cdna, $first_met_pos);
+        #say $mutated_orf;
+        #say $cds;
+        my $reading_frame = is_in_frame($mutated_orf, $cds) ? 'Conserved' : 'Lost';
+        $hash_seq_info->{'first_met_position'} = $first_met_pos - $reference + $position_correction;
+        $hash_seq_info->{'stop_codon_position'} = $stop_codon_pos != -1 ? $stop_codon_pos - $reference +  $position_correction : 'No Stop';
+        $hash_seq_info->{'reading_frame'} = $reading_frame;
+        $hash_seq_info->{'seq_length'} = (length($mutated_orf) * 100 / length($cds)) . '%';
+        # Print warnings if first met pos calculated is not a MET in the original cds sequence.
+        if (substr($cds, $hash_seq_info->{'first_met_position'}, $CODON_LENGTH) ne $MET){
+            print ("Error\nfirst met pos = " . $hash_seq_info->{'first_met_position'} . " in $cds\n");
+        }
+    }
+    return $hash_seq_info;
+
 }
 1;
