@@ -14,4 +14,7 @@ Metionina encontrada en la region 3' -> al arreglarlo no debe encontrar metionin
 ENST00000413687-rs755224308
 Deleccion que afecta a la parte codificante cuyo resultado es el inicio en la misma metionina pero eliminando nucleotidos posteriores:
 AT(GGAGAGTAA)GGATGAGGTCAGCGACACCGACAGTGGCATCATCCTGCAGTCT
+ATG           GATGAGGTCAGCGACACCGACAGTGGCATCATCCTGCAGTCT
 Al solucionarlo, la posicion de la primera metionina sera 0
+ATG-ACC-CAA-GCC-CGG-TAG
+ATG-GGG-ACC-CAA-GCC-CGG-TAG

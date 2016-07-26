@@ -489,6 +489,9 @@ sub get_kozak_info{
     my $original_cdna_seq = $tva->transcript->seq->seq;
     my $original_cds_seq = $tva->transcript->translateable_seq;
     my $mutated_cdna_seq = get_variation_cdna_seq($tva);
+    if (!defined($mutated_cdna_seq)){
+        return $hash_kozak_info;
+    }
     # Find the position in which coding region starts at cdna sequence.
     my $default_kozak_pos = myUtils::SeqUtils::get_translation_start_pos($original_cdna_seq, $original_cds_seq);
     my $mutated_kozaks =  myUtils::KozakUtils::get_kozak_info($mutated_cdna_seq, $MAX_KOZAK_RESULTS);
@@ -513,6 +516,16 @@ sub get_kozak_info{
         }
     }
 
+    # Correction in order to point to the original sequence position.
+    # If muation is a insertion, we have to add values to reference.
+    my $position_correction = 0;
+    if (length($mutated_cdna_seq) > length($original_cdna_seq)){
+        $position_correction = -(length($mutated_cdna_seq) - length($original_cdna_seq));
+     } 
+     if (length($mutated_cdna_seq) < length($original_cdna_seq) && defined($tva->transcript_variation->cds_start)){
+        $position_correction = (length($original_cdna_seq) - length($mutated_cdna_seq));
+     } 
+
     # Look for the first kozak after default kozak in mutated.
     my $first_mutated_kozak = ();
     foreach my $mutated_kozak (@{$mutated_kozaks}){
@@ -531,15 +544,7 @@ sub get_kozak_info{
         return $hash_kozak_info;
     }
 
-    # Correction in order to point to the original sequence position.
-    # If muation is a insertion, we have to add values to reference.
-    my $position_correction = 0;
-    if (length($mutated_cdna_seq) > length($original_cdna_seq)){
-        $position_correction = -(length($mutated_cdna_seq) - length($original_cdna_seq));
-     } 
-     if (length($mutated_cdna_seq) < length($original_cdna_seq) && defined($tva->transcript_variation->cds_start)){
-        $position_correction = (length($original_cdna_seq) - length($mutated_cdna_seq));
-     } 
+
 
     # Calculate frameshift with SeqUtils
     my $mutated_orf = myUtils::SeqUtils::get_orf($mutated_cdna_seq, $first_mutated_kozak->{'START'});   

@@ -231,7 +231,8 @@ sub get_met_mutation_info{
         }
         
         # Print warnings if stop codon pos calculated is not a stop codon in the original cds sequence.
-        if ($hash_seq_info->{'stop_codon_position'} ne 'No Stop'){
+        # End codon can be in 3' utr region. This cases are not checked.
+        if ($hash_seq_info->{'stop_codon_position'} ne 'No Stop' && $hash_seq_info->{'stop_codon_position'} <= length($cds) - $CODON_LENGTH){
             if (!exists_in_list(substr($cds, $hash_seq_info->{'stop_codon_position'}, $CODON_LENGTH), \@STOP_CODONS)){
                 print ("Error\nstop codon pos = " . $hash_seq_info->{'stop_codon_position'} . " in $cds\n");
             }
