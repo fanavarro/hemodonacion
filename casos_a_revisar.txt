@@ -1,0 +1,17 @@
+ENST00000534633-rs749679234
+Primera metionina duplicada.
+
+ENST00000427697-rs767541103
+Secuencia kozak encontrada en la region 3' -> al arreglarlo no deberia encontrar secuencia kozak.
+
+ENST00000373116-rs756099580
+Duplicacion de GCGGGGGTTAGAGGTCACCATG, donde el ultimo ATG es el codon de inicio. -> al arreglarlo, la posicion inicial seria 0 y no -22.
+
+ENST00000490064-rs776101089
+first met pos = 349 in ATGCTCCGGCACTCCCCCTCGCTGTGGGAGCTGGTGGAGGAGCACGTTCCGCTCCGGGAGCGACGCGAAGTGAAGAGGATTCTGGGGGAGGCGGCGGTGGACCTGAGCCTGGAGCTGCGGGCGGAGCGGTCACAGAGATCTCAGCATCATCAAGGACCAACTGAACGTGTCCAACATTGA
+Metionina encontrada en la region 3' -> al arreglarlo no debe encontrar metionina.
+
+ENST00000413687-rs755224308
+Deleccion que afecta a la parte codificante cuyo resultado es el inicio en la misma metionina pero eliminando nucleotidos posteriores:
+AT(GGAGAGTAA)GGATGAGGTCAGCGACACCGACAGTGGCATCATCCTGCAGTCT
+Al solucionarlo, la posicion de la primera metionina sera 0

@@ -59,7 +59,7 @@ my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcri
 
 # Chromosomes to be treated
 # my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
- my @chromosomes = qw(Y);
+ my @chromosomes = qw(1);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
@@ -118,8 +118,9 @@ sub get_transcript_variation_info{
     my @result_list;
 
     my $count = 1;
+    my $n = scalar @{$trvs};
     foreach my $tv ( @{$trvs} ) {
-	print "Chromosome $chromosome\t Transcript Variation: $count/" . scalar @{$trvs} . "\n";
+	print "Chromosome $chromosome\t Transcript Variation: $count/$n\t" . $tv->transcript->display_id . '-' . $tv->variation_feature->variation_name . "\n";
 	$count = $count + 1;
 	
 	my $variation = $tv->variation_feature->variation;
@@ -515,6 +516,10 @@ sub get_kozak_info{
     # Look for the first kozak after default kozak in mutated.
     my $first_mutated_kozak = ();
     foreach my $mutated_kozak (@{$mutated_kozaks}){
+        # If we are iterating outside coding region, break the loop. Kozak not found.
+        if (max($mutated_kozak->{'START'} - $reference + $position_correction, 0) >= length($original_cds_seq)){
+            last;
+        }
         if ($mutated_kozak->{'START'} >= $reference && $mutated_kozak->{'RELIABILITY'} >= 0.25){
             $first_mutated_kozak = $mutated_kozak;
             last;
@@ -543,8 +548,13 @@ sub get_kozak_info{
     $hash_kozak_info->{'PREVIOUS_ATGS'} = $first_mutated_kozak->{'PREVIOUS_ATGS'};
     $hash_kozak_info->{'RELIABILITY'} = $first_mutated_kozak->{'RELIABILITY'};
     $hash_kozak_info->{'KOZAK_IDENTITY'} = $first_mutated_kozak->{'KOZAK_IDENTITY'};
-    # We perform the substraction to get the position in cds sequence
-    $hash_kozak_info->{'START'} = $first_mutated_kozak->{'START'} - $reference + $position_correction;
+    # If mutated and original met are different, apply the pos correction
+    if($first_mutated_kozak->{'START'} != $natural_kozak->{'START'}){
+        # We perform the substraction to get the position in cds sequence
+        $hash_kozak_info->{'START'} = max($first_mutated_kozak->{'START'} - $reference + $position_correction, 0);
+    } else {
+        $hash_kozak_info->{'START'} = max($first_mutated_kozak->{'START'} - $reference, 0);
+    }
     # We add +1 to point at the first base of the stop codon
     $hash_kozak_info->{'FINISH'} = $first_mutated_kozak->{'FINISH'} - $reference + 1 + $position_correction;
     $hash_kozak_info->{'ORF_AMINOACID_LENGTH'} = $first_mutated_kozak->{'ORF_AMINOACID_LENGTH'};

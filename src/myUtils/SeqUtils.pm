@@ -51,6 +51,18 @@ sub is_in_frame{
     my $mutated_orf_seq = shift;
     my $original_aa = get_translation($original_orf_seq);
     my $mutated_aa = get_translation($mutated_orf_seq);
+    
+    # if mutation is a deletion is possible that first met in the
+    # mutation is not changed; for example AT(GGAGAGTAA)GGATGA...
+    # will produce the same met than the original, but three aminoacids
+    # after that met are deleted, so we have to check from GGATGA...
+    if (length($mutated_aa) < length($original_aa)){
+        my $difference = length($original_aa) - length($mutated_aa);
+        $original_aa = substr($original_aa, $difference + 1);
+    } elsif(length($mutated_aa) > length($original_aa)){
+        my $difference = length($mutated_aa) - length($original_aa);
+        $mutated_aa = substr($mutated_aa, $difference + 1);
+    }
     return (index($original_aa, $mutated_aa) != -1) || (index($mutated_aa, $original_aa) != -1);
 }
 
@@ -175,9 +187,13 @@ sub get_met_mutation_info{
     } else {
         $reference = $translation_start_pos;
     }
+    
+    my $first_met_pos = index($mutated_cdna, $MET, $reference);
 
     # Correction in order to point to the original sequence position.
-    # If muation is a insertion, we have to add values to reference.
+    # If muation is a insertion, we have to substract values to reference.
+    # If deletion, we have to add values to reference only if first met found
+    # in mutated seq is different from the natural.
     my $position_correction = 0;
     if (length($mutated_cdna) > length($cdna)){
         $position_correction = -(length($mutated_cdna) - length($cdna));
@@ -187,20 +203,38 @@ sub get_met_mutation_info{
      } 
 
     
-    my $first_met_pos = index($mutated_cdna, $MET, $reference);
-    if ($first_met_pos != -1){
+    
+    # if a met is found and it is inside cds region, fill result hash
+    if ($first_met_pos != -1 &&  max($first_met_pos - $reference + $position_correction, 0) < length($cds)){
         my $stop_codon_pos = get_stop_codon_position($mutated_cdna, $first_met_pos);
         my $mutated_orf = get_orf($mutated_cdna, $first_met_pos);
         #say $mutated_orf;
         #say $cds;
-        my $reading_frame = is_in_frame($mutated_orf, $cds) ? 'Conserved' : 'Lost';
-        $hash_seq_info->{'first_met_position'} = $first_met_pos - $reference + $position_correction;
+        my $reading_frame = is_in_frame($cds, $mutated_orf) ? 'Conserved' : 'Lost';
+        
+        # If mutated and original met are different, apply the pos correction
+        if ($first_met_pos != $translation_start_pos){
+            # Use of max to avoid errors in met duplication cases, where first pos indicated -3.
+            $hash_seq_info->{'first_met_position'} = max($first_met_pos - $reference + $position_correction, 0);
+        }
+        else {
+            # Use of max to avoid errors in met duplication cases, where first pos indicated -3.
+            $hash_seq_info->{'first_met_position'} = max($first_met_pos - $reference , 0);
+        }
+        
         $hash_seq_info->{'stop_codon_position'} = $stop_codon_pos != -1 ? $stop_codon_pos - $reference +  $position_correction : 'No Stop';
         $hash_seq_info->{'reading_frame'} = $reading_frame;
         $hash_seq_info->{'seq_length'} = (length($mutated_orf) * 100 / length($cds)) . '%';
         # Print warnings if first met pos calculated is not a MET in the original cds sequence.
         if (substr($cds, $hash_seq_info->{'first_met_position'}, $CODON_LENGTH) ne $MET){
             print ("Error\nfirst met pos = " . $hash_seq_info->{'first_met_position'} . " in $cds\n");
+        }
+        
+        # Print warnings if stop codon pos calculated is not a stop codon in the original cds sequence.
+        if ($hash_seq_info->{'stop_codon_position'} ne 'No Stop'){
+            if (!exists_in_list(substr($cds, $hash_seq_info->{'stop_codon_position'}, $CODON_LENGTH), \@STOP_CODONS)){
+                print ("Error\nstop codon pos = " . $hash_seq_info->{'stop_codon_position'} . " in $cds\n");
+            }
         }
     }
     return $hash_seq_info;

@@ -17,20 +17,20 @@ my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcri
 my $transcript_adaptor  = $registry->get_adaptor('human', 'core', 'Transcript');
 
 #my $transcript = $transcript_adaptor->fetch_by_stable_id('ENST00000366603');
-my $transcript = $transcript_adaptor->fetch_by_stable_id('ENST00000616558');
+my $transcript = $transcript_adaptor->fetch_by_stable_id('ENST00000373116');
 my @transcripts = ($transcript);
 my $constraint = "(translation_start=1 or translation_end=1)";
 my $trvs = $trv_adaptor->fetch_all_by_Transcripts_with_constraint(\@transcripts, $constraint);
 foreach my $tv ( @{$trvs} ) {
     my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
     foreach my $tva ( @{$tvas} ) {
-	get_variation_cds_seq($tva);
+	get_variation_cdna_seq($tva);
 	#get_variation_cdna_seq($tva);
         #get_variation_cds_seq_upstream($tva);
 	#my $next_met = get_first_met_info($tva);
 	#print $next_met . "\n";
 	#get_variation_seq($tva);
-        get_kozak_info2($tva);
+        #get_kozak_info2($tva);
 	print "---------------------------\n";
     }
 }
