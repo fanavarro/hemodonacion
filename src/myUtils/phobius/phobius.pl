@@ -336,6 +336,7 @@ $opt_help = 0;
 $result = GetOptions ('short!','long!','raw!','plp=s','png=s','gp=s','h!','help!');
 die ("Error on command line") unless $result;
 
+# Evitar que aparezca la version en cada llamada al programa
 # print STDERR $PHOBIUS_VER;
 if ($#ARGV>0 || $opt_h || $opt_help ) {
     print "usage: phobius.pl [options] [infile]\
