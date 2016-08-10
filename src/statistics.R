@@ -1,7 +1,8 @@
 setwd("/home/fabad/hemodonacion/src")
 
 # Leer el csv sin filtros
-csv = read.csv("kozak.csv", sep="\t",stringsAsFactors=FALSE)
+csv = read.csv("final_out_no_filter.csv", sep="\t",stringsAsFactors=FALSE)
+csv = signal_lost(csv)
 csv$READING_FRAME_STATUS = factor(csv$READING_FRAME_STATUS)
 csv$KOZAK_READING_FRAME_STATUS = factor(csv$KOZAK_READING_FRAME_STATUS)
 csv$KOZAK_STOP_CODON = factor(csv$KOZAK_STOP_CODON)
@@ -67,5 +68,36 @@ boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START,
 ###
   #borrar
 # select variables v1, v2, v3
-myvars <- c("TRANSCRIPT_ID", "VARIATION_NAME", "CODON_CHANGE", "FIRST_MET_POSITION", "STOP_CODON_POSITION", "READING_FRAME_STATUS", "KOZAK_START", "KOZAK_END", "KOZAK_STOP_CODON", "KOZAK_READING_FRAME_STATUS")
+myvars <- c("SIGNAL_PEPTIDE_START","SIGNAL_PEPTIDE_END","FIRST_MET_POSITION", "SIGNAL_FIRST_MET_AFFECTED", "KOZAK_START", "SIGNAL_FIRST_KOZAK_AFFECTED")
 View(csv[myvars])
+
+signal_lost = function(csv){
+  for (i in 1:nrow(csv)){
+    signal_start = csv[i,"SIGNAL_PEPTIDE_START"]
+    # Sumamos dos ya que en el csv se indica el inicio del ultimo codon
+    # De esta forma, signal_end tiene el nucleotido exacto donde
+    # termina el peptido señal. 
+    signal_end = (csv[i,"SIGNAL_PEPTIDE_END"]) + 2
+    first_met = csv[i,"FIRST_MET_POSITION"]
+    first_kozak = csv[i,"KOZAK_START"]
+    signal_first_met_affected = NA
+    signal_first_kozak_affected = NA
+    if (!is.na(signal_start) && !is.na(signal_end)){
+      if(!is.na(first_met)){
+        if (first_met == signal_start){signal_first_met_affected = "Totally conserved"}
+        if (first_met > signal_start && first_met <= signal_end){signal_first_met_affected = "Partially conserved"}
+        if (first_met == (signal_end + 1)){signal_first_met_affected = "Exactly lost"}
+        if (first_met > (signal_end + 1)){signal_first_met_affected = "Lost"}
+      }
+      if (!is.na(first_kozak)){
+        if (first_kozak == signal_start){signal_first_kozak_affected = "Totally conserved"}
+        if (first_kozak > signal_start && first_kozak <= signal_end){signal_first_kozak_affected = "Partially conserved"}
+        if (first_kozak == (signal_end + 1)){signal_first_kozak_affected = "Exactly lost"}
+        if (first_kozak > (signal_end + 1)){signal_first_kozak_affected = "Lost"}
+      }
+    }
+    csv[i, "SIGNAL_FIRST_MET_AFFECTED"] = signal_first_met_affected
+    csv[i, "SIGNAL_FIRST_KOZAK_AFFECTED"] = signal_first_kozak_affected
+  }
+  return(csv)
+}
