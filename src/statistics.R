@@ -2,12 +2,15 @@ setwd("/home/fabad/hemodonacion/src")
 
 # Leer el csv sin filtros
 csv = read.csv("final_out_no_filter.csv", sep="\t",stringsAsFactors=FALSE)
-csv = signal_lost(csv)
+csv[,"MUTATED_SEQUENCE_LENGTH"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH))
+csv = add_signal_lost_sup_info(csv)
 csv$READING_FRAME_STATUS = factor(csv$READING_FRAME_STATUS)
 csv$KOZAK_READING_FRAME_STATUS = factor(csv$KOZAK_READING_FRAME_STATUS)
 csv$KOZAK_STOP_CODON = factor(csv$KOZAK_STOP_CODON)
 csv$STOP_CODON_POSITION = factor(csv$STOP_CODON_POSITION)
 csv$GENE_NAME = factor(csv$GENE_NAME)
+csv$SIGNAL_FIRST_MET_AFFECTED = factor(csv$SIGNAL_FIRST_MET_AFFECTED)
+csv$SIGNAL_FIRST_KOZAK_AFFECTED = factor(csv$SIGNAL_FIRST_KOZAK_AFFECTED)
 
 # Eliminar los casos en los que hay errores en las regiones 5' o 3'
 csv = csv[csv$CDS_ERRORS == '',]
@@ -28,9 +31,30 @@ lowMaf = csvWithMaf[csvWithMaf$MINOR_ALLELE_FREQUENCY < 0.01,]
 
 # Resumen de cada subconjunto de datos segun la maf
 summary(lowMaf$FIRST_MET_POSITION)
+summary(lowMaf$SIGNAL_FIRST_MET_AFFECTED)
+summary(lowMaf$READING_FRAME_STATUS)
+# Marco de lectura conservado si, ademas de tener "Conserved" tiene una longitud mayor al 1% de la seq original
+nrow(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH > 1 & lowMaf$READING_FRAME_STATUS == 'Conserved',])
+nrow(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH <= 1 & lowMaf$READING_FRAME_STATUS == 'Conserved',]) + nrow(lowMaf[lowMaf$READING_FRAME_STATUS == 'Lost',])
+
 summary(highMaf$FIRST_MET_POSITION)
+summary(highMaf$SIGNAL_FIRST_MET_AFFECTED)
+summary(highMaf$READING_FRAME_STATUS)
+nrow(highMaf[highMaf$MUTATED_SEQUENCE_LENGTH > 1 & highMaf$READING_FRAME_STATUS == 'Conserved',])
+nrow(highMaf[highMaf$MUTATED_SEQUENCE_LENGTH <= 1 & highMaf$READING_FRAME_STATUS == 'Conserved',]) + nrow(highMaf[highMaf$READING_FRAME_STATUS == 'Lost',])
+
+
 summary(lowMaf$KOZAK_START)
+summary(lowMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
+summary(lowMaf$KOZAK_READING_FRAME_STATUS)
+nrow(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH > 1 & lowMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',])
+nrow(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH <= 1 & lowMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',]) + nrow(lowMaf[lowMaf$KOZAK_READING_FRAME_STATUS == 'Lost',])
+
 summary(highMaf$KOZAK_START)
+summary(highMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
+summary(highMaf$KOZAK_READING_FRAME_STATUS)
+nrow(highMaf[highMaf$MUTATED_SEQUENCE_LENGTH > 1 & highMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',])
+nrow(highMaf[highMaf$MUTATED_SEQUENCE_LENGTH <= 1 & highMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',]) + nrow(highMaf[highMaf$KOZAK_READING_FRAME_STATUS == 'Lost',])
 
 # Histogramas de la posición de la primera metionina
 hist(highMaf$FIRST_MET_POSITION, xlim = c(0,1000))
@@ -43,7 +67,7 @@ hist(lowMaf$KOZAK_START)
 
 # Comprobar homogeneidad de varianzas
 var.test(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION) # Varianzas distintas
-var.test(highMaf$KOZAK_START, lowMaf$KOZAK_START) # Varianzas iguales
+var.test(highMaf$KOZAK_START, lowMaf$KOZAK_START) # Varianzas distintas
 
 #Test de normalidad
 shapiro.test(highMaf$FIRST_MET_POSITION) # No normal
@@ -67,11 +91,16 @@ boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START,
 
 ###
   #borrar
+met_cons=length(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH > 1 & lowMaf$READING_FRAME_STATUS == 'Conserved',])
+met_nocons=length(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH <= 1 & lowMaf$READING_FRAME_STATUS == 'Conserved',]) + length(lowMaf[lowMaf$READING_FRAME_STATUS == 'Lost',])
+
+
 # select variables v1, v2, v3
 myvars <- c("SIGNAL_PEPTIDE_START","SIGNAL_PEPTIDE_END","FIRST_MET_POSITION", "SIGNAL_FIRST_MET_AFFECTED", "KOZAK_START", "SIGNAL_FIRST_KOZAK_AFFECTED")
+myvars=c("MUTATED_SEQ_LENGTH2", "MUTATED_SEQUENCE_LENGTH")
 View(csv[myvars])
 
-signal_lost = function(csv){
+add_signal_lost_sup_info = function(csv){
   for (i in 1:nrow(csv)){
     signal_start = csv[i,"SIGNAL_PEPTIDE_START"]
     # Sumamos dos ya que en el csv se indica el inicio del ultimo codon
@@ -101,3 +130,4 @@ signal_lost = function(csv){
   }
   return(csv)
 }
+
