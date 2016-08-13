@@ -36,25 +36,28 @@ summary(lowMaf$READING_FRAME_STATUS)
 # Marco de lectura conservado si, ademas de tener "Conserved" tiene una longitud mayor al 1% de la seq original
 nrow(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH > 1 & lowMaf$READING_FRAME_STATUS == 'Conserved',])
 nrow(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH <= 1 & lowMaf$READING_FRAME_STATUS == 'Conserved',]) + nrow(lowMaf[lowMaf$READING_FRAME_STATUS == 'Lost',])
+summary(lowMaf$SIGNAL_FIRST_MET_AFFECTED)
 
 summary(highMaf$FIRST_MET_POSITION)
 summary(highMaf$SIGNAL_FIRST_MET_AFFECTED)
 summary(highMaf$READING_FRAME_STATUS)
 nrow(highMaf[highMaf$MUTATED_SEQUENCE_LENGTH > 1 & highMaf$READING_FRAME_STATUS == 'Conserved',])
 nrow(highMaf[highMaf$MUTATED_SEQUENCE_LENGTH <= 1 & highMaf$READING_FRAME_STATUS == 'Conserved',]) + nrow(highMaf[highMaf$READING_FRAME_STATUS == 'Lost',])
-
+summary(highMaf$SIGNAL_FIRST_MET_AFFECTED)
 
 summary(lowMaf$KOZAK_START)
 summary(lowMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
 summary(lowMaf$KOZAK_READING_FRAME_STATUS)
 nrow(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH > 1 & lowMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',])
 nrow(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH <= 1 & lowMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',]) + nrow(lowMaf[lowMaf$KOZAK_READING_FRAME_STATUS == 'Lost',])
+summary(lowMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
 
 summary(highMaf$KOZAK_START)
 summary(highMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
 summary(highMaf$KOZAK_READING_FRAME_STATUS)
 nrow(highMaf[highMaf$MUTATED_SEQUENCE_LENGTH > 1 & highMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',])
 nrow(highMaf[highMaf$MUTATED_SEQUENCE_LENGTH <= 1 & highMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',]) + nrow(highMaf[highMaf$KOZAK_READING_FRAME_STATUS == 'Lost',])
+summary(highMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
 
 # Histogramas de la posición de la primera metionina
 hist(highMaf$FIRST_MET_POSITION, xlim = c(0,1000))
@@ -77,16 +80,17 @@ shapiro.test(lowMaf$KOZAK_START) # No normal
 
 # Test de wilcoxon para comparar medias
 wilcox.test(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, paired = F, conf.level = 0.95) # Distribuciones diferentes
-wilcox.test(highMaf$KOZAK_START, lowMaf$KOZAK_START, paired = F, conf.level = 0.95) # Distribuciones iguales
+wilcox.test(highMaf$KOZAK_START, lowMaf$KOZAK_START, paired = F, conf.level = 0.95) # Distribuciones diferentes
 
 # Boxplots
 boxplot(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, ylim=c(0,3000))
 boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START, ylim=c(0,1500))
+op <- par(mfrow = c(1, 2))
 boxplot(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, 
         main="Comparación de la posición de la primera metionina alternativa\nentre los grupos de muestras con MAF alta y MAF baja")
-boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START,
+boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START, ylim=c(0,4000),
         main="Comparación de la posición de la primera Kozak alternativa\nentre los grupos de muestras con MAF alta y MAF baja")
-
+par(op)
 
 
 ###
