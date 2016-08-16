@@ -3,7 +3,9 @@ setwd("/home/fabad/hemodonacion/src")
 # Leer el csv sin filtros
 csv = read.csv("final_out_no_filter.csv", sep="\t",stringsAsFactors=FALSE)
 csv[,"MUTATED_SEQUENCE_LENGTH"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH))
+csv[,"KOZAK_MUTATED_SEQUENCE_LENGTH"]=as.numeric(gsub("%","",csv$KOZAK_MUTATED_SEQUENCE_LENGTH))
 csv = add_signal_lost_sup_info(csv)
+
 csv$READING_FRAME_STATUS = factor(csv$READING_FRAME_STATUS)
 csv$KOZAK_READING_FRAME_STATUS = factor(csv$KOZAK_READING_FRAME_STATUS)
 csv$KOZAK_STOP_CODON = factor(csv$KOZAK_STOP_CODON)
@@ -11,6 +13,9 @@ csv$STOP_CODON_POSITION = factor(csv$STOP_CODON_POSITION)
 csv$GENE_NAME = factor(csv$GENE_NAME)
 csv$SIGNAL_FIRST_MET_AFFECTED = factor(csv$SIGNAL_FIRST_MET_AFFECTED)
 csv$SIGNAL_FIRST_KOZAK_AFFECTED = factor(csv$SIGNAL_FIRST_KOZAK_AFFECTED)
+
+
+
 
 # Eliminar los casos en los que hay errores en las regiones 5' o 3'
 csv = csv[csv$CDS_ERRORS == '',]
@@ -48,8 +53,8 @@ summary(highMaf$SIGNAL_FIRST_MET_AFFECTED)
 summary(lowMaf$KOZAK_START)
 summary(lowMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
 summary(lowMaf$KOZAK_READING_FRAME_STATUS)
-nrow(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH > 1 & lowMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',])
-nrow(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH <= 1 & lowMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',]) + nrow(lowMaf[lowMaf$KOZAK_READING_FRAME_STATUS == 'Lost',])
+nrow(lowMaf[lowMaf$KOZAK_MUTATED_SEQUENCE_LENGTH > 1 & lowMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',])
+nrow(lowMaf[lowMaf$KOZAK_MUTATED_SEQUENCE_LENGTH <= 1 & lowMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',]) + nrow(lowMaf[lowMaf$KOZAK_READING_FRAME_STATUS == 'Lost',])
 summary(lowMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
 
 summary(highMaf$KOZAK_START)
@@ -100,10 +105,10 @@ met_nocons=length(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH <= 1 & lowMaf$READING_FR
 
 
 # select variables v1, v2, v3
-myvars <- c("SIGNAL_PEPTIDE_START","SIGNAL_PEPTIDE_END","FIRST_MET_POSITION", "SIGNAL_FIRST_MET_AFFECTED", "KOZAK_START", "SIGNAL_FIRST_KOZAK_AFFECTED")
+myvars <- c("TRANSCRIPT_ID","FIRST_MET_POSITION","STOP_CODON_POSITION","MUTATED_SEQUENCE_LENGTH", "KOZAK_START", "KOZAK_END", "KOZAK_MUTATED_SEQUENCE_LENGTH", "KOZAK_STOP_CODON", "KOZAK_READING_FRAME_STATUS")
 myvars=c("MUTATED_SEQ_LENGTH2", "MUTATED_SEQUENCE_LENGTH")
 View(csv[myvars])
-
+myvars = c("CHROMOSOME", "GENE_ID", "GENE_NAME", "TRANSCRIPT_ID", "TRANSCRIPT_REFSEQ_ID", "TRANSCRIPT_BIOTYPE", "CDS_ERRORS", "PROTEIN_ID", "VARIATION_NAME", "SOURCE", "TRANSCRIPT_VARIATION_ALLELE_DBID", "MINOR_ALLELE_FREQUENCY", "CODON_CHANGE", "AMINOACID_CHANGE", "FIRST_MET_POSITION", "STOP_CODON_POSITION", "MUTATED_SEQUENCE_LENGTH", "READING_FRAME_STATUS", "KOZAK_START", "KOZAK_END", "KOZAK_STOP_CODON", "KOZAK_MUTATED_SEQUENCE_LENGTH", "KOZAK_ORF_AA_LENGTH", "KOZAK_IDENTITY", "KOZAK_RELIABILITY", "KOZAK_READING_FRAME_STATUS", "KOZAK_PROTEIN_SEQ", "SIGNAL_PEPTIDE_START", "SIGNAL_PEPTIDE_END", "CONSEQUENCE", "PHENOTYPE", "SO_TERM", "SIFT", "POLYPHEN", "PUBLICATIONS")
 add_signal_lost_sup_info = function(csv){
   for (i in 1:nrow(csv)){
     signal_start = csv[i,"SIGNAL_PEPTIDE_START"]
@@ -135,3 +140,31 @@ add_signal_lost_sup_info = function(csv){
   return(csv)
 }
 
+add_kozak_mutated_seq_length = function(csv){
+  for (i in 1:nrow(csv)){
+  #for (i in 1:3){
+    met_start = csv[i, "FIRST_MET_POSITION"]
+    met_end = csv[i, "STOP_CODON_POSITION"]
+    met_seq_length = as.double(met_end) - as.double(met_start) + 1
+    met_percentage = as.numeric(gsub("%","",csv[i, "MUTATED_SEQUENCE_LENGTH"]))
+    #met_percentage = as.double(csv[i, "MUTATED_SEQUENCE_LENGTH"])
+    
+    kozak_start = csv[i, "KOZAK_START"]
+    kozak_end = csv[i, "KOZAK_END"]
+    kozak_seq_length =as.double(kozak_end) - as.double(kozak_start) + 1
+    #cat("\n")
+    #cat("met start=",met_start,"\n", "met end=",met_end, "\n", "met length=",met_seq_length,"\n")
+    #cat("kozak start=",kozak_start,"\n", "kozak end=",kozak_end, "\n", "kozak length=",kozak_seq_length,"\n")
+    
+    if(!is.na(kozak_seq_length) && !is.na(met_percentage) && !is.na(met_seq_length)){
+      kozak_mutated_seq_length = kozak_seq_length * met_percentage / met_seq_length
+      #cat("kozak_mutated_seq_length=", kozak_mutated_seq_length,"\t", "met_percentage=",met_percentage,"\n")
+      csv[i, "KOZAK_MUTATED_SEQUENCE_LENGTH"] = paste(kozak_mutated_seq_length, "%", sep="")
+    }else{
+      csv[i, "KOZAK_MUTATED_SEQUENCE_LENGTH"] = NA
+    }
+    
+  }
+  return(csv)
+}
+write.table(csv[myvars], file = "final_out_no_filter2.csv", na="", sep="\t", row.names = F)

@@ -3,7 +3,7 @@ use warnings;
 use Bio::EnsEMBL::Registry;
 use myUtils::CsvManager;
 
-STDOUT->autoflush(1);
+#STDOUT->autoflush(1);
 #Get input and output file from input parameters
 my $output;
 my $input;
@@ -35,8 +35,8 @@ $registry->set_reconnect_when_lost();
 # Get the adaptor to get the Transcript, slices and transcript variation from the database
 my $transcript_adaptor = $registry->get_adaptor( 'homo_sapiens', 'core', 'transcript' );
 
-my @fields1 = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
-my @fields2 = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
+my @fields1 = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS KOZAK_START KOZAK_END KOZAK_STOP_CODON KOZAK_ORF_AA_LENGTH KOZAK_IDENTITY KOZAK_RELIABILITY KOZAK_READING_FRAME_STATUS KOZAK_PROTEIN_SEQ SIGNAL_PEPTIDE_START SIGNAL_PEPTIDE_END CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
+my @fields2 = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS KOZAK_START KOZAK_END KOZAK_STOP_CODON KOZAK_ORF_AA_LENGTH KOZAK_MUTATED_SEQUENCE_LENGTH KOZAK_IDENTITY KOZAK_RELIABILITY KOZAK_READING_FRAME_STATUS KOZAK_PROTEIN_SEQ SIGNAL_PEPTIDE_START SIGNAL_PEPTIDE_END CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
 my $in_csv = myUtils::CsvManager->new (
 	fields    => \@fields1,
 	csv_separator   => "\t",
@@ -60,7 +60,6 @@ $out_csv->myUtils::CsvManager::writeHeader();
 foreach my $old_entry (@old_entries){
 	print $count . "/" . $total_entries . "\n";
 	$count = $count + 1;
-	my $transcript_stable_id = $old_entry->{'TRANSCRIPT_ID'};
 	my %new_entry = get_new_entry($old_entry);
 	$out_csv->myUtils::CsvManager::writeEntry(%new_entry);
 }
@@ -74,16 +73,21 @@ $out_csv->myUtils::CsvManager::close();
 sub get_new_entry{
 	my %old_entry = %{$_[0]};
 	my %new_entry = %old_entry;
-	my $transcript = $transcript_adaptor->fetch_by_stable_id($old_entry{'TRANSCRIPT_ID'});
-	my @db_entries = @{$transcript->get_all_DBEntries('RefSeq_mRNA')};
-	my $transcript_refseq_id = '';
-	foreach my $dbentry ( @db_entries ){
-		if ($dbentry->display_id){
-			$transcript_refseq_id = $transcript_refseq_id . $dbentry->display_id . '-';
+	my $kozak_mutated_seq_length = '';
+	if(defined($old_entry{'KOZAK_END'}) && defined($old_entry{'KOZAK_START'}) && $old_entry{'KOZAK_END'} ne '' && $old_entry{'KOZAK_START'} ne ''){
+		my $transcript = $transcript_adaptor->fetch_by_stable_id($old_entry{'TRANSCRIPT_ID'});
+		if (defined($transcript)){
+			my $seq = $transcript->translateable_seq;
+			if (defined($seq) && $seq ne ''){
+				my $seq_length = length($seq);
+				my $kozak_length = ($old_entry{'KOZAK_ORF_AA_LENGTH'} + 1) * 3;
+				$kozak_mutated_seq_length = $kozak_length * 100 / $seq_length;
+			}
+		} else{
+			print "Transcrito " . $old_entry{'TRANSCRIPT_ID'} . " no encontrado\n";
 		}
 	}
-	chop($transcript_refseq_id);
-	$new_entry{'TRANSCRIPT_REFSEQ_ID'} = $transcript_refseq_id;
+	$new_entry{'KOZAK_MUTATED_SEQUENCE_LENGTH'} = $kozak_mutated_seq_length;
 	return %new_entry;
 }
 
