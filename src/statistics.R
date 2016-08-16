@@ -54,14 +54,14 @@ summary(lowMaf$KOZAK_START)
 summary(lowMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
 summary(lowMaf$KOZAK_READING_FRAME_STATUS)
 nrow(lowMaf[lowMaf$KOZAK_MUTATED_SEQUENCE_LENGTH > 1 & lowMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',])
-nrow(lowMaf[lowMaf$KOZAK_MUTATED_SEQUENCE_LENGTH <= 1 & lowMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',]) + nrow(lowMaf[lowMaf$KOZAK_READING_FRAME_STATUS == 'Lost',])
+nrow(lowMaf[lowMaf$KOZAK_MUTATED_SEQUENCE_LENGTH <= 1 & !is.na(lowMaf$KOZAK_MUTATED_SEQUENCE_LENGTH) & lowMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',]) + nrow(lowMaf[lowMaf$KOZAK_READING_FRAME_STATUS == 'Lost',])
 summary(lowMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
 
 summary(highMaf$KOZAK_START)
 summary(highMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
 summary(highMaf$KOZAK_READING_FRAME_STATUS)
-nrow(highMaf[highMaf$MUTATED_SEQUENCE_LENGTH > 1 & highMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',])
-nrow(highMaf[highMaf$MUTATED_SEQUENCE_LENGTH <= 1 & highMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',]) + nrow(highMaf[highMaf$KOZAK_READING_FRAME_STATUS == 'Lost',])
+nrow(highMaf[highMaf$KOZAK_MUTATED_SEQUENCE_LENGTH > 1 & highMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',])
+nrow(highMaf[highMaf$KOZAK_MUTATED_SEQUENCE_LENGTH <= 1 & highMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',]) + nrow(highMaf[highMaf$KOZAK_READING_FRAME_STATUS == 'Lost',])
 summary(highMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
 
 # Histogramas de la posición de la primera metionina
