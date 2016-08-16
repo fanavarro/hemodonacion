@@ -1,0 +1,87 @@
+library(gdata)
+library(hash)
+library(descr)
+
+filter_xls = function(xls){
+  minCoverage = 20
+  minQuality = 60
+  
+  # Filter the position affected by the mutation
+  if("proteinPos" %in% colnames(xls)){
+    xls = xls[xls$proteinPos == 1,]
+  } else if ("Protein_position" %in% colnames(xls)){
+    xls = xls[xls$Protein_position == 1,]
+  } else if ("protein" %in% colnames(xls)){
+    index = with(xls, grepl("p.Met1[a-zA-Z]", protein))
+    xls = xls[index,]
+  }
+  
+  # Filter by coverage and quality
+  if ("coverage" %in% colnames(xls)){
+    xls = xls[xls$coverage >= minCoverage,]
+  } else if ("QUAL" %in% colnames(xls)){
+    xls = xls[xls$QUAL >= minQuality,]
+  }
+  return(xls)
+}
+
+get_gene_names = function(xls){
+  if("gene" %in% colnames(xls)){
+    return(sort(xls$gene))
+  } else if("GeneSymbol" %in% colnames(xls)){
+    return(sort(xls$GeneSymbol))
+  } else if("Gene.Name" %in% colnames(xls)){
+    return(sort(xls$Gene.Name))
+  }
+}
+
+exomes_dir = "/home/fabad/hemodonacion/data/exomes/"
+exome_files = c("14-173.xlsx",
+                "2064.xlsx",
+                "ABGP.xlsx",
+                "Exoma 10-164.xlsx",
+                "Exoma 11-584.xlsx",
+                "Exoma 2166 nuevo.xlsx",
+                "Paqui.xlsx")
+
+exome_tables = hash()
+
+# Read xlsx files and store it in a hash
+for (file in exome_files){
+  abs_file_dir = paste(exomes_dir, file, sep="")
+  exome_tables[file] = read.xls(abs_file_dir)
+  write(paste("exoma", file, "leido."), "")
+}
+
+# filter data
+for (file in exome_files){
+  exome_tables[file] = filter_xls(exome_tables[[file]])
+}
+
+# get genes
+genes = c()
+for (file in exome_files){
+  genes = c(genes, as.vector(get_gene_names(exome_tables[[file]])))
+}
+
+# gene frequency
+op = par(las=2) # make label text perpendicular to axis
+op = par(mar=c(5,8,4,2)) # increase y-axis margin.
+barplot(table(genes), horiz=T)
+par(op)
+  View(exome_tables[["14-173.xlsx"]])
+  View(exome_tables[["2064.xlsx"]])
+  View(exome_tables[["ABGP.xlsx"]])
+  View(exome_tables[["Exoma 10-164.xlsx"]])
+  View(exome_tables[["Exoma 11-584.xlsx"]])
+  View(exome_tables[["Exoma 2166 nuevo.xlsx"]])
+  View(exome_tables[["Paqui.xlsx"]])
+  
+
+  get_gene_names(exome_tables[["14-173.xlsx"]])
+  get_gene_names(exome_tables[["2064.xlsx"]])
+  get_gene_names(exome_tables[["ABGP.xlsx"]])
+  get_gene_names(exome_tables[["Exoma 10-164.xlsx"]])
+  get_gene_names(exome_tables[["Exoma 11-584.xlsx"]])
+  get_gene_names(exome_tables[["Exoma 2166 nuevo.xlsx"]])
+  get_gene_names(exome_tables[["Paqui.xlsx"]])
