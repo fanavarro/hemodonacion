@@ -91,10 +91,10 @@ wilcox.test(highMaf$KOZAK_START, lowMaf$KOZAK_START, paired = F, conf.level = 0.
 boxplot(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, ylim=c(0,3000))
 boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START, ylim=c(0,1500))
 op <- par(mfrow = c(1, 2))
-boxplot(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, 
-        main="Comparación de la posición de la primera metionina alternativa\nentre los grupos de muestras con MAF alta y MAF baja")
-boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START, ylim=c(0,4000),
-        main="Comparación de la posición de la primera Kozak alternativa\nentre los grupos de muestras con MAF alta y MAF baja")
+boxplot(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, ylab="Initial codon position",names=c("High MAF", "Low MAF"),
+        main="First initial codon position comparative\nbetween high and low MAF")
+boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START, ylim=c(0,4000), ylab="Initial codon position", names = c("High MAF", "Low MAF"),
+        main="First initial codon position in strong Kozak sequence\ncomparative between high and low MAF.")
 par(op)
 
 
