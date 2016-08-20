@@ -2,6 +2,43 @@ library(gdata)
 library(hash)
 library(descr)
 
+search = function(database, xls){
+  found = data.frame(matrix(ncol=ncol(database)))
+  colnames(found) = colnames(database)
+  # Si el xlsx tiene entrada para dbsnp e id de refseq
+  if("dbsnp" %in% colnames(xls) && "transcript" %in% colnames(xls)){
+    for (i in 1:nrow(xls)){
+      dbsnp = toString(xls[i, "dbsnp"])
+      refseq_id = toString(xls[i,"transcript"])
+      entry = database[database$TRANSCRIPT_REFSEQ_ID == refseq_id & !is.na(database$TRANSCRIPT_REFSEQ_ID) & database$VARIATION_NAME == dbsnp & !is.na(database$VARIATION_NAME), ]
+      if (nrow(entry) != 0){
+        found = rbind(found, entry)
+      }
+      
+    }
+  }
+  # Si tiene id de transcrito de ensembl y cambio de nucleotido del tipo aTg/aAg
+  else if("Feature" %in% colnames(xls) && "Codons" %in% colnames(xls)){
+    for (i in 1:nrow(xls)){
+      transcript_id = xls[i, "Feature"]
+      codon_change = xls[i,"Codons"]
+      entry = database[database$TRANSCRIPT_ID == transcript_id & !is.na(database$TRANSCRIPT_ID) & database$CODON_CHANGE == codon_change & !is.na(database$CODON_CHANGE), ]
+      if(nrow(entry) != 0){
+        found = rbind(found, entry)
+      }
+    }
+  }
+  return(found)
+}
+
+View(search(csv, exome_tables[["14-173.xlsx"]]))
+View(search(csv, exome_tables[["2064.xlsx"]]))
+View(search(csv, exome_tables[["ABGP.xlsx"]]))
+View(search(csv, exome_tables[["Exoma 10-164.xlsx"]]))
+View(search(csv, exome_tables[["Exoma 11-584.xlsx"]]))
+View(search(csv, exome_tables[["Exoma 2166 nuevo.xlsx"]]))
+View(search(csv, exome_tables[["Paqui.xlsx"]]))
+
 filter_xls = function(xls){
   minCoverage = 20
   minQuality = 60

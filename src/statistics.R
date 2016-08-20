@@ -25,6 +25,8 @@ csv = csv[csv$TRANSCRIPT_BIOTYPE != 'non_stop_decay' & csv$TRANSCRIPT_BIOTYPE !=
 
 # Numero de genes con mutaciones afectando en el codon de inicio
 length(unique(csv$GENE_NAME))
+View(table(csv$GENE_NAME))
+nrow(csv)/length(unique(csv$GENE_NAME))
 
 # Obtener un conjunto en el que existe MAF definida y otro en el que no.
 csvWithMaf = csv[!is.na(csv$MINOR_ALLELE_FREQUENCY),]
