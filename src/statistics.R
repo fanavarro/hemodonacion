@@ -5,6 +5,7 @@ csv = read.csv("final_out_no_filter.csv", sep="\t",stringsAsFactors=FALSE)
 csv[,"MUTATED_SEQUENCE_LENGTH"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH))
 csv[,"KOZAK_MUTATED_SEQUENCE_LENGTH"]=as.numeric(gsub("%","",csv$KOZAK_MUTATED_SEQUENCE_LENGTH))
 csv = add_signal_lost_sup_info(csv)
+csv = add_mutation_type(csv)
 
 csv$READING_FRAME_STATUS = factor(csv$READING_FRAME_STATUS)
 csv$KOZAK_READING_FRAME_STATUS = factor(csv$KOZAK_READING_FRAME_STATUS)
@@ -27,6 +28,14 @@ csv = csv[csv$TRANSCRIPT_BIOTYPE != 'non_stop_decay' & csv$TRANSCRIPT_BIOTYPE !=
 length(unique(csv$GENE_NAME))
 View(table(csv$GENE_NAME))
 nrow(csv)/length(unique(csv$GENE_NAME))
+
+# Transcritos afectados de TP53, CACNA1C y TP53
+length(unique(csv[csv$GENE_NAME=="TP53",]$TRANSCRIPT_ID))
+length(unique(csv[csv$GENE_NAME=="CACNA1C",]$TRANSCRIPT_ID))
+length(unique(csv[csv$GENE_NAME=="CDKN2A",]$TRANSCRIPT_ID))
+
+# Numero de deleciones, inserciones y cambios puntuales
+View(table(csv$VARIATION_TYPE))
 
 # Obtener un conjunto en el que existe MAF definida y otro en el que no.
 csvWithMaf = csv[!is.na(csv$MINOR_ALLELE_FREQUENCY),]
@@ -108,7 +117,7 @@ met_nocons=length(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH <= 1 & lowMaf$READING_FR
 
 # select variables v1, v2, v3
 myvars <- c("TRANSCRIPT_ID","FIRST_MET_POSITION","STOP_CODON_POSITION","MUTATED_SEQUENCE_LENGTH", "KOZAK_START", "KOZAK_END", "KOZAK_MUTATED_SEQUENCE_LENGTH", "KOZAK_STOP_CODON", "KOZAK_READING_FRAME_STATUS")
-myvars=c("MUTATED_SEQ_LENGTH2", "MUTATED_SEQUENCE_LENGTH")
+myvars=c("CODON_CHANGE", "VARIATION_TYPE")
 View(csv[myvars])
 myvars = c("CHROMOSOME", "GENE_ID", "GENE_NAME", "TRANSCRIPT_ID", "TRANSCRIPT_REFSEQ_ID", "TRANSCRIPT_BIOTYPE", "CDS_ERRORS", "PROTEIN_ID", "VARIATION_NAME", "SOURCE", "TRANSCRIPT_VARIATION_ALLELE_DBID", "MINOR_ALLELE_FREQUENCY", "CODON_CHANGE", "AMINOACID_CHANGE", "FIRST_MET_POSITION", "STOP_CODON_POSITION", "MUTATED_SEQUENCE_LENGTH", "READING_FRAME_STATUS", "KOZAK_START", "KOZAK_END", "KOZAK_STOP_CODON", "KOZAK_MUTATED_SEQUENCE_LENGTH", "KOZAK_ORF_AA_LENGTH", "KOZAK_IDENTITY", "KOZAK_RELIABILITY", "KOZAK_READING_FRAME_STATUS", "KOZAK_PROTEIN_SEQ", "SIGNAL_PEPTIDE_START", "SIGNAL_PEPTIDE_END", "CONSEQUENCE", "PHENOTYPE", "SO_TERM", "SIFT", "POLYPHEN", "PUBLICATIONS")
 add_signal_lost_sup_info = function(csv){
@@ -142,9 +151,26 @@ add_signal_lost_sup_info = function(csv){
   return(csv)
 }
 
+add_mutation_type = function(csv){
+  for (i in 1:nrow(csv)){
+    codon_change = trimws(csv[i, "CODON_CHANGE"])
+    if (!is.na(codon_change) && "" != codon_change){
+      splitted = strsplit(codon_change, "/")
+      original = splitted[[1]][1]
+      mutated = splitted[[1]][2]
+      if(nchar(original) > nchar(mutated)){
+        csv[i, "VARIATION_TYPE"] = "Deletion"
+      } else if(nchar(original) < nchar(mutated)){
+        csv[i, "VARIATION_TYPE"] = "Insertion"
+      } else {
+        csv[i, "VARIATION_TYPE"] = "Nucleotid change"
+      }
+    }
+  }
+  return(csv)
+}
 add_kozak_mutated_seq_length = function(csv){
   for (i in 1:nrow(csv)){
-  #for (i in 1:3){
     met_start = csv[i, "FIRST_MET_POSITION"]
     met_end = csv[i, "STOP_CODON_POSITION"]
     met_seq_length = as.double(met_end) - as.double(met_start) + 1
