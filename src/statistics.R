@@ -1,4 +1,53 @@
 setwd("/home/fabad/hemodonacion/src")
+add_signal_lost_sup_info = function(csv){
+  for (i in 1:nrow(csv)){
+    signal_start = csv[i,"SIGNAL_PEPTIDE_START"]
+    # Sumamos dos ya que en el csv se indica el inicio del ultimo codon
+    # De esta forma, signal_end tiene el nucleotido exacto donde
+    # termina el peptido señal. 
+    signal_end = (csv[i,"SIGNAL_PEPTIDE_END"]) + 2
+    first_met = csv[i,"FIRST_MET_POSITION"]
+    first_kozak = csv[i,"KOZAK_START"]
+    signal_first_met_affected = NA
+    signal_first_kozak_affected = NA
+    if (!is.na(signal_start) && !is.na(signal_end)){
+      if(!is.na(first_met)){
+        if (first_met == signal_start){signal_first_met_affected = "Totally conserved"}
+        if (first_met > signal_start && first_met <= signal_end){signal_first_met_affected = "Partially conserved"}
+        if (first_met == (signal_end + 1)){signal_first_met_affected = "Exactly lost"}
+        if (first_met > (signal_end + 1)){signal_first_met_affected = "Lost"}
+      }
+      if (!is.na(first_kozak)){
+        if (first_kozak == signal_start){signal_first_kozak_affected = "Totally conserved"}
+        if (first_kozak > signal_start && first_kozak <= signal_end){signal_first_kozak_affected = "Partially conserved"}
+        if (first_kozak == (signal_end + 1)){signal_first_kozak_affected = "Exactly lost"}
+        if (first_kozak > (signal_end + 1)){signal_first_kozak_affected = "Lost"}
+      }
+    }
+    csv[i, "SIGNAL_FIRST_MET_AFFECTED"] = signal_first_met_affected
+    csv[i, "SIGNAL_FIRST_KOZAK_AFFECTED"] = signal_first_kozak_affected
+  }
+  return(csv)
+}
+
+add_mutation_type = function(csv){
+  for (i in 1:nrow(csv)){
+    codon_change = trimws(csv[i, "CODON_CHANGE"])
+    if (!is.na(codon_change) && "" != codon_change){
+      splitted = strsplit(codon_change, "/")
+      original = splitted[[1]][1]
+      mutated = splitted[[1]][2]
+      if(nchar(original) > nchar(mutated)){
+        csv[i, "VARIATION_TYPE"] = "Deletion"
+      } else if(nchar(original) < nchar(mutated)){
+        csv[i, "VARIATION_TYPE"] = "Insertion"
+      } else {
+        csv[i, "VARIATION_TYPE"] = "Nucleotid change"
+      }
+    }
+  }
+  return(csv)
+}
 
 # Leer el csv sin filtros
 csv = read.csv("final_out_no_filter.csv", sep="\t",stringsAsFactors=FALSE)
@@ -120,55 +169,7 @@ myvars <- c("TRANSCRIPT_ID","FIRST_MET_POSITION","STOP_CODON_POSITION","MUTATED_
 myvars=c("CODON_CHANGE", "VARIATION_TYPE")
 View(csv[myvars])
 myvars = c("CHROMOSOME", "GENE_ID", "GENE_NAME", "TRANSCRIPT_ID", "TRANSCRIPT_REFSEQ_ID", "TRANSCRIPT_BIOTYPE", "CDS_ERRORS", "PROTEIN_ID", "VARIATION_NAME", "SOURCE", "TRANSCRIPT_VARIATION_ALLELE_DBID", "MINOR_ALLELE_FREQUENCY", "CODON_CHANGE", "AMINOACID_CHANGE", "FIRST_MET_POSITION", "STOP_CODON_POSITION", "MUTATED_SEQUENCE_LENGTH", "READING_FRAME_STATUS", "KOZAK_START", "KOZAK_END", "KOZAK_STOP_CODON", "KOZAK_MUTATED_SEQUENCE_LENGTH", "KOZAK_ORF_AA_LENGTH", "KOZAK_IDENTITY", "KOZAK_RELIABILITY", "KOZAK_READING_FRAME_STATUS", "KOZAK_PROTEIN_SEQ", "SIGNAL_PEPTIDE_START", "SIGNAL_PEPTIDE_END", "CONSEQUENCE", "PHENOTYPE", "SO_TERM", "SIFT", "POLYPHEN", "PUBLICATIONS")
-add_signal_lost_sup_info = function(csv){
-  for (i in 1:nrow(csv)){
-    signal_start = csv[i,"SIGNAL_PEPTIDE_START"]
-    # Sumamos dos ya que en el csv se indica el inicio del ultimo codon
-    # De esta forma, signal_end tiene el nucleotido exacto donde
-    # termina el peptido señal. 
-    signal_end = (csv[i,"SIGNAL_PEPTIDE_END"]) + 2
-    first_met = csv[i,"FIRST_MET_POSITION"]
-    first_kozak = csv[i,"KOZAK_START"]
-    signal_first_met_affected = NA
-    signal_first_kozak_affected = NA
-    if (!is.na(signal_start) && !is.na(signal_end)){
-      if(!is.na(first_met)){
-        if (first_met == signal_start){signal_first_met_affected = "Totally conserved"}
-        if (first_met > signal_start && first_met <= signal_end){signal_first_met_affected = "Partially conserved"}
-        if (first_met == (signal_end + 1)){signal_first_met_affected = "Exactly lost"}
-        if (first_met > (signal_end + 1)){signal_first_met_affected = "Lost"}
-      }
-      if (!is.na(first_kozak)){
-        if (first_kozak == signal_start){signal_first_kozak_affected = "Totally conserved"}
-        if (first_kozak > signal_start && first_kozak <= signal_end){signal_first_kozak_affected = "Partially conserved"}
-        if (first_kozak == (signal_end + 1)){signal_first_kozak_affected = "Exactly lost"}
-        if (first_kozak > (signal_end + 1)){signal_first_kozak_affected = "Lost"}
-      }
-    }
-    csv[i, "SIGNAL_FIRST_MET_AFFECTED"] = signal_first_met_affected
-    csv[i, "SIGNAL_FIRST_KOZAK_AFFECTED"] = signal_first_kozak_affected
-  }
-  return(csv)
-}
 
-add_mutation_type = function(csv){
-  for (i in 1:nrow(csv)){
-    codon_change = trimws(csv[i, "CODON_CHANGE"])
-    if (!is.na(codon_change) && "" != codon_change){
-      splitted = strsplit(codon_change, "/")
-      original = splitted[[1]][1]
-      mutated = splitted[[1]][2]
-      if(nchar(original) > nchar(mutated)){
-        csv[i, "VARIATION_TYPE"] = "Deletion"
-      } else if(nchar(original) < nchar(mutated)){
-        csv[i, "VARIATION_TYPE"] = "Insertion"
-      } else {
-        csv[i, "VARIATION_TYPE"] = "Nucleotid change"
-      }
-    }
-  }
-  return(csv)
-}
 add_kozak_mutated_seq_length = function(csv){
   for (i in 1:nrow(csv)){
     met_start = csv[i, "FIRST_MET_POSITION"]
