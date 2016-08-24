@@ -3,15 +3,16 @@ library(hash)
 library(descr)
 
 search = function(database, xls){
-  found = data.frame(matrix(ncol=ncol(database)))
-  colnames(found) = colnames(database)
+  #found = data.frame(matrix(ncol=ncol(database)))
+  #colnames(found) = colnames(database)
+  found = read.table(text="", col.names = colnames(database))
   # Si el xlsx tiene entrada para dbsnp e id de refseq
   if("dbsnp" %in% colnames(xls) && "transcript" %in% colnames(xls)){
     for (i in 1:nrow(xls)){
       dbsnp = toString(xls[i, "dbsnp"])
       refseq_id = toString(xls[i,"transcript"])
       entry = database[database$TRANSCRIPT_REFSEQ_ID == refseq_id & !is.na(database$TRANSCRIPT_REFSEQ_ID) & database$VARIATION_NAME == dbsnp & !is.na(database$VARIATION_NAME), ]
-      if (nrow(entry) != 0){
+      if (!is.na(entry) && nrow(entry) != 0){
         found = rbind(found, entry)
       }
       
@@ -23,7 +24,7 @@ search = function(database, xls){
       transcript_id = xls[i, "Feature"]
       codon_change = xls[i,"Codons"]
       entry = database[database$TRANSCRIPT_ID == transcript_id & !is.na(database$TRANSCRIPT_ID) & database$CODON_CHANGE == codon_change & !is.na(database$CODON_CHANGE), ]
-      if(nrow(entry) != 0){
+      if(!is.na(entry) && nrow(entry) != 0){
         found = rbind(found, entry)
       }
     }
@@ -122,3 +123,12 @@ par(op)
   get_gene_names(exome_tables[["Exoma 11-584.xlsx"]])
   get_gene_names(exome_tables[["Exoma 2166 nuevo.xlsx"]])
   get_gene_names(exome_tables[["Paqui.xlsx"]])
+
+# Numero de mutaciones encontradas individualmente
+nrow(exome_tables[["14-173.xlsx"]])
+nrow(exome_tables[["2064.xlsx"]])
+nrow(exome_tables[["ABGP.xlsx"]])
+nrow(exome_tables[["Exoma 10-164.xlsx"]])
+nrow(exome_tables[["Exoma 11-584.xlsx"]])
+nrow(exome_tables[["Exoma 2166 nuevo.xlsx"]])
+nrow(exome_tables[["Paqui.xlsx"]])
