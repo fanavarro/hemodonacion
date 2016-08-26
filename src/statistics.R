@@ -86,6 +86,18 @@ length(unique(csv[csv$GENE_NAME=="CDKN2A",]$TRANSCRIPT_ID))
 # Numero de deleciones, inserciones y cambios puntuales
 View(table(csv$VARIATION_TYPE))
 
+# El uso de la metionina en kozak fuerte provoca la conservacion del marco
+# de lectura en mayor medida que la primera metionina encontrada?
+rf_met_conserved = nrow(csv[csv$READING_FRAME_STATUS == "Conserved",]); rf_met_conserved
+rf_met_lost = nrow(csv[csv$READING_FRAME_STATUS == "Lost",]); rf_met_lost
+rf_kozak_conserved = nrow(csv[csv$KOZAK_READING_FRAME_STATUS == "Conserved",]); rf_kozak_conserved
+rf_kozak_lost = nrow(csv[csv$KOZAK_READING_FRAME_STATUS == "Lost",]); rf_kozak_lost
+m = as.table(rbind(c(rf_met_conserved, rf_met_lost), c(rf_kozak_conserved, rf_kozak_lost)))
+dimnames(m) = list(alt_met=c("First Met", "Kozak Met"),
+                   reading_frame=c("Conserved", "Lost"))
+m
+chisq.test(m) # Muy significativo. El uso de la metionina en una secuencia de kozak fuerte favorece el mantenimiento del marco de lectura.
+
 # Obtener un conjunto en el que existe MAF definida y otro en el que no.
 csvWithMaf = csv[!is.na(csv$MINOR_ALLELE_FREQUENCY),]
 csvNoMaf = csv[is.na(csv$MINOR_ALLELE_FREQUENCY),]
@@ -99,29 +111,29 @@ summary(lowMaf$FIRST_MET_POSITION)
 summary(lowMaf$SIGNAL_FIRST_MET_AFFECTED)
 summary(lowMaf$READING_FRAME_STATUS)
 # Marco de lectura conservado si, ademas de tener "Conserved" tiene una longitud mayor al 1% de la seq original
-nrow(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH > 1 & lowMaf$READING_FRAME_STATUS == 'Conserved',])
-nrow(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH <= 1 & lowMaf$READING_FRAME_STATUS == 'Conserved',]) + nrow(lowMaf[lowMaf$READING_FRAME_STATUS == 'Lost',])
+rf_conserved_met_low_maf = nrow(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH > 1 & lowMaf$READING_FRAME_STATUS == 'Conserved',])
+rf_lost_met_low_maf = nrow(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH <= 1 & lowMaf$READING_FRAME_STATUS == 'Conserved',]) + nrow(lowMaf[lowMaf$READING_FRAME_STATUS == 'Lost',])
 summary(lowMaf$SIGNAL_FIRST_MET_AFFECTED)
 
 summary(highMaf$FIRST_MET_POSITION)
 summary(highMaf$SIGNAL_FIRST_MET_AFFECTED)
 summary(highMaf$READING_FRAME_STATUS)
-nrow(highMaf[highMaf$MUTATED_SEQUENCE_LENGTH > 1 & highMaf$READING_FRAME_STATUS == 'Conserved',])
-nrow(highMaf[highMaf$MUTATED_SEQUENCE_LENGTH <= 1 & highMaf$READING_FRAME_STATUS == 'Conserved',]) + nrow(highMaf[highMaf$READING_FRAME_STATUS == 'Lost',])
+rf_conserved_met_high_maf = nrow(highMaf[highMaf$MUTATED_SEQUENCE_LENGTH > 1 & highMaf$READING_FRAME_STATUS == 'Conserved',])
+rf_lost_met_high_maf = nrow(highMaf[highMaf$MUTATED_SEQUENCE_LENGTH <= 1 & highMaf$READING_FRAME_STATUS == 'Conserved',]) + nrow(highMaf[highMaf$READING_FRAME_STATUS == 'Lost',])
 summary(highMaf$SIGNAL_FIRST_MET_AFFECTED)
 
 summary(lowMaf$KOZAK_START)
 summary(lowMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
 summary(lowMaf$KOZAK_READING_FRAME_STATUS)
-nrow(lowMaf[lowMaf$KOZAK_MUTATED_SEQUENCE_LENGTH > 1 & lowMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',])
-nrow(lowMaf[lowMaf$KOZAK_MUTATED_SEQUENCE_LENGTH <= 1 & !is.na(lowMaf$KOZAK_MUTATED_SEQUENCE_LENGTH) & lowMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',]) + nrow(lowMaf[lowMaf$KOZAK_READING_FRAME_STATUS == 'Lost',])
+rf_conserved_kozak_low_maf = nrow(lowMaf[lowMaf$KOZAK_MUTATED_SEQUENCE_LENGTH > 1 & lowMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',])
+rf_lost_kozak_low_maf = nrow(lowMaf[lowMaf$KOZAK_MUTATED_SEQUENCE_LENGTH <= 1 & !is.na(lowMaf$KOZAK_MUTATED_SEQUENCE_LENGTH) & lowMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',]) + nrow(lowMaf[lowMaf$KOZAK_READING_FRAME_STATUS == 'Lost',])
 summary(lowMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
 
 summary(highMaf$KOZAK_START)
 summary(highMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
 summary(highMaf$KOZAK_READING_FRAME_STATUS)
-nrow(highMaf[highMaf$KOZAK_MUTATED_SEQUENCE_LENGTH > 1 & highMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',])
-nrow(highMaf[highMaf$KOZAK_MUTATED_SEQUENCE_LENGTH <= 1 & highMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',]) + nrow(highMaf[highMaf$KOZAK_READING_FRAME_STATUS == 'Lost',])
+rf_conserved_kozak_high_maf = nrow(highMaf[highMaf$KOZAK_MUTATED_SEQUENCE_LENGTH > 1 & highMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',])
+rf_lost_kozak_high_maf = nrow(highMaf[highMaf$KOZAK_MUTATED_SEQUENCE_LENGTH <= 1 & highMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',]) + nrow(highMaf[highMaf$KOZAK_READING_FRAME_STATUS == 'Lost',])
 summary(highMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
 
 # Histogramas de la posición de la primera metionina
@@ -157,11 +169,37 @@ boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START, ylim=c(0,4000), ylab="Initial c
         main="First initial codon position in strong Kozak sequence\ncomparative between high and low MAF.")
 par(op)
 
-
+# Test de Chi Cuadrado para comparar las variables cualitativas
+# READING FRAME STATUS
+m = as.table(rbind(c(rf_conserved_met_low_maf,rf_lost_met_low_maf), c(rf_conserved_met_high_maf,rf_lost_met_high_maf)))
+dimnames(m)=list(GRUPO = c("MAF BAJA", "MAF ALTA"),
+                 READING_FRAME_STATUS = c("CONSERVED", "LOST"))
+m
+chisq.test(m) # p-value menor que 0.05 indica que cada grupo de mutaciones presenta diferencias significativas
 ###
-  #borrar
-met_cons=length(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH > 1 & lowMaf$READING_FRAME_STATUS == 'Conserved',])
-met_nocons=length(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH <= 1 & lowMaf$READING_FRAME_STATUS == 'Conserved',]) + length(lowMaf[lowMaf$READING_FRAME_STATUS == 'Lost',])
+
+# KOZAK READING FRAME STATUS
+m = as.table(rbind(c(rf_conserved_kozak_low_maf,rf_lost_kozak_low_maf), c(rf_conserved_kozak_high_maf,rf_lost_kozak_high_maf)))
+dimnames(m)=list(GRUPO = c("MAF BAJA", "MAF ALTA"),
+                 READING_FRAME_STATUS = c("CONSERVED", "LOST"))
+m
+chisq.test(m) # p-value mayor que 0.05 indica que cada grupo de mutaciones no presenta diferencias significativas
+
+# SIGNAL FIRST MET AFFECTED
+high_maf_signal_values_met = table(highMaf$SIGNAL_FIRST_MET_AFFECTED)
+low_maf_signal_values_met = table(lowMaf$SIGNAL_FIRST_MET_AFFECTED)
+m = as.table(rbind(c(low_maf_signal_values_met), c(high_maf_signal_values_met)))
+rownames(m) = c("MAF BAJA","MAF ALTA")
+m
+chisq.test(m) # p-value menor que 0.05 indica que cada grupo de mutaciones presenta diferencias significativas
+
+# SIGNAL KOZAK MET AFFECTED
+high_maf_signal_values_kozak = table(highMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
+low_maf_signal_values_kozak = table(lowMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
+m = as.table(rbind(c(low_maf_signal_values_kozak), c(high_maf_signal_values_kozak)))
+rownames(m) = c("MAF BAJA","MAF ALTA")
+m
+chisq.test(m) # p-value menor que 0.05 indica que cada grupo de mutaciones presenta diferencias significativas
 
 
 # select variables v1, v2, v3
