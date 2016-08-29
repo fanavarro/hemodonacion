@@ -167,6 +167,13 @@ boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START, ylim=c(0,4000), ylab="Initial c
         main="First initial codon position in strong Kozak sequence\ncomparative between high and low MAF.")
 par(op)
 
+op <- par(mfrow = c(1, 2))
+boxplot(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, ylim=c(0,250), ylab="Posición del codón inicial (en pares de bases)",names=c("MAF alta", "MAF baja"),
+        main="Comparativa de la posición del primer codón de inicio\nencontrado entre los grupos de MAF alta y baja.")
+boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START, ylim=c(0,600), ylab="Posición del codón inicial (en pares de bases)", names = c("MAF alta", "MAF baja"),
+        main="Comparativa de la posición del primer codón de inicio\nencontrado en un contexto de Kozak fuerte\nentre los grupos de MAF alta y baja.")
+par(op)
+
 # Test de Chi Cuadrado para comparar las variables cualitativas
 # READING FRAME STATUS
 m = as.table(rbind(c(rf_conserved_met_low_maf,rf_lost_met_low_maf), c(rf_conserved_met_high_maf,rf_lost_met_high_maf)))
