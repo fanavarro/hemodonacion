@@ -14,14 +14,12 @@ add_signal_lost_sup_info = function(csv){
       if(!is.na(first_met)){
         if (first_met == signal_start){signal_first_met_affected = "Totally conserved"}
         if (first_met > signal_start && first_met <= signal_end){signal_first_met_affected = "Partially conserved"}
-        if (first_met == (signal_end + 1)){signal_first_met_affected = "Exactly lost"}
-        if (first_met > (signal_end + 1)){signal_first_met_affected = "Lost"}
+        if (first_met >= (signal_end + 1)){signal_first_met_affected = "Lost"}
       }
       if (!is.na(first_kozak)){
         if (first_kozak == signal_start){signal_first_kozak_affected = "Totally conserved"}
         if (first_kozak > signal_start && first_kozak <= signal_end){signal_first_kozak_affected = "Partially conserved"}
-        if (first_kozak == (signal_end + 1)){signal_first_kozak_affected = "Exactly lost"}
-        if (first_kozak > (signal_end + 1)){signal_first_kozak_affected = "Lost"}
+        if (first_kozak >= (signal_end + 1)){signal_first_kozak_affected = "Lost"}
       }
     }
     csv[i, "SIGNAL_FIRST_MET_AFFECTED"] = signal_first_met_affected
