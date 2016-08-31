@@ -1,4 +1,4 @@
-setwd("/home/fabad/hemodonacion/src")
+setwd("~/hemodonacion/data/tsv")
 add_signal_lost_sup_info = function(csv){
   for (i in 1:nrow(csv)){
     signal_start = csv[i,"SIGNAL_PEPTIDE_START"]
@@ -70,6 +70,9 @@ csv = csv[csv$CDS_ERRORS == '',]
 
 # Eliminar los casos en los que el biotipo es "non_stop_decay" o "nonsense_mediated_decay"
 csv = csv[csv$TRANSCRIPT_BIOTYPE != 'non_stop_decay' & csv$TRANSCRIPT_BIOTYPE != 'nonsense_mediated_decay',]
+
+# Generar el fichero filtrado
+write.table(csv, file = "final_out_filter.csv", na="", sep="\t", row.names = F)
 
 # Numero de genes con mutaciones afectando en el codon de inicio
 length(unique(csv$GENE_NAME))
@@ -160,12 +163,6 @@ wilcox.test(highMaf$KOZAK_START, lowMaf$KOZAK_START, paired = F, conf.level = 0.
 # Boxplots
 boxplot(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, ylim=c(0,3000))
 boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START, ylim=c(0,1500))
-op <- par(mfrow = c(1, 2))
-boxplot(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, ylab="Initial codon position",names=c("High MAF", "Low MAF"),
-        main="First initial codon position comparative\nbetween high and low MAF")
-boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START, ylim=c(0,4000), ylab="Initial codon position", names = c("High MAF", "Low MAF"),
-        main="First initial codon position in strong Kozak sequence\ncomparative between high and low MAF.")
-par(op)
 
 op <- par(mfrow = c(1, 2))
 boxplot(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, ylim=c(0,250), ylab="Posición del codón inicial (en pares de bases)",names=c("MAF alta", "MAF baja"),
@@ -209,34 +206,9 @@ chisq.test(m) # p-value menor que 0.05 indica que cada grupo de mutaciones prese
 
 # select variables v1, v2, v3
 myvars <- c("TRANSCRIPT_ID","FIRST_MET_POSITION","STOP_CODON_POSITION","MUTATED_SEQUENCE_LENGTH", "KOZAK_START", "KOZAK_END", "KOZAK_MUTATED_SEQUENCE_LENGTH", "KOZAK_STOP_CODON", "KOZAK_READING_FRAME_STATUS")
-myvars=c("CODON_CHANGE", "VARIATION_TYPE")
-View(csv[myvars])
+myvars=c("GENE_NAME","VARIATION_NAME","MINOR_ALLELE_FREQUENCY", "FIRST_MET_POSITION","READING_FRAME_STATUS", "KOZAK_START", "KOZAK_READING_FRAME_STATUS", "CODON_CHANGE")
+View(highMaf[myvars])
 myvars = c("CHROMOSOME", "GENE_ID", "GENE_NAME", "TRANSCRIPT_ID", "TRANSCRIPT_REFSEQ_ID", "TRANSCRIPT_BIOTYPE", "CDS_ERRORS", "PROTEIN_ID", "VARIATION_NAME", "SOURCE", "TRANSCRIPT_VARIATION_ALLELE_DBID", "MINOR_ALLELE_FREQUENCY", "CODON_CHANGE", "AMINOACID_CHANGE", "FIRST_MET_POSITION", "STOP_CODON_POSITION", "MUTATED_SEQUENCE_LENGTH", "READING_FRAME_STATUS", "KOZAK_START", "KOZAK_END", "KOZAK_STOP_CODON", "KOZAK_MUTATED_SEQUENCE_LENGTH", "KOZAK_ORF_AA_LENGTH", "KOZAK_IDENTITY", "KOZAK_RELIABILITY", "KOZAK_READING_FRAME_STATUS", "KOZAK_PROTEIN_SEQ", "SIGNAL_PEPTIDE_START", "SIGNAL_PEPTIDE_END", "CONSEQUENCE", "PHENOTYPE", "SO_TERM", "SIFT", "POLYPHEN", "PUBLICATIONS")
+View(csv[csv$GENE_NAME=="C6orf7",])
 
-add_kozak_mutated_seq_length = function(csv){
-  for (i in 1:nrow(csv)){
-    met_start = csv[i, "FIRST_MET_POSITION"]
-    met_end = csv[i, "STOP_CODON_POSITION"]
-    met_seq_length = as.double(met_end) - as.double(met_start) + 1
-    met_percentage = as.numeric(gsub("%","",csv[i, "MUTATED_SEQUENCE_LENGTH"]))
-    #met_percentage = as.double(csv[i, "MUTATED_SEQUENCE_LENGTH"])
-    
-    kozak_start = csv[i, "KOZAK_START"]
-    kozak_end = csv[i, "KOZAK_END"]
-    kozak_seq_length =as.double(kozak_end) - as.double(kozak_start) + 1
-    #cat("\n")
-    #cat("met start=",met_start,"\n", "met end=",met_end, "\n", "met length=",met_seq_length,"\n")
-    #cat("kozak start=",kozak_start,"\n", "kozak end=",kozak_end, "\n", "kozak length=",kozak_seq_length,"\n")
-    
-    if(!is.na(kozak_seq_length) && !is.na(met_percentage) && !is.na(met_seq_length)){
-      kozak_mutated_seq_length = kozak_seq_length * met_percentage / met_seq_length
-      #cat("kozak_mutated_seq_length=", kozak_mutated_seq_length,"\t", "met_percentage=",met_percentage,"\n")
-      csv[i, "KOZAK_MUTATED_SEQUENCE_LENGTH"] = paste(kozak_mutated_seq_length, "%", sep="")
-    }else{
-      csv[i, "KOZAK_MUTATED_SEQUENCE_LENGTH"] = NA
-    }
-    
-  }
-  return(csv)
-}
-write.table(csv[myvars], file = "final_out_no_filter2.csv", na="", sep="\t", row.names = F)
+
