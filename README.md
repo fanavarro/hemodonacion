@@ -11,3 +11,14 @@ El repositorio consta de las siguientes carpetas:
 	data/exomes -> contiene ficheros de tipo xlsx con la información de los exomas de 7 pacientes individuales.
 	data/tsv -> contiene el fichero "final_out_no_filter.csv", con el fichero obtenido mediante el script ensemblMining.pl y el fichero "final_out_filter.csv", resultado de filtrar el primero para eliminar transcritos que no producen proteina.
 
+Para ejecutar ensemblMining.pl es necesario:
+	Perl 5.10
+	API de ensembl para perl.
+	Librerias de Perl:
+		LWP::Simple::REST
+		LWP::Simple
+		JSON
+		XML::LibXML
+		HTML::TableExtract
+		Class::Singleton
+		List::Util
