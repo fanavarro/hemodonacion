@@ -48,7 +48,7 @@ add_mutation_type = function(csv){
 }
 
 # Leer el csv sin filtros
-csv = read.csv("final_out_no_filter.csv", sep="\t",stringsAsFactors=FALSE)
+csv = read.csv("final_out_no_filter2.csv", sep="\t",stringsAsFactors=FALSE)
 csv[,"MUTATED_SEQUENCE_LENGTH"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH))
 csv[,"KOZAK_MUTATED_SEQUENCE_LENGTH"]=as.numeric(gsub("%","",csv$KOZAK_MUTATED_SEQUENCE_LENGTH))
 csv = add_signal_lost_sup_info(csv)
@@ -93,10 +93,10 @@ View(table(csv$VARIATION_TYPE))
 
 # El uso de la metionina en kozak fuerte provoca la conservacion del marco
 # de lectura en mayor medida que la primera metionina encontrada?
-rf_met_conserved = nrow(csv[csv$READING_FRAME_STATUS == "Conserved",]); rf_met_conserved
-rf_met_lost = nrow(csv[csv$READING_FRAME_STATUS == "Lost",]); rf_met_lost
-rf_kozak_conserved = nrow(csv[csv$KOZAK_READING_FRAME_STATUS == "Conserved",]); rf_kozak_conserved
-rf_kozak_lost = nrow(csv[csv$KOZAK_READING_FRAME_STATUS == "Lost",]); rf_kozak_lost
+rf_met_conserved = nrow(csv[csv$READING_FRAME_STATUS == "Conserved" & csv$MUTATED_SEQUENCE_LENGTH > 1,]); rf_met_conserved
+rf_met_lost = nrow(csv[csv$READING_FRAME_STATUS == "Lost",]) + nrow(csv[csv$READING_FRAME_STATUS == "Conserved" & csv$MUTATED_SEQUENCE_LENGTH <= 1,]); rf_met_lost
+rf_kozak_conserved = nrow(csv[csv$KOZAK_READING_FRAME_STATUS == "Conserved" & csv$KOZAK_MUTATED_SEQUENCE_LENGTH > 1,]); rf_kozak_conserved
+rf_kozak_lost = nrow(csv[csv$KOZAK_READING_FRAME_STATUS == "Lost",]) + nrow(csv[csv$KOZAK_READING_FRAME_STATUS == "Conserved" & !is.na(csv$KOZAK_MUTATED_SEQUENCE_LENGTH) & csv$KOZAK_MUTATED_SEQUENCE_LENGTH <= 1,]); rf_kozak_lost
 m = as.table(rbind(c(rf_met_conserved, rf_met_lost), c(rf_kozak_conserved, rf_kozak_lost)))
 dimnames(m) = list(alt_met=c("First Met", "Kozak Met"),
                    reading_frame=c("Conserved", "Lost"))
@@ -224,3 +224,7 @@ View(csv[csv$GENE_NAME=="TOP3B",])
 View(csv[csv$GENE_NAME=="ZNF682",])
 View(csv[csv$GENE_NAME=="ZNF827",])
 
+
+csv = add_kozak_mutated_seq_length(csv)
+myvars=c("FIRST_MET_POSITION","STOP_CODON_POSIION","MUTATED_SEQUENCE_LENGTH", "KOZAK_START", "KOZAK_END", "KOZAK_MUTATED_SEQUENCE_LENGTH")
+View(csv[myvars])
