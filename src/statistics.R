@@ -48,7 +48,7 @@ add_mutation_type = function(csv){
 }
 
 # Leer el csv sin filtros
-csv = read.csv("final_out_no_filter2.csv", sep="\t",stringsAsFactors=FALSE)
+csv = read.csv("final_out_no_filter.csv", sep="\t",stringsAsFactors=FALSE)
 csv[,"MUTATED_SEQUENCE_LENGTH"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH))
 csv[,"KOZAK_MUTATED_SEQUENCE_LENGTH"]=as.numeric(gsub("%","",csv$KOZAK_MUTATED_SEQUENCE_LENGTH))
 csv = add_signal_lost_sup_info(csv)
@@ -228,3 +228,17 @@ View(csv[csv$GENE_NAME=="ZNF827",])
 csv = add_kozak_mutated_seq_length(csv)
 myvars=c("FIRST_MET_POSITION","STOP_CODON_POSIION","MUTATED_SEQUENCE_LENGTH", "KOZAK_START", "KOZAK_END", "KOZAK_MUTATED_SEQUENCE_LENGTH")
 View(csv[myvars])
+
+# Comprobar marco de lectura segun kozak fuerte
+strong = csv[csv$KOZAK_IDENTITY!="",]
+strong=strong[strong$KOZAK_IDENTITY=="GXXATGG" | strong$KOZAK_IDENTITY=="AXXATGG",]
+weak = csv[csv$KOZAK_IDENTITY!="",]
+weak = weak[weak$KOZAK_IDENTITY != "GXXATGG" & weak$KOZAK_IDENTITY != "AXXATGG",]
+#Check
+nrow(weak) + nrow(strong) == nrow(csv[csv$KOZAK_IDENTITY!="",])
+
+strongConserved=nrow(strong[strong$KOZAK_READING_FRAME_STATUS == "Conserved",])
+strongLost=nrow(strong[strong$KOZAK_READING_FRAME_STATUS == "Lost",])
+
+weakConserved=nrow(weak[weak$KOZAK_READING_FRAME_STATUS == "Conserved",])
+weakLost=nrow(weak[weak$KOZAK_READING_FRAME_STATUS == "Lost",])
