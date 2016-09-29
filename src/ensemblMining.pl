@@ -30,7 +30,7 @@ if (scalar @ARGV == 1){
 print "Results will be printed in $output\n";
 
 # CSV file configuration
-my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME VARIATION_TYPE SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS KOZAK_START KOZAK_END KOZAK_STOP_CODON KOZAK_MUTATED_SEQUENCE_LENGTH KOZAK_ORF_AA_LENGTH KOZAK_IDENTITY KOZAK_RELIABILITY KOZAK_READING_FRAME_STATUS KOZAK_PROTEIN_SEQ SIGNAL_PEPTIDE_START SIGNAL_PEPTIDE_END CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
+my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME VARIATION_TYPE SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS SIGNAL_PEPTIDE_CONSERVATION KOZAK_START KOZAK_END KOZAK_STOP_CODON KOZAK_MUTATED_SEQUENCE_LENGTH KOZAK_ORF_AA_LENGTH KOZAK_IDENTITY KOZAK_RELIABILITY KOZAK_READING_FRAME_STATUS KOZAK_PROTEIN_SEQ SIGNAL_PEPTIDE_START SIGNAL_PEPTIDE_END CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
 my $out_csv = myUtils::CsvManager->new (
 	fields    => \@fields,
 	csv_separator   => "\t",
@@ -59,7 +59,7 @@ my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcri
 
 # Chromosomes to be treated
 # my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
-my @chromosomes = qw(Y);
+my @chromosomes = qw(21);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
@@ -168,6 +168,7 @@ sub get_transcript_variation_info{
             $entry{'STOP_CODON_POSITION'} = $seq_info->{'stop_codon_position'};
             $entry{'MUTATED_SEQUENCE_LENGTH'} = $seq_info->{'seq_length'};
             $entry{'READING_FRAME_STATUS'} = $seq_info->{'reading_frame'};
+            $entry{'SIGNAL_PEPTIDE_CONSERVATION'} = get_signal_peptide_conservarion($signal_peptide_info->{'START'}, $signal_peptide_info->{'END'}, $seq_info->{'first_met_position'});
             $entry{'KOZAK_START'} = $kozak_info->{'START'};
             $entry{'KOZAK_END'} = $kozak_info->{'FINISH'};
             $entry{'KOZAK_STOP_CODON'} = $kozak_info->{'STOP_CODON'};
@@ -193,7 +194,6 @@ sub get_transcript_variation_info{
             if ( defined($polyphen) ) {
                 $entry{'POLYPHEN'} = "$polyphen";
             }
-            # $out_csv->myUtils::CsvManager::writeEntry(%entry);
             push(@result_list, \%entry);
         }
     }
@@ -595,7 +595,7 @@ sub get_signal_peptide_info{
                 if ($feature->{'TYPE'} eq 'SIGNAL'){
                     # Translate from aminoacid to nucleotid coordinates.
                     my $signal_start = ($feature->{'START'} - 1) * 3;
-                    my $signal_end = ($feature->{'END'} - 1) * 3;
+                    my $signal_end = (($feature->{'END'} - 1) * 3) + 2;
                     $signal_peptide_info{'START'} = $signal_start;
                     $signal_peptide_info{'END'} = $signal_end;
                     last;
@@ -613,7 +613,29 @@ sub get_signal_peptide_info{
 }
 
 
+# Get the percentage of signal peptide conservation
+# by using an alternative initiation codon.
+# param 0 -> signal peptide start in bp.
+# param 1 -> signal peptide end in bp.
+# param 2 -> alternative initiation codon position in bp.
+sub get_signal_peptide_conservarion{
+    my $sp_start = shift;
+    my $sp_end = shift;
+    my $alt_met_pos = shift;
 
+    if (!defined ($sp_start) || $sp_start eq '' || !defined($sp_end) || $sp_end eq '' || !defined($alt_met_pos) || $alt_met_pos eq ''){
+        return '';
+    }
+
+    if ($alt_met_pos > $sp_end){
+        return '0%';
+    }
+
+    my $sp_length = $sp_end - $sp_start + 1;
+    my $sp_mutated_length = $sp_end - $alt_met_pos + 1;
+    my $conservation = $sp_mutated_length * 100 / $sp_length;
+    return $conservation . '%';
+}
 
 
 
