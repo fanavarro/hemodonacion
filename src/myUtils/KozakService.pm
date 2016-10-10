@@ -28,6 +28,9 @@ sub get_kozak_info{
 
 	my $url = 'http://atgpr.dbcls.jp/cgi-bin/atgpr.cgi';
 	my $response = $this->{BROWSER}->post( $url, { 'seq' => $sequence, 'number' => $n_results } );
+	foreach my $key (keys %{$response}){
+		print $key . "\t-> " . $response->{$key} . "\n";
+	}
 
 	my $te = HTML::TableExtract->new( );
 	$te->parse($response->decoded_content());
@@ -54,6 +57,7 @@ sub get_kozak_info{
 				my $trim_value = @{$row}[$i];
 				$trim_value =~ tr/\n//d;
 				$hash_ref->{$header[$i]} = $trim_value;
+				# print $header[$i] . " -> " . $hash_ref->{$header[$i]} . "\n";
 			}
 			push(@{$hash_ref_list}, $hash_ref);
 		}

@@ -210,9 +210,11 @@ sub button_handler {
             # Paint kozak positions
             foreach my $kozak_position (@{$kozak_positions}){
                 my $kozak_start = $kozak_position->{START};
+                print "Kozak start = " . $kozak_start . "\n";
                 $kozak_start = $kozak_start + (int($kozak_start/($LENGTH_PER_LINE - 1)));
                 if ($kozak_start != $protein_start_pos){
                     my $kozak_reliability = $kozak_position->{RELIABILITY};
+                    print "Kozak reliability = " . $kozak_reliability . "\n";
                     $self->{results}->SetStyle( $kozak_start ,  $kozak_start + 3, Wx::TextAttr->new( Wx::Colour->new( 255, 15, 255 ),Wx::Colour->new( POSIX::floor($kozak_reliability * 255),0, 0 ) ));
                 }
             }

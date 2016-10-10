@@ -21,10 +21,10 @@ sub get_kozak_info{
 		# Minus 1 to start in 0.
 		$hash_ref->{START}--;
 		$hash_ref->{FINISH}--;
-		#say "---------------------------------------------------------------";
-		#foreach my $key (keys %{$hash_ref}){
-		#	say $key . "\t-> " . $hash_ref->{$key};
-		#}
+		say "---------------------------------------------------------------";
+		foreach my $key (keys %{$hash_ref}){
+			say $key . "\t-> " . $hash_ref->{$key};
+		}
 	}
 	return \@sorted;
 }
