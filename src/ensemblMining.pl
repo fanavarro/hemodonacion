@@ -59,7 +59,7 @@ my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcri
 
 # Chromosomes to be treated
 # my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
-my @chromosomes = qw(21);
+my @chromosomes = qw(Y);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
@@ -68,43 +68,38 @@ my @so_terms = ('start_lost');
 my $variation_pos_at_peptide = 1;
 # For each chromosome, get its variations with specified so terms.
 foreach my $chromosome (@chromosomes) {
-	#get_variations_by_chromosome_so_terms($chromosome, \@so_terms, $out_csv);
-	my $result_list = get_variations_by_chromosome_peptide_position($chromosome, $variation_pos_at_peptide, $out_csv);
-        $out_csv->myUtils::CsvManager::writeEntries($result_list);
+    #get_variations_by_chromosome_so_terms($chromosome, \@so_terms, $out_csv);
+    my $transcripts = get_transcripts_by_chromosome( $chromosome );
+    my $transcript_variations = get_transcript_variations_by_transcripts_peptide_position( $transcripts, $variation_pos_at_peptide );
+    #my $transcript_variations = get_transcript_variations_by_transcripts_SO_terms( $transcripts, \@so_terms );
+    my $result_list = get_transcript_variation_info($chromosome, $transcript_variations);
+    $out_csv->myUtils::CsvManager::writeEntries($result_list);
 }
 
 $out_csv->myUtils::CsvManager::close();
 
-# Get variations from chromosome (param 1) with the so term (param 2).
-# param 1 -> Chromosome name
-# param 2 -> SO term list
+# Get TranscriptVariation objects from transcript list and so term list.
+# param 1 -> transcript reference list
+# param 2 -> SO term reference list
 # return a list ref of hashes with information about transcript variation objects in param 1.
-sub get_variations_by_chromosome_so_terms {
-	my $chromosome = $_[0];
+sub get_transcript_variations_by_transcripts_SO_terms {
+	my $transcripts = $_[0];
 	my $so_terms = $_[1];
-	# Get all transcripts from chromosome
-	my $transcript  = get_transcripts_by_chromosome( $chromosome );
-	# Get variation in transcripts with so terms
-	my $trvs = $trv_adaptor->fetch_all_by_Transcripts_SO_terms($transcript, $so_terms);
+	return $trv_adaptor->fetch_all_by_Transcripts_SO_terms($transcripts, $so_terms);
 
-	return get_transcript_variation_info($chromosome, $trvs);
 }
-# Get variations from chromosome (param 1) at the peptide position (param 2).
-# param 1 -> Chromosome name
-# param 2 -> Peptide position
-# return a list ref of hashes with information about transcript variation objects in param 1.
-sub get_variations_by_chromosome_peptide_position {
-	my $chromosome = $_[0];
-	my $peptide_position = $_[1];
-	# Get all transcripts from chromosome
-	my $transcript  = get_transcripts_by_chromosome( $chromosome );
 
-	# Get variation in transcripts adding the position constraint
-        my $constraint = "(translation_start=$peptide_position or translation_end=$peptide_position)";
-	my $trvs = $trv_adaptor->fetch_all_by_Transcripts_with_constraint($transcript, $constraint);
-
-	return get_transcript_variation_info($chromosome, $trvs);
+# Get TranscriptVariation objects from transcripts and variation position.
+# param 0 -> Reference list of transcripts.
+# param 1 -> Position of the variation in amino acid sequence.
+# return Reference list of transcript variations.
+sub get_transcript_variations_by_transcripts_peptide_position{
+    my $transcripts = $_[0];
+    my $var_pos = $_[1];
+    my $constraint = "(translation_start=$var_pos or translation_end=$var_pos)";
+    return $trv_adaptor->fetch_all_by_Transcripts_with_constraint($transcripts, $constraint);
 }
+
 
 # Get info about TranscriptVariation list.
 # param 0 -> Chromosome

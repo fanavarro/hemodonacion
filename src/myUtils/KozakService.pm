@@ -28,9 +28,9 @@ sub get_kozak_info{
 
 	my $url = 'http://atgpr.dbcls.jp/cgi-bin/atgpr.cgi';
 	my $response = $this->{BROWSER}->post( $url, { 'seq' => $sequence, 'number' => $n_results } );
-	foreach my $key (keys %{$response}){
-		print $key . "\t-> " . $response->{$key} . "\n";
-	}
+	#foreach my $key (keys %{$response}){
+	#	print $key . "\t-> " . $response->{$key} . "\n";
+	#}
 
 	my $te = HTML::TableExtract->new( );
 	$te->parse($response->decoded_content());
