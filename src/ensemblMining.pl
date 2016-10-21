@@ -8,6 +8,7 @@ use myUtils::SeqUtils;
 use myUtils::PhobiusService;
 use File::Path qw(make_path);
 use List::Util qw[min max];
+use DateTime;
 
 #my $CODON_LENGTH = 3;
 #my $MET = 'ATG';
@@ -59,18 +60,22 @@ my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcri
 
 # Chromosomes to be treated
 # my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
-my @chromosomes = qw(Y);
+my @chromosomes = qw(1);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
 # at least one base of the canonical start codon.
 my @so_terms = ('start_lost');
 my $variation_pos_at_peptide = 1;
+my $transcript_constraints = "source = 'havana' and biotype = 'protein_coding' and t.status = 'KNOWN'";
 # For each chromosome, get its variations with specified so terms.
 foreach my $chromosome (@chromosomes) {
     #get_variations_by_chromosome_so_terms($chromosome, \@so_terms, $out_csv);
-    my $transcripts = get_transcripts_by_chromosome( $chromosome );
+    my $transcripts = get_transcripts_by_chromosome_with_constraints( $chromosome, $transcript_constraints );
     my $transcript_variations = get_transcript_variations_by_transcripts_peptide_position( $transcripts, $variation_pos_at_peptide );
+    #print "Filtering " . scalar @{$transcript_variations} . " transcripts \n";
+    #$transcript_variations = filter_transcript_variations($transcript_variations);
+    #print "Filtering finished: " . scalar @{$transcript_variations} . " transcript_variations\n";
     #my $transcript_variations = get_transcript_variations_by_transcripts_SO_terms( $transcripts, \@so_terms );
     my $result_list = get_transcript_variation_info($chromosome, $transcript_variations);
     $out_csv->myUtils::CsvManager::writeEntries($result_list);
@@ -78,14 +83,90 @@ foreach my $chromosome (@chromosomes) {
 
 $out_csv->myUtils::CsvManager::close();
 
+# Apply a filter to the TranscriptVariation list passed as argument.
+# param 0 -> Reference list of transcripts.
+sub filter_transcript_variations{
+    my @original_list = @{$_[0]};
+    my @filtered_list;
+    my $cont = 1;
+    my $max = scalar (@original_list);
+    my $start_time = DateTime->now;
+    foreach my $transcript_variation (@original_list){
+        print $cont . "/" . $max . "\n";
+        $cont = $cont + 1;
+        if (pass_filter($transcript_variation)){
+            push @filtered_list, $transcript_variation;
+        }
+    }
+    my $end_time = DateTime->now;
+    my $elapse = $end_time - $start_time;
+    print "Elapsed time : ".$elapse->in_units('minutes')."m\n";
+    return \@filtered_list;
+}
+# Functions that receives a TranscriptVariation object
+# and returns if it pass the filter or not.
+sub pass_filter{
+    my $transcript_variation = $_[0];
+    my $transcript = $transcript_variation->transcript;
+    my $variation_feature = $transcript_variation->variation_feature;
+
+    # Checkings at transcript level:
+
+    # If it contains something in cds_error, transcript does not pass the filter.
+    my $cds_errors = get_cds_errors($transcript);
+    if ($cds_errors ne ""){
+        print $transcript->stable_id . " with CDS errors.\n";
+        return 0;
+    }
+
+    # If transcript does not have translation, return false.
+    if (!defined($transcript->translation)){
+        #print $transcript->stable_id . " with no translation.\n";
+        return 0;
+    }
+
+    # If biotype is not protein coding, return false.
+    # Checked in sql query...
+    #my $biotype = $transcript->biotype;
+    #if($biotype ne 'protein_coding' && $biotype ne 'known_protein_coding'){
+    #    #print $transcript->stable_id . " with bad biotype.\n";
+    #    return 0;
+    #}
+
+    # If transcript is not supported by havana, return false.
+    # Checked in sql query...
+    #if (!defined($transcript->havana_transcript)){
+    #    #print $transcript->stable_id . " with no havana support.\n";
+    #    return 0;
+    #}
+
+    # If transcript status is different from known, return false.
+    # Checked in sql query...
+    #if ($transcript->status ne 'KNOWN'){
+    #    #print $transcript->stable_id . " not known\n";
+    #    return 0;
+    #}
+    
+    # Checkings at variation level:
+
+    # Variation must have at least one evidence between 'Multiple_observations', 
+    # 'Frequency', 'HapMap', '1000Genomes', 'ESP', 'Cited', 'Phenotype_or_Disease' or 'ExAC'
+    my @evidence_status = @{$variation_feature->get_all_evidence_values};
+    if (scalar(@evidence_status) == 0){
+        #print $variation_feature->display_id . " with no evidences.\n";
+        return 0;
+    }
+    return 1;
+}
+
 # Get TranscriptVariation objects from transcript list and so term list.
 # param 1 -> transcript reference list
 # param 2 -> SO term reference list
 # return a list ref of hashes with information about transcript variation objects in param 1.
 sub get_transcript_variations_by_transcripts_SO_terms {
-	my $transcripts = $_[0];
-	my $so_terms = $_[1];
-	return $trv_adaptor->fetch_all_by_Transcripts_SO_terms($transcripts, $so_terms);
+    my $transcripts = $_[0];
+    my $so_terms = $_[1];
+    return $trv_adaptor->fetch_all_by_Transcripts_SO_terms($transcripts, $so_terms);
 
 }
 
@@ -120,8 +201,11 @@ sub get_transcript_variation_info{
 	
 	my $variation = $tv->variation_feature->variation;
         my $transcript = $tv->transcript;
+        my $cds_errors = get_cds_errors($transcript);
+        # If there exist errors in cds or variation does not have evidences, we skip the transcript_variation.
+        if ($cds_errors ne ""){next};
+        if (scalar(@{$variation->get_all_evidence_values}) == 0){next};
 	my $minor_allele_frequency = $tv->variation_feature->minor_allele_frequency ? $tv->variation_feature->minor_allele_frequency : '';
-	my $cds_errors = get_cds_errors($transcript);
 	my $phenotype_info = get_phenotype_info($variation);
 	my $publications_info = get_publications_info($variation);
         my $ref_seq_mrna_ids = get_ref_seq_mrna_ids($transcript);
@@ -213,12 +297,14 @@ sub exists_in_list {
 
 # Get all transcripts that belongs to chromosomes in list.
 # param 0 -> List reference with chromosome names.
+# param 1 -> Constraints to pass to DB.
 # return list reference of transcripts.
-sub get_transcripts_by_chromosomes {
+sub get_transcripts_by_chromosomes_with_constraint {
     my $chromosomes = $_[0];
+    my $constraints = $_[1];
     my @transcripts = ();
     while ( my $chromosome = shift @{$chromosomes} ) {
-        my $aux = get_transcripts_by_chromosome($chromosome);
+        my $aux = get_transcripts_by_chromosome_with_constraints($chromosome, $constraints);
         push( @transcripts, @{$aux} );
     }
     return \@transcripts;
@@ -226,11 +312,13 @@ sub get_transcripts_by_chromosomes {
 
 # Get all transcripts that belongs to chromosome.
 # param 0 -> Chromosome name.
+# param 1 -> Constraints to pass to DB.
 # return list reference of transcripts.
-sub get_transcripts_by_chromosome {
+sub get_transcripts_by_chromosome_with_constraints {
     my $chromosome = $_[0];
+    my $constraints = $_[1];
     my $slice = $slice_adaptor->fetch_by_region( 'chromosome', $chromosome );
-    my $transcripts = $transcript_adaptor->fetch_all_by_Slice($slice);
+    my $transcripts = $transcript_adaptor->fetch_all_by_Slice_constraint($slice, $constraints);
     return $transcripts;
 }
 
