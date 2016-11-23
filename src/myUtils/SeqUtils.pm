@@ -239,6 +239,36 @@ sub get_met_mutation_info{
         }
     }
     return $hash_seq_info;
-
 }
+
+
+# Get the kozak context from a transcript.
+# param 0 -> cdna string.
+# param 1 -> cds string.
+# param 2 -> number of positions to check before ATG.
+# param 3 -> number of positions to check after ATG.
+# return String with the Kozak context or undef if indexes are out of bounds.
+sub get_kozak_context {
+    my $cdna = shift;
+    my $cds = shift;
+    my $pos_before = shift;
+    my $pos_after = shift;
+
+    my $translation_start_pos = get_translation_start_pos($cdna, $cds);
+
+    # If there are not enough positions before ATG, return udnef.
+    if ($translation_start_pos < $pos_before){
+        return undef;
+    }
+
+    # If there are not enough positions after ATG, return undef.
+    if ($pos_after > length ($cds) - 3) {
+        return undef;
+    }
+
+    # return substring starting from (start - positions before), including
+    # pos_before + pos_after + 3(ATG codon) positions.
+    return substr($cdna, $translation_start_pos - $pos_before, $pos_before + $pos_after + 3);    
+}
+
 1;
