@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-open my $fd, '<', "kozaks.txt" or die "Could not open file $!";
+open my $fd, '<', "kozaks.fasta" or die "Could not open file $!";
 
 my $id=1;
 
