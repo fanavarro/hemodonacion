@@ -12,4 +12,6 @@ my $hits = $matchpwm->myUtils::MatchPWM::get_kozak_matches($seq);
 my $n = scalar @{$hits->{START}};
 for (my $i = 0; $i < $n; $i++){
 	print $hits->{START}->[$i] . "\t" . $hits->{END}->[$i] . "\t" . $hits->{WIDTH}->[$i] . "\t" . $hits->{SCORE}->[$i] . "\t" . $hits->{INIT_CODON}->[$i] . "\n";
+	my $init = $hits->{INIT_CODON}->[$i];
+	print substr($seq, $init, 1) . "\n";
 }

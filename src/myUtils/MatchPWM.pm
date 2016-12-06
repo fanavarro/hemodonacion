@@ -31,11 +31,11 @@ sub get_kozak_matches{
 	
 	$this->{R}->set('seq', $seq);
 	$this->{R}->run(q`hits = matchPWM(pwm, seq, with.score = T)`);
-	$this->{R}->run(q`start = start(hits)`);
-	$this->{R}->run(q`end = end(hits)`);
+	$this->{R}->run(q`start = start(hits) - 1`);
+	$this->{R}->run(q`end = end(hits) - 1`);
 	$this->{R}->run(q`width = width(hits)`);
 	$this->{R}->run(q`score = mcols(hits)$score`);
-	$this->{R}->run(q`init_codon = start(hits) + ((width(hits)-3)/2)`);
+	$this->{R}->run(q`init_codon = (start(hits) + ((width(hits)-3)/2))-1`);
 
 	
 	$hits->{START} = $this->{R}->get('start');
