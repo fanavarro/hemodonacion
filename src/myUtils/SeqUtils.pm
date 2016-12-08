@@ -155,7 +155,7 @@ sub exists_in_list {
 # affecting initiation codon cdna sequence, and a value indicating
 # if the mutation are affecting to the five prime utr. The function
 # returns a hash with the following keys:
-# 'first_met_position' shows the position of the first met found
+# 'met_position' shows the position of the initiator codon used.
 # in the mutated sequence, but in coordinates of the original cds
 # sequence.
 # 'reading_frame' shows if the reading frame is conserved or lost.
@@ -164,9 +164,16 @@ sub exists_in_list {
 # 'seq_length' Percentage of the protein that is conserved. For example,
 # if a protein has 50 aminoacid and the mutation causes the loss of 25
 # aminoacids, this value will be 50%.
+# param 0 -> cdna sequence.
+# param 1 -> cds sequence.
+# param 2 -> cdna of the mutated sequence.
+# param 3 -> boolean indicating if 5' utr is affected by variation.
+# param 4 -> position of the met to use as initiation codon. If not defined, 
+#		the first met found in coding region of the mutated sequence 
+#		will be used.
 sub get_met_mutation_info{
     my $hash_seq_info = {};
-    $hash_seq_info->{'first_met_position'} = '';
+    $hash_seq_info->{'met_position'} = '';
     $hash_seq_info->{'reading_frame'} = '';
     $hash_seq_info->{'stop_codon_position'} = '';
     $hash_seq_info->{'seq_length'} = '';
@@ -176,6 +183,7 @@ sub get_met_mutation_info{
     my $cds = $_[1];
     my $mutated_cdna = $_[2];
     my $five_affected = $_[3];
+    my $used_met_pos = $_[4];
     my $translation_start_pos = get_translation_start_pos($cdna, $cds);
 
     # We start to count positions from reference
@@ -187,8 +195,10 @@ sub get_met_mutation_info{
     } else {
         $reference = $translation_start_pos;
     }
-    
-    my $first_met_pos = index($mutated_cdna, $MET, $reference);
+
+    if(!defined $used_met_pos){
+        $used_met_pos = index($mutated_cdna, $MET, $reference);
+    }
 
     # Correction in order to point to the original sequence position.
     # If muation is a insertion, we have to substract values to reference.
@@ -205,29 +215,29 @@ sub get_met_mutation_info{
     
     
     # if a met is found and it is inside cds region, fill result hash
-    if ($first_met_pos != -1 &&  max($first_met_pos - $reference + $position_correction, 0) < length($cds)){
-        my $stop_codon_pos = get_stop_codon_position($mutated_cdna, $first_met_pos);
-        my $mutated_orf = get_orf($mutated_cdna, $first_met_pos);
+    if ($used_met_pos != -1 &&  max($used_met_pos - $reference + $position_correction, 0) < length($cds)){
+        my $stop_codon_pos = get_stop_codon_position($mutated_cdna, $used_met_pos);
+        my $mutated_orf = get_orf($mutated_cdna, $used_met_pos);
         #say $mutated_orf;
         #say $cds;
         my $reading_frame = is_in_frame($cds, $mutated_orf) ? 'Conserved' : 'Lost';
         
         # If mutated and original met are different, apply the pos correction
-        if ($first_met_pos != $translation_start_pos){
+        if ($used_met_pos != $translation_start_pos){
             # Use of max to avoid errors in met duplication cases, where first pos indicated -3.
-            $hash_seq_info->{'first_met_position'} = max($first_met_pos - $reference + $position_correction, 0);
+            $hash_seq_info->{'met_position'} = max($used_met_pos - $reference + $position_correction, 0);
         }
         else {
             # Use of max to avoid errors in met duplication cases, where first pos indicated -3.
-            $hash_seq_info->{'first_met_position'} = max($first_met_pos - $reference , 0);
+            $hash_seq_info->{'met_position'} = max($used_met_pos - $reference , 0);
         }
         
         $hash_seq_info->{'stop_codon_position'} = $stop_codon_pos != -1 ? $stop_codon_pos - $reference +  $position_correction : '';
         $hash_seq_info->{'reading_frame'} = $reading_frame;
         $hash_seq_info->{'seq_length'} = (length($mutated_orf) * 100 / length($cds)) . '%';
         # Print warnings if first met pos calculated is not a MET in the original cds sequence.
-        if (substr($cds, $hash_seq_info->{'first_met_position'}, $CODON_LENGTH) ne $MET){
-            print ("Error\nfirst met pos = " . $hash_seq_info->{'first_met_position'} . " in $cds\n");
+        if (substr($cds, $hash_seq_info->{'met_position'}, $CODON_LENGTH) ne $MET){
+            print ("Error\nfirst met pos = " . $hash_seq_info->{'met_position'} . " in $cds\n");
         }
         
         # Print warnings if stop codon pos calculated is not a stop codon in the original cds sequence.

@@ -9,6 +9,7 @@ use myUtils::PhobiusService;
 use File::Path qw(make_path);
 use List::Util qw[min max];
 use DateTime;
+use myUtils::MatchPWM;
 
 #my $CODON_LENGTH = 3;
 #my $MET = 'ATG';
@@ -31,7 +32,7 @@ if (scalar @ARGV == 1){
 print "Results will be printed in $output\n";
 
 # CSV file configuration
-my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME VARIATION_TYPE SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS SIGNAL_PEPTIDE_CONSERVATION KOZAK_START KOZAK_END KOZAK_STOP_CODON KOZAK_MUTATED_SEQUENCE_LENGTH KOZAK_ORF_AA_LENGTH KOZAK_IDENTITY KOZAK_RELIABILITY KOZAK_READING_FRAME_STATUS KOZAK_SIGNAL_PEPTIDE_CONSERVATION KOZAK_PROTEIN_SEQ SIGNAL_PEPTIDE_START SIGNAL_PEPTIDE_END CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
+my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE SIGNAL_PEPTIDE_START SIGNAL_PEPTIDE_END CDS_ERRORS PROTEIN_ID VARIATION_NAME VARIATION_TYPE SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE MET_POSITION_1 STOP_CODON_POSITION_1 MUTATED_SEQUENCE_LENGTH_1 READING_FRAME_STATUS_1 SIGNAL_PEPTIDE_CONSERVATION_1 MET_POSITION_2 STOP_CODON_POSITION_2 MUTATED_SEQUENCE_LENGTH_2 SCORE_2 READING_FRAME_STATUS_2 SIGNAL_PEPTIDE_CONSERVATION_2 MET_POSITION_3 STOP_CODON_POSITION_3 MUTATED_SEQUENCE_LENGTH_3 SCORE_3 READING_FRAME_STATUS_3 SIGNAL_PEPTIDE_CONSERVATION_3 CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
 my $out_csv = myUtils::CsvManager->new (
 	fields    => \@fields,
 	csv_separator   => "\t",
@@ -125,32 +126,6 @@ sub pass_filter{
         return 0;
     }
 
-    # If biotype is not protein coding, return false.
-    # Checked in sql query...
-    #my $biotype = $transcript->biotype;
-    #if($biotype ne 'protein_coding' && $biotype ne 'known_protein_coding'){
-    #    #print $transcript->stable_id . " with bad biotype.\n";
-    #    return 0;
-    #}
-
-    # If transcript is not supported by havana, return false.
-    # Checked in sql query...
-    #if (!defined($transcript->havana_transcript)){
-    #    #print $transcript->stable_id . " with no havana support.\n";
-    #    return 0;
-    #}
-
-    # If transcript status is different from known, return false.
-    # Checked in sql query...
-    #if ($transcript->status ne 'KNOWN'){
-    #    #print $transcript->stable_id . " not known\n";
-    #    return 0;
-    #}
-    
-    # Checkings at variation level:
-
-    # Variation must have at least one evidence between 'Multiple_observations', 
-    # 'Frequency', 'HapMap', '1000Genomes', 'ESP', 'Cited', 'Phenotype_or_Disease' or 'ExAC'
     my @evidence_status = @{$variation_feature->get_all_evidence_values};
     if (scalar(@evidence_status) == 0){
         #print $variation_feature->display_id . " with no evidences.\n";
@@ -213,7 +188,6 @@ sub get_transcript_variation_info{
 	my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
 
 	foreach my $tva ( @{$tvas} ) {
-		print "entro\n";
             my %entry;
 	    	
             my @ensembl_consequences;
@@ -228,7 +202,9 @@ sub get_transcript_variation_info{
             my $sift     = $tva->sift_prediction;
             my $polyphen = $tva->polyphen_prediction;
             my $seq_info = get_sequence_info($tva);
-            my $kozak_info = get_kozak_info($tva);
+            my $atgpr_info = get_atgpr_info($tva);
+            my $pwm_info = get_match_pwm_info($tva);
+
             $entry{'CHROMOSOME'} = $chromosome;
             $entry{'GENE_ID'} = $transcript->get_Gene->stable_id;
             $entry{'GENE_NAME'} = $transcript->get_Gene->external_name;
@@ -244,21 +220,25 @@ sub get_transcript_variation_info{
             $entry{'MINOR_ALLELE_FREQUENCY'} = $minor_allele_frequency;
             $entry{'CODON_CHANGE'} = defined($tva->display_codon_allele_string) ? $tva->display_codon_allele_string : ' ';
             $entry{'AMINOACID_CHANGE'} = defined($tva->pep_allele_string) ? $tva->pep_allele_string : ' ';
-            $entry{'FIRST_MET_POSITION'} = $seq_info->{'first_met_position'};
-            $entry{'STOP_CODON_POSITION'} = $seq_info->{'stop_codon_position'};
-            $entry{'MUTATED_SEQUENCE_LENGTH'} = $seq_info->{'seq_length'};
-            $entry{'READING_FRAME_STATUS'} = $seq_info->{'reading_frame'};
-            $entry{'SIGNAL_PEPTIDE_CONSERVATION'} = get_signal_peptide_conservarion($signal_peptide_info->{'START'}, $signal_peptide_info->{'END'}, $seq_info->{'first_met_position'});
-            $entry{'KOZAK_START'} = $kozak_info->{'START'};
-            $entry{'KOZAK_END'} = $kozak_info->{'FINISH'};
-            $entry{'KOZAK_STOP_CODON'} = $kozak_info->{'STOP_CODON'};
-            $entry{'KOZAK_MUTATED_SEQUENCE_LENGTH'} = $kozak_info->{'KOZAK_MUTATED_SEQUENCE_LENGTH'};
-            $entry{'KOZAK_ORF_AA_LENGTH'} = $kozak_info->{'ORF_AMINOACID_LENGTH'};
-            $entry{'KOZAK_IDENTITY'} = $kozak_info->{'KOZAK_IDENTITY'};
-            $entry{'KOZAK_RELIABILITY'} = $kozak_info->{'RELIABILITY'};
-            $entry{'KOZAK_PROTEIN_SEQ'} = $kozak_info->{'PROTEIN_SEQUENCE'};
-            $entry{'KOZAK_READING_FRAME_STATUS'} = $kozak_info->{'FRAMESHIFT'};
-            $entry{'KOZAK_SIGNAL_PEPTIDE_CONSERVATION'} = get_signal_peptide_conservarion($signal_peptide_info->{'START'}, $signal_peptide_info->{'END'}, $kozak_info->{'START'});
+            $entry{'MET_POSITION_1'} = $seq_info->{'met_position'};
+            $entry{'STOP_CODON_POSITION_1'} = $seq_info->{'stop_codon_position'};
+            $entry{'MUTATED_SEQUENCE_LENGTH_1'} = $seq_info->{'seq_length'};
+            $entry{'READING_FRAME_STATUS_1'} = $seq_info->{'reading_frame'};
+            $entry{'SIGNAL_PEPTIDE_CONSERVATION_1'} = get_signal_peptide_conservarion($signal_peptide_info->{'START'}, $signal_peptide_info->{'END'}, $seq_info->{'met_position'});
+            $entry{'MET_POSITION_2'} = $atgpr_info->{'START'};
+            $entry{'STOP_CODON_POSITION_2'} = $atgpr_info->{'STOP_CODON'} eq 'Yes' ? $atgpr_info->{'FINISH'} : '';
+            $entry{'MUTATED_SEQUENCE_LENGTH_2'} = $atgpr_info->{'KOZAK_MUTATED_SEQUENCE_LENGTH'};
+            $entry{'SCORE_2'} = $atgpr_info->{'RELIABILITY'};
+            $entry{'READING_FRAME_STATUS_2'} = $atgpr_info->{'FRAMESHIFT'};
+            $entry{'SIGNAL_PEPTIDE_CONSERVATION_2'} = get_signal_peptide_conservarion($signal_peptide_info->{'START'}, $signal_peptide_info->{'END'}, $atgpr_info->{'START'});
+
+            $entry{'MET_POSITION_3'} = $pwm_info->{'met_position'};
+            $entry{'STOP_CODON_POSITION_3'} = $pwm_info->{'stop_codon_position'};
+            $entry{'MUTATED_SEQUENCE_LENGTH_3'} = $pwm_info->{'seq_length'};
+            $entry{'SCORE_3'} = $pwm_info->{'score'};
+            $entry{'READING_FRAME_STATUS_3'} = $pwm_info->{'reading_frame'};
+            $entry{'SIGNAL_PEPTIDE_CONSERVATION_3'} = get_signal_peptide_conservarion($signal_peptide_info->{'START'}, $signal_peptide_info->{'END'}, $pwm_info->{'met_position'});
+
             $entry{'SIGNAL_PEPTIDE_START'} = $signal_peptide_info->{'START'} if (defined($signal_peptide_info));
             $entry{'SIGNAL_PEPTIDE_END'} = $signal_peptide_info->{'END'} if (defined($signal_peptide_info));
             $entry{'CONSEQUENCE'} = join( '-', @ensembl_consequences );
@@ -339,7 +319,7 @@ sub get_transcripts_by_chromosome_with_constraints {
 sub get_sequence_info{
     my $tva = $_[0];
     my $hash_seq_info = {};
-    $hash_seq_info->{'first_met_position'} = '';
+    $hash_seq_info->{'met_position'} = '';
     $hash_seq_info->{'reading_frame'} = '';
     $hash_seq_info->{'stop_codon_position'} = '';
     $hash_seq_info->{'seq_length'} = '';
@@ -378,7 +358,6 @@ sub get_variation_cdna_seq{
         print "Feature Seq not available -> " . $feature_seq . "\n";
         return undef;
     }
-    print "llego!\n";
     substr($seq, $variation_start, $variation_end - $variation_start + 1) = $feature_seq;
     
     
@@ -530,34 +509,34 @@ sub get_ref_seq_mrna_ids{
     return $transcript_refseq_id;
 }
 
-# Get the first kozak sequence in the
+# Get the first sequence in the
 # original transcript and in the mutated
-# transcript. This information is used
+# transcript by using atgpr prediction of init codon.
+# This information is used
 # to determine if the mutated transcript
 # has lost the frameshift.
 # param 0 -> TranscriptVariationAllele object
-# return -> Hash with kozak sequence info in
+# return -> Hash with atgpr predicted sequence info in
 # the mutated transcript.
-sub get_kozak_info{
+sub get_atgpr_info{
     my $tva = $_[0];
-    my $source = $tva->variation_feature->variation->source;
-    my $hash_kozak_info = {};
-    $hash_kozak_info->{'FRAMESHIFT'} = '';
-    $hash_kozak_info->{'PREVIOUS_ATGS'} = '';
-    $hash_kozak_info->{'RELIABILITY'} = '';
-    $hash_kozak_info->{'KOZAK_IDENTITY'} = '';
-    $hash_kozak_info->{'START'} = '';
-    $hash_kozak_info->{'FINISH'} = '';
-    $hash_kozak_info->{'ORF_AMINOACID_LENGTH'} = '';
-    $hash_kozak_info->{'STOP_CODON'} = '';
-    $hash_kozak_info->{'PROTEIN_SEQUENCE'} = '';
-    $hash_kozak_info->{'KOZAK_MUTATED_SEQUENCE_LENGTH'} = '';
+    my $hash_atgpr_info = {};
+    $hash_atgpr_info->{'FRAMESHIFT'} = '';
+    $hash_atgpr_info->{'PREVIOUS_ATGS'} = '';
+    $hash_atgpr_info->{'RELIABILITY'} = '';
+    $hash_atgpr_info->{'KOZAK_IDENTITY'} = '';
+    $hash_atgpr_info->{'START'} = '';
+    $hash_atgpr_info->{'FINISH'} = '';
+    $hash_atgpr_info->{'ORF_AMINOACID_LENGTH'} = '';
+    $hash_atgpr_info->{'STOP_CODON'} = '';
+    $hash_atgpr_info->{'PROTEIN_SEQUENCE'} = '';
+    $hash_atgpr_info->{'KOZAK_MUTATED_SEQUENCE_LENGTH'} = '';
    
 
 
     my $mutated_cdna_seq = get_variation_cdna_seq($tva);
     if (!defined($mutated_cdna_seq)){
-        return $hash_kozak_info;
+        return $hash_atgpr_info;
     }
     my $original_cdna_seq = $tva->transcript->seq->seq;
     my $original_cds_seq = $tva->transcript->translateable_seq;
@@ -611,36 +590,76 @@ sub get_kozak_info{
 
     # If natural kozak or first kozak in mutated sequence are not been found, return empty hash.
     if (!defined($natural_kozak->{'START'}) || !defined($first_mutated_kozak->{'START'})){
-        return $hash_kozak_info;
+        return $hash_atgpr_info;
     }
 
 
 
     # Calculate frameshift with SeqUtils
     my $mutated_orf = myUtils::SeqUtils::get_orf($mutated_cdna_seq, $first_mutated_kozak->{'START'});   
-    $hash_kozak_info->{'FRAMESHIFT'} = myUtils::SeqUtils::is_in_frame($mutated_orf, $original_cds_seq) ? 'Conserved' : 'Lost';
+    $hash_atgpr_info->{'FRAMESHIFT'} = myUtils::SeqUtils::is_in_frame($mutated_orf, $original_cds_seq) ? 'Conserved' : 'Lost';
 
-    $hash_kozak_info->{'PREVIOUS_ATGS'} = $first_mutated_kozak->{'PREVIOUS_ATGS'};
-    $hash_kozak_info->{'RELIABILITY'} = $first_mutated_kozak->{'RELIABILITY'};
-    $hash_kozak_info->{'KOZAK_IDENTITY'} = $first_mutated_kozak->{'KOZAK_IDENTITY'};
+    $hash_atgpr_info->{'PREVIOUS_ATGS'} = $first_mutated_kozak->{'PREVIOUS_ATGS'};
+    $hash_atgpr_info->{'RELIABILITY'} = $first_mutated_kozak->{'RELIABILITY'};
+    $hash_atgpr_info->{'KOZAK_IDENTITY'} = $first_mutated_kozak->{'KOZAK_IDENTITY'};
     # If mutated and original met are different, apply the pos correction
     if($first_mutated_kozak->{'START'} != $natural_kozak->{'START'}){
         # We perform the substraction to get the position in cds sequence
-        $hash_kozak_info->{'START'} = max($first_mutated_kozak->{'START'} - $reference + $position_correction, 0);
+        $hash_atgpr_info->{'START'} = max($first_mutated_kozak->{'START'} - $reference + $position_correction, 0);
     } else {
-        $hash_kozak_info->{'START'} = max($first_mutated_kozak->{'START'} - $reference, 0);
+        $hash_atgpr_info->{'START'} = max($first_mutated_kozak->{'START'} - $reference, 0);
     }
     # We add +1 to point at the first base of the stop codon
-    $hash_kozak_info->{'FINISH'} = $first_mutated_kozak->{'FINISH'} - $reference + 1 + $position_correction;
-    $hash_kozak_info->{'ORF_AMINOACID_LENGTH'} = $first_mutated_kozak->{'ORF_AMINOACID_LENGTH'};
-    $hash_kozak_info->{'STOP_CODON'} = $first_mutated_kozak->{'STOP_CODON'};
-    $hash_kozak_info->{'PROTEIN_SEQUENCE'} = $first_mutated_kozak->{'PROTEIN_SEQUENCE'};
-    $hash_kozak_info->{'KOZAK_MUTATED_SEQUENCE_LENGTH'} = (length($mutated_orf) * 100 / length($original_cds_seq)) . '%';
+    $hash_atgpr_info->{'FINISH'} = $first_mutated_kozak->{'FINISH'} - $reference + 1 + $position_correction;
+    $hash_atgpr_info->{'ORF_AMINOACID_LENGTH'} = $first_mutated_kozak->{'ORF_AMINOACID_LENGTH'};
+    $hash_atgpr_info->{'STOP_CODON'} = $first_mutated_kozak->{'STOP_CODON'};
+    $hash_atgpr_info->{'PROTEIN_SEQUENCE'} = $first_mutated_kozak->{'PROTEIN_SEQUENCE'};
+    $hash_atgpr_info->{'KOZAK_MUTATED_SEQUENCE_LENGTH'} = (length($mutated_orf) * 100 / length($original_cds_seq)) . '%';
     # Check if kozak position are not pointing to met.
-    if (substr($original_cds_seq, $hash_kozak_info->{'START'}, 3) ne 'ATG'){
-        print ("Error\nfirst kozak pos = " . $hash_kozak_info->{'START'} . " in $original_cds_seq\nCodon found = " . substr($original_cds_seq, $hash_kozak_info->{'START'}, 3) . "\n");
+    if (substr($original_cds_seq, $hash_atgpr_info->{'START'}, 3) ne 'ATG'){
+        print ("Error\nfirst kozak pos = " . $hash_atgpr_info->{'START'} . " in $original_cds_seq\nCodon found = " . substr($original_cds_seq, $hash_atgpr_info->{'START'}, 3) . "\n");
     }
-    return $hash_kozak_info;
+    return $hash_atgpr_info;
+}
+
+sub get_match_pwm_info{
+    my $tva = $_[0];
+    my $hash_pwm_info = {};
+    $hash_pwm_info->{'met_position'} = '';
+    $hash_pwm_info->{'reading_frame'} = '';
+    $hash_pwm_info->{'stop_codon_position'} = '';
+    $hash_pwm_info->{'seq_length'} = '';
+    $hash_pwm_info->{'score'} = '';
+
+    my $mutated_cdna = get_variation_cdna_seq($tva);
+    if (defined($mutated_cdna)){
+        my $cdna = $tva->transcript->seq->seq;
+        my $cds = $tva->transcript->translateable_seq;
+        my $translation_start_pos = myUtils::SeqUtils::get_translation_start_pos($cdna, $cds);
+        my $five_prime_affected = !defined($tva->transcript_variation->cds_start);
+
+        my $matchpwm = myUtils::MatchPWM->instance();
+        my $hits = $matchpwm->myUtils::MatchPWM::get_kozak_matches($mutated_cdna);
+        my $n = scalar @{$hits->{INIT_CODON}};
+        my $index = 0;
+        while ($index < $n && $hits->{INIT_CODON}->[$index] < $translation_start_pos){
+            $index = $index + 1;
+        }
+        # If we have found a kozak sequence after original met
+        if($index < $n){
+           my $found_met_pos = $hits->{INIT_CODON}->[$index];
+		print "pwm met found at pos $found_met_pos (" . substr($cdna, $found_met_pos, 3) . ")\n";
+           my $hash_seq_info = myUtils::SeqUtils::get_met_mutation_info($cdna, $cds, $mutated_cdna, $five_prime_affected, $found_met_pos);
+           $hash_pwm_info->{'met_position'} = $hash_seq_info->{'met_position'};
+           $hash_pwm_info->{'reading_frame'} = $hash_seq_info->{'reading_frame'};
+           $hash_pwm_info->{'stop_codon_position'} = $hash_seq_info->{'stop_codon_position'};
+           $hash_pwm_info->{'seq_length'} = $hash_seq_info->{'seq_length'};
+           $hash_pwm_info->{'score'} = $hits->{SCORE}->[$index];
+        }
+
+        
+    }
+    return $hash_pwm_info;
 }
 
 # Receives a transcript object and return information
