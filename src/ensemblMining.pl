@@ -60,14 +60,14 @@ my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcri
 
 # Chromosomes to be treated
 # my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
-my @chromosomes = qw(1);
+my @chromosomes = qw(Y);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
 # at least one base of the canonical start codon.
 my @so_terms = ('start_lost');
 my $variation_pos_at_peptide = 1;
-my $transcript_constraints = "source = 'havana' and biotype = 'protein_coding' and t.status = 'KNOWN'";
+my $transcript_constraints = "source = 'ensembl_havana' and biotype = 'protein_coding' and t.status = 'KNOWN'";
 # For each chromosome, get its variations with specified so terms.
 foreach my $chromosome (@chromosomes) {
     #get_variations_by_chromosome_so_terms($chromosome, \@so_terms, $out_csv);
@@ -213,6 +213,7 @@ sub get_transcript_variation_info{
 	my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
 
 	foreach my $tva ( @{$tvas} ) {
+		print "entro\n";
             my %entry;
 	    	
             my @ensembl_consequences;
@@ -322,30 +323,6 @@ sub get_transcripts_by_chromosome_with_constraints {
     return $transcripts;
 }
 
-# Extract information about variation sequence.
-# param 0 -> TranscriptVariationAllele object.
-# return -> Hash with the following keys:
-# 'first_met_position': position of first Met found relative to peptide.
-# 'reading_frame': Conserved or Lost.
-# 'stop_codon_position': Position of the first stop codon (keeping reading frame).
-# 'seq_length': Length of the mutated sequence.
-sub get_sequence_info{
-    my $tva = $_[0];
-    my $hash_seq_info = {};
-    $hash_seq_info->{'first_met_position'} = '';
-    $hash_seq_info->{'reading_frame'} = '';
-    $hash_seq_info->{'stop_codon_position'} = '';
-    $hash_seq_info->{'seq_length'} = '';
-    my $source = $tva->variation_feature->variation->source;
-    if (defined($source)){
-        if ($source->name eq 'dbSNP'){
-            $hash_seq_info = get_sequence_info_dbsnp($tva);
-        }
-    }
-    return $hash_seq_info;
-}
-
-
 
 # Extract information about variation sequence
 # when we have information about alleles, that it is
@@ -359,7 +336,7 @@ sub get_sequence_info{
 # 'reading_frame': Conserved or Lost.
 # 'stop_codon_position': Position of the first stop codon (keeping reading frame).
 # 'seq_length': Percentage of the orf found in the mutated sequence size according to original orf.
-sub get_sequence_info_dbsnp{
+sub get_sequence_info{
     my $tva = $_[0];
     my $hash_seq_info = {};
     $hash_seq_info->{'first_met_position'} = '';
@@ -396,7 +373,14 @@ sub get_variation_cdna_seq{
     # If is a deletion, feature_seq is '-', so we will use '' instead
     # to build the final sequence.
     my $feature_seq = $tva->feature_seq eq "-" ? "" : $tva->feature_seq;
+
+    if ( $feature_seq =~ m/[^ATGCNatgcn]/ ){
+        print "Feature Seq not available -> " . $feature_seq . "\n";
+        return undef;
+    }
+    print "llego!\n";
     substr($seq, $variation_start, $variation_end - $variation_start + 1) = $feature_seq;
+    
     
     return $seq;
 }
@@ -558,27 +542,26 @@ sub get_kozak_info{
     my $tva = $_[0];
     my $source = $tva->variation_feature->variation->source;
     my $hash_kozak_info = {};
-    # If source is not dbSNP, exit.
-    if (!defined($source) || (defined($source) && $source->name ne 'dbSNP')){
-         $hash_kozak_info->{'FRAMESHIFT'} = '';
-         $hash_kozak_info->{'PREVIOUS_ATGS'} = '';
-         $hash_kozak_info->{'RELIABILITY'} = '';
-         $hash_kozak_info->{'KOZAK_IDENTITY'} = '';
-         $hash_kozak_info->{'START'} = '';
-         $hash_kozak_info->{'FINISH'} = '';
-         $hash_kozak_info->{'ORF_AMINOACID_LENGTH'} = '';
-         $hash_kozak_info->{'STOP_CODON'} = '';
-         $hash_kozak_info->{'PROTEIN_SEQUENCE'} = '';
-         $hash_kozak_info->{'KOZAK_MUTATED_SEQUENCE_LENGTH'} = '';
-         return $hash_kozak_info;  
-    }
+    $hash_kozak_info->{'FRAMESHIFT'} = '';
+    $hash_kozak_info->{'PREVIOUS_ATGS'} = '';
+    $hash_kozak_info->{'RELIABILITY'} = '';
+    $hash_kozak_info->{'KOZAK_IDENTITY'} = '';
+    $hash_kozak_info->{'START'} = '';
+    $hash_kozak_info->{'FINISH'} = '';
+    $hash_kozak_info->{'ORF_AMINOACID_LENGTH'} = '';
+    $hash_kozak_info->{'STOP_CODON'} = '';
+    $hash_kozak_info->{'PROTEIN_SEQUENCE'} = '';
+    $hash_kozak_info->{'KOZAK_MUTATED_SEQUENCE_LENGTH'} = '';
+   
 
-    my $original_cdna_seq = $tva->transcript->seq->seq;
-    my $original_cds_seq = $tva->transcript->translateable_seq;
+
     my $mutated_cdna_seq = get_variation_cdna_seq($tva);
     if (!defined($mutated_cdna_seq)){
         return $hash_kozak_info;
     }
+    my $original_cdna_seq = $tva->transcript->seq->seq;
+    my $original_cds_seq = $tva->transcript->translateable_seq;
+
     # Find the position in which coding region starts at cdna sequence.
     my $default_kozak_pos = myUtils::SeqUtils::get_translation_start_pos($original_cdna_seq, $original_cds_seq);
     my $mutated_kozaks =  myUtils::KozakUtils::get_kozak_info($mutated_cdna_seq, $MAX_KOZAK_RESULTS);

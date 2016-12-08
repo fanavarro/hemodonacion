@@ -222,7 +222,7 @@ sub get_met_mutation_info{
             $hash_seq_info->{'first_met_position'} = max($first_met_pos - $reference , 0);
         }
         
-        $hash_seq_info->{'stop_codon_position'} = $stop_codon_pos != -1 ? $stop_codon_pos - $reference +  $position_correction : 'No Stop';
+        $hash_seq_info->{'stop_codon_position'} = $stop_codon_pos != -1 ? $stop_codon_pos - $reference +  $position_correction : '';
         $hash_seq_info->{'reading_frame'} = $reading_frame;
         $hash_seq_info->{'seq_length'} = (length($mutated_orf) * 100 / length($cds)) . '%';
         # Print warnings if first met pos calculated is not a MET in the original cds sequence.
@@ -232,7 +232,7 @@ sub get_met_mutation_info{
         
         # Print warnings if stop codon pos calculated is not a stop codon in the original cds sequence.
         # End codon can be in 3' utr region. This cases are not checked.
-        if ($hash_seq_info->{'stop_codon_position'} ne 'No Stop' && $hash_seq_info->{'stop_codon_position'} <= length($cds) - $CODON_LENGTH){
+        if ($hash_seq_info->{'stop_codon_position'} ne '' && $hash_seq_info->{'stop_codon_position'} <= length($cds) - $CODON_LENGTH){
             if (!exists_in_list(substr($cds, $hash_seq_info->{'stop_codon_position'}, $CODON_LENGTH), \@STOP_CODONS)){
                 print ("Error\nstop codon pos = " . $hash_seq_info->{'stop_codon_position'} . " in $cds\n");
             }
