@@ -32,7 +32,7 @@ if (scalar @ARGV == 1){
 print "Results will be printed in $output\n";
 
 # CSV file configuration
-my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE SIGNAL_PEPTIDE_START SIGNAL_PEPTIDE_END CDS_ERRORS PROTEIN_ID VARIATION_NAME VARIATION_TYPE SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE MET_POSITION_1 STOP_CODON_POSITION_1 MUTATED_SEQUENCE_LENGTH_1 READING_FRAME_STATUS_1 SIGNAL_PEPTIDE_CONSERVATION_1 MET_POSITION_2 STOP_CODON_POSITION_2 MUTATED_SEQUENCE_LENGTH_2 SCORE_2 READING_FRAME_STATUS_2 SIGNAL_PEPTIDE_CONSERVATION_2 MET_POSITION_3 STOP_CODON_POSITION_3 MUTATED_SEQUENCE_LENGTH_3 SCORE_3 READING_FRAME_STATUS_3 SIGNAL_PEPTIDE_CONSERVATION_3 CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
+my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE METS_IN_5_UTR SIGNAL_PEPTIDE_START SIGNAL_PEPTIDE_END CDS_ERRORS PROTEIN_ID VARIATION_NAME VARIATION_TYPE SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE CDS_COORDS AMINOACID_CHANGE MET_POSITION_1 STOP_CODON_POSITION_1 MUTATED_SEQUENCE_LENGTH_1 READING_FRAME_STATUS_1 SIGNAL_PEPTIDE_CONSERVATION_1 MET_POSITION_2 STOP_CODON_POSITION_2 MUTATED_SEQUENCE_LENGTH_2 SCORE_2 READING_FRAME_STATUS_2 SIGNAL_PEPTIDE_CONSERVATION_2 MET_POSITION_3 STOP_CODON_POSITION_3 MUTATED_SEQUENCE_LENGTH_3 SCORE_3 READING_FRAME_STATUS_3 SIGNAL_PEPTIDE_CONSERVATION_3 CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
 my $out_csv = myUtils::CsvManager->new (
 	fields    => \@fields,
 	csv_separator   => "\t",
@@ -185,6 +185,8 @@ sub get_transcript_variation_info{
 	my $publications_info = get_publications_info($variation);
         my $ref_seq_mrna_ids = get_ref_seq_mrna_ids($transcript);
         my $signal_peptide_info = get_signal_peptide_info($transcript);
+        my $mets_in_5_utr = myUtils::SeqUtils::count_mets($transcript->five_prime_utr->seq) if (defined $transcript->five_prime_utr);
+        my $cds_coords = $tv->cds_start . '-' . $tv->cds_end if (defined $tv->cds_start && defined $tv->cds_end);
 	my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
 
 	foreach my $tva ( @{$tvas} ) {
@@ -211,6 +213,7 @@ sub get_transcript_variation_info{
             $entry{'TRANSCRIPT_ID'} = $transcript->display_id;
             $entry{'TRANSCRIPT_REFSEQ_ID'} = $ref_seq_mrna_ids;
             $entry{'TRANSCRIPT_BIOTYPE'} = $transcript->biotype;
+            $entry{'METS_IN_5_UTR'} = $mets_in_5_utr;
             $entry{'CDS_ERRORS'} = $cds_errors;
             $entry{'PROTEIN_ID'} = $transcript->translation->display_id;
             $entry{'VARIATION_NAME'} = $tv->variation_feature->variation_name;
@@ -219,6 +222,7 @@ sub get_transcript_variation_info{
             $entry{'TRANSCRIPT_VARIATION_ALLELE_DBID'} = $tva->dbID;
             $entry{'MINOR_ALLELE_FREQUENCY'} = $minor_allele_frequency;
             $entry{'CODON_CHANGE'} = defined($tva->display_codon_allele_string) ? $tva->display_codon_allele_string : ' ';
+            $entry{'CDS_COORDS'} = $cds_coords;
             $entry{'AMINOACID_CHANGE'} = defined($tva->pep_allele_string) ? $tva->pep_allele_string : ' ';
             $entry{'MET_POSITION_1'} = $seq_info->{'met_position'};
             $entry{'STOP_CODON_POSITION_1'} = $seq_info->{'stop_codon_position'};

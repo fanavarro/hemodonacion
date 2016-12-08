@@ -288,4 +288,18 @@ sub get_kozak_context {
     return substr($cdna, $translation_start_pos - $pos_before, $pos_before + $pos_after + 3);    
 }
 
+# Receives a sequence and count the number of initiation codons found.
+sub count_mets{
+    my $seq = shift;
+    my $count = 0;
+    if (defined $seq){
+        for (my $i = 0; $i < length($seq)-2; $i++){
+	    if (substr($seq, $i, 3) eq "ATG"){
+                $count++;
+            }
+        }
+    }
+    return $count;
+}
+
 1;
