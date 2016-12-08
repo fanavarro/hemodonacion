@@ -42,7 +42,19 @@ sub get_kozak_matches{
 	$hits->{END} = $this->{R}->get('end');
 	$hits->{WIDTH} = $this->{R}->get('width');
 	$hits->{SCORE} = $this->{R}->get('score');
-	$hits->{INIT_CODON} = $this->{R}->get('init_codon');
+	$hits->{INIT_CODON_POS} = $this->{R}->get('init_codon');
+	
+
+	# Checkings needed if we only have 1 result or 0 results.
+	# If we only have 1 result, this result is a scalar, not a list. We have to create the list with the scalar.
+	# If there are not results, the values are integer(0) indicating empty list. In this case, we create the empty list.
+	if (!ref($hits->{START})){
+		$hits->{START} = $hits->{START} =~ m/\(0\)/ ? [] : [$hits->{START}];
+		$hits->{END} =  $hits->{END} =~ m/\(0\)/ ? [] : [$hits->{END}];
+		$hits->{WIDTH} =  $hits->{WIDTH} =~ m/\(0\)/ ? [] : [$hits->{WIDTH}];
+		$hits->{SCORE} =  $hits->{SCORE} =~ m/\(0\)/ ? [] : [$hits->{SCORE}];
+		$hits->{INIT_CODON_POS} =  $hits->{INIT_CODON_POS} =~ m/\(0\)/ ? [] : [$hits->{INIT_CODON_POS}];
+	}
 	return $hits;
 }
 

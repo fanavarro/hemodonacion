@@ -32,7 +32,7 @@ if (scalar @ARGV == 1){
 print "Results will be printed in $output\n";
 
 # CSV file configuration
-my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE METS_IN_5_UTR SIGNAL_PEPTIDE_START SIGNAL_PEPTIDE_END CDS_ERRORS PROTEIN_ID VARIATION_NAME VARIATION_TYPE SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE CDS_COORDS AMINOACID_CHANGE MET_POSITION_1 STOP_CODON_POSITION_1 MUTATED_SEQUENCE_LENGTH_1 READING_FRAME_STATUS_1 SIGNAL_PEPTIDE_CONSERVATION_1 MET_POSITION_2 STOP_CODON_POSITION_2 MUTATED_SEQUENCE_LENGTH_2 SCORE_2 READING_FRAME_STATUS_2 SIGNAL_PEPTIDE_CONSERVATION_2 MET_POSITION_3 STOP_CODON_POSITION_3 MUTATED_SEQUENCE_LENGTH_3 SCORE_3 READING_FRAME_STATUS_3 SIGNAL_PEPTIDE_CONSERVATION_3 CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
+my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE METS_IN_5_UTR SIGNAL_PEPTIDE_START SIGNAL_PEPTIDE_END CDS_ERRORS PROTEIN_ID VARIATION_NAME VARIATION_TYPE SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE CDS_COORDS AMINOACID_CHANGE MET_POSITION_1 STOP_CODON_POSITION_1 MUTATED_SEQUENCE_LENGTH_1 READING_FRAME_STATUS_1 SIGNAL_PEPTIDE_CONSERVATION_1 MET_POSITION_2 STOP_CODON_POSITION_2 MUTATED_SEQUENCE_LENGTH_2 SCORE_2 READING_FRAME_STATUS_2 SIGNAL_PEPTIDE_CONSERVATION_2 MET_POSITION_3 INIT_CODON_3 STOP_CODON_POSITION_3 MUTATED_SEQUENCE_LENGTH_3 SCORE_3 READING_FRAME_STATUS_3 SIGNAL_PEPTIDE_CONSERVATION_3 CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
 my $out_csv = myUtils::CsvManager->new (
 	fields    => \@fields,
 	csv_separator   => "\t",
@@ -61,7 +61,7 @@ my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcri
 
 # Chromosomes to be treated
 # my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
-my @chromosomes = qw(Y);
+my @chromosomes = qw(1 2 3 4 5 6);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
@@ -74,9 +74,6 @@ foreach my $chromosome (@chromosomes) {
     #get_variations_by_chromosome_so_terms($chromosome, \@so_terms, $out_csv);
     my $transcripts = get_transcripts_by_chromosome_with_constraints( $chromosome, $transcript_constraints );
     my $transcript_variations = get_transcript_variations_by_transcripts_peptide_position( $transcripts, $variation_pos_at_peptide );
-    #print "Filtering " . scalar @{$transcript_variations} . " transcripts \n";
-    #$transcript_variations = filter_transcript_variations($transcript_variations);
-    #print "Filtering finished: " . scalar @{$transcript_variations} . " transcript_variations\n";
     #my $transcript_variations = get_transcript_variations_by_transcripts_SO_terms( $transcripts, \@so_terms );
     my $result_list = get_transcript_variation_info($chromosome, $transcript_variations);
     $out_csv->myUtils::CsvManager::writeEntries($result_list);
@@ -221,9 +218,9 @@ sub get_transcript_variation_info{
             $entry{'SOURCE'} = $variation->source_name;
             $entry{'TRANSCRIPT_VARIATION_ALLELE_DBID'} = $tva->dbID;
             $entry{'MINOR_ALLELE_FREQUENCY'} = $minor_allele_frequency;
-            $entry{'CODON_CHANGE'} = defined($tva->display_codon_allele_string) ? $tva->display_codon_allele_string : ' ';
+            $entry{'CODON_CHANGE'} = defined($tva->display_codon_allele_string) ? $tva->display_codon_allele_string : '';
             $entry{'CDS_COORDS'} = $cds_coords;
-            $entry{'AMINOACID_CHANGE'} = defined($tva->pep_allele_string) ? $tva->pep_allele_string : ' ';
+            $entry{'AMINOACID_CHANGE'} = defined($tva->pep_allele_string) ? $tva->pep_allele_string : '';
             $entry{'MET_POSITION_1'} = $seq_info->{'met_position'};
             $entry{'STOP_CODON_POSITION_1'} = $seq_info->{'stop_codon_position'};
             $entry{'MUTATED_SEQUENCE_LENGTH_1'} = $seq_info->{'seq_length'};
@@ -237,6 +234,7 @@ sub get_transcript_variation_info{
             $entry{'SIGNAL_PEPTIDE_CONSERVATION_2'} = get_signal_peptide_conservarion($signal_peptide_info->{'START'}, $signal_peptide_info->{'END'}, $atgpr_info->{'START'});
 
             $entry{'MET_POSITION_3'} = $pwm_info->{'met_position'};
+            $entry{'INIT_CODON_3'} = $pwm_info->{'init_codon'};
             $entry{'STOP_CODON_POSITION_3'} = $pwm_info->{'stop_codon_position'};
             $entry{'MUTATED_SEQUENCE_LENGTH_3'} = $pwm_info->{'seq_length'};
             $entry{'SCORE_3'} = $pwm_info->{'score'};
@@ -633,6 +631,7 @@ sub get_match_pwm_info{
     $hash_pwm_info->{'reading_frame'} = '';
     $hash_pwm_info->{'stop_codon_position'} = '';
     $hash_pwm_info->{'seq_length'} = '';
+    $hash_pwm_info->{'init_codon'} = '';
     $hash_pwm_info->{'score'} = '';
 
     my $mutated_cdna = get_variation_cdna_seq($tva);
@@ -644,21 +643,29 @@ sub get_match_pwm_info{
 
         my $matchpwm = myUtils::MatchPWM->instance();
         my $hits = $matchpwm->myUtils::MatchPWM::get_kozak_matches($mutated_cdna);
-        my $n = scalar @{$hits->{INIT_CODON}};
+        my $n = 0;
+        if (defined $hits && defined $hits->{INIT_CODON_POS}){
+            $n = scalar @{$hits->{INIT_CODON_POS}};
+        }
         my $index = 0;
-        while ($index < $n && $hits->{INIT_CODON}->[$index] < $translation_start_pos){
+        # Buscamos un match que no este en 5' utr y que enga un ATG como codon de inicio
+        while ($index < $n){
+            if ($hits->{INIT_CODON_POS}->[$index] >= $translation_start_pos && substr($mutated_cdna, $hits->{INIT_CODON_POS}->[$index], 3) ne "ATG"){
+                last;
+            }
             $index = $index + 1;
         }
         # If we have found a kozak sequence after original met
         if($index < $n){
-           my $found_met_pos = $hits->{INIT_CODON}->[$index];
-		print "pwm met found at pos $found_met_pos (" . substr($cdna, $found_met_pos, 3) . ")\n";
+           my $found_met_pos = $hits->{INIT_CODON_POS}->[$index];
+           #print "pwm met found at pos $found_met_pos (" . substr($cdna, $found_met_pos, 3) . ")\n";
            my $hash_seq_info = myUtils::SeqUtils::get_met_mutation_info($cdna, $cds, $mutated_cdna, $five_prime_affected, $found_met_pos);
            $hash_pwm_info->{'met_position'} = $hash_seq_info->{'met_position'};
            $hash_pwm_info->{'reading_frame'} = $hash_seq_info->{'reading_frame'};
            $hash_pwm_info->{'stop_codon_position'} = $hash_seq_info->{'stop_codon_position'};
            $hash_pwm_info->{'seq_length'} = $hash_seq_info->{'seq_length'};
            $hash_pwm_info->{'score'} = $hits->{SCORE}->[$index];
+           $hash_pwm_info->{'init_codon'} = substr($mutated_cdna, $found_met_pos, 3);
         }
 
         
@@ -713,11 +720,11 @@ sub get_signal_peptide_conservarion{
     my $sp_end = shift;
     my $alt_met_pos = shift;
 
-    if (!defined ($sp_start) || $sp_start eq '' || !defined($sp_end) || $sp_end eq '' || !defined($alt_met_pos) || $alt_met_pos eq ''){
+    if (!defined ($sp_start) || $sp_start eq '' || !defined($sp_end) || $sp_end eq ''){
         return '';
     }
 
-    if ($alt_met_pos > $sp_end){
+    if (!defined($alt_met_pos) || $alt_met_pos eq '' || $alt_met_pos > $sp_end){
         return '0%';
     }
 
