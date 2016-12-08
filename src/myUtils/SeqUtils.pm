@@ -49,8 +49,15 @@ sub get_translation{
 sub is_in_frame{
     my $original_orf_seq = shift;
     my $mutated_orf_seq = shift;
+    my $relative_length = (length($mutated_orf_seq) * 100 / length($original_orf_seq));
+
+    # If the mutated orf has less than 1% of original orf, it cant be in frame.
+    if ($relative_length <= 1.0){
+        return 0;
+    }
     my $original_aa = get_translation($original_orf_seq);
     my $mutated_aa = get_translation($mutated_orf_seq);
+
     
     # if mutation is a deletion is possible that first met in the
     # mutation is not changed; for example AT(GGAGAGTAA)GGATGA...
