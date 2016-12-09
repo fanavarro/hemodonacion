@@ -61,7 +61,7 @@ my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcri
 
 # Chromosomes to be treated
 # my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
-my @chromosomes = qw(1 2 3 4 5 6);
+my @chromosomes = qw(1 2 3 4 5 6 7);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
@@ -650,7 +650,7 @@ sub get_match_pwm_info{
         my $index = 0;
         # Buscamos un match que no este en 5' utr y que enga un ATG como codon de inicio
         while ($index < $n){
-            if ($hits->{INIT_CODON_POS}->[$index] >= $translation_start_pos && substr($mutated_cdna, $hits->{INIT_CODON_POS}->[$index], 3) ne "ATG"){
+            if ($hits->{INIT_CODON_POS}->[$index] >= $translation_start_pos && substr($mutated_cdna, $hits->{INIT_CODON_POS}->[$index], 3) eq "ATG"){
                 last;
             }
             $index = $index + 1;
@@ -720,11 +720,11 @@ sub get_signal_peptide_conservarion{
     my $sp_end = shift;
     my $alt_met_pos = shift;
 
-    if (!defined ($sp_start) || $sp_start eq '' || !defined($sp_end) || $sp_end eq ''){
+    if (!defined ($sp_start) || $sp_start eq '' || !defined($sp_end) || $sp_end eq '' || !defined($alt_met_pos) || $alt_met_pos eq ''){
         return '';
     }
 
-    if (!defined($alt_met_pos) || $alt_met_pos eq '' || $alt_met_pos > $sp_end){
+    if ($alt_met_pos > $sp_end){
         return '0%';
     }
 

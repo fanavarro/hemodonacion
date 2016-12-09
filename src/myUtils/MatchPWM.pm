@@ -2,6 +2,7 @@ package myUtils::MatchPWM;
 use Statistics::R;
 use strict;
 use warnings;
+use Try::Tiny;
 use base 'Class::Singleton';
 
 sub _new_instance {
@@ -23,13 +24,28 @@ sub _new_instance {
 #	$hits->{END} = list of the endings of matches.
 #	$hits->{WIDTH} = list of the widths of matches.
 #	$hits->{SCORE} = list of the scores of matches.
-#	$hits->{INIT_CODON} = list of init codon positions
+#	$hits->{INIT_CODON_POS} = list of init codon positions
 sub get_kozak_matches{
 	my $this = shift;
 	my $seq = shift;
 	my $hits;
+	try {
+		$this->{R}->run('seq = "' . $seq . '"');
+	} catch {
+		# Por lo visto R se reinicia cuando falla... hay que reinicializar...
+		$this->{R}->run(q`library(PWMEnrich)`);
+		$this->{R}->run(q`pwm = data.matrix(read.table("myUtils/pwm/kozak_context.pwm"))`);
+		try {
+			$this->{R}->set('seq', $seq);
+		} catch {
+			$this->{R}->run(q`library(PWMEnrich)`);
+			$this->{R}->run(q`pwm = data.matrix(read.table("myUtils/pwm/kozak_context.pwm"))`);
+			return undef;
+		};
+	};
+
+
 	
-	$this->{R}->set('seq', $seq);
 	$this->{R}->run(q`hits = matchPWM(pwm, seq, with.score = T)`);
 	$this->{R}->run(q`start = start(hits) - 1`);
 	$this->{R}->run(q`end = end(hits) - 1`);
