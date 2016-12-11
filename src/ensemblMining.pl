@@ -11,11 +11,10 @@ use List::Util qw[min max];
 use DateTime;
 use myUtils::MatchPWM;
 
-#my $CODON_LENGTH = 3;
-#my $MET = 'ATG';
-#my @STOP_CODONS = qw(TAG TAA TGA);
-my $MAX_KOZAK_RESULTS = 50000;
 
+my $MAX_KOZAK_RESULTS = 50000;
+# Ignored transcript variation alleles due to errors in data that crashes the program.
+my @IGNORED_TVA_DBID = qw(518419535 518419533 518419659 518419534 518419489 518348176 518348177 518348175);
 # Needed to write to nohup.out in real time
 STDOUT->autoflush(1);
 
@@ -187,6 +186,9 @@ sub get_transcript_variation_info{
 	my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
 
 	foreach my $tva ( @{$tvas} ) {
+            if(myUtils::SeqUtils::exists_in_list($tva->dbID, \@IGNORED_TVA_DBID)){
+                next;
+            }
             my %entry;
 	    	
             my @ensembl_consequences;
@@ -356,7 +358,8 @@ sub get_variation_cdna_seq{
     # to build the final sequence.
     my $feature_seq = $tva->feature_seq eq "-" ? "" : $tva->feature_seq;
 
-    if ( $feature_seq =~ m/[^ATGCNatgcn]/ ){
+    # If feature seq not contains nucleotides or it is very large, possible error on data...
+    if ( $feature_seq =~ m/[^ATGCNatgcn]/ || length($feature_seq) > length($seq)){
         print "Feature Seq not available -> " . $feature_seq . "\n";
         return undef;
     }

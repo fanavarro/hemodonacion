@@ -1,6 +1,5 @@
 use strict;
 use warnings;
-use myUtils::KozakUtils;
 use Bio::EnsEMBL::Registry;
 use v5.10.0;
 
@@ -16,14 +15,15 @@ $registry->load_registry_from_db(
 my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcriptvariation' );
 my $transcript_adaptor  = $registry->get_adaptor('human', 'core', 'Transcript');
 
-#my $transcript = $transcript_adaptor->fetch_by_stable_id('ENST00000366603');
-my $transcript = $transcript_adaptor->fetch_by_stable_id('ENST00000313695');
+#my $transcript = $transcript_adaptor->fetch_by_stable_id('ENST00000397262');
+my $transcript = $transcript_adaptor->fetch_by_stable_id('ENST00000520154');
 my @transcripts = ($transcript);
 my $constraint = "(translation_start=1 or translation_end=1)";
 my $trvs = $trv_adaptor->fetch_all_by_Transcripts_with_constraint(\@transcripts, $constraint);
 foreach my $tv ( @{$trvs} ) {
     my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
     foreach my $tva ( @{$tvas} ) {
+	print $tva->dbID() . "\n";
 	print $tv->variation_feature->variation->stable_id . "\n" . get_variation_cdna_seq($tva) . "\n\n";
 	#get_variation_cdna_seq($tva);
         #get_variation_cds_seq_upstream($tva);
@@ -54,9 +54,11 @@ sub get_variation_cdna_seq{
         print "Feature Seq not available -> " . $feature_seq . "\n";
         return undef;
     }
+    print "Feature seq = $feature_seq" . "\n";
     substr($seq, $variation_start, $variation_end - $variation_start + 1) = $feature_seq;
     
     
-    return $seq;
+    #return $seq;
+    return undef;
 }
 
