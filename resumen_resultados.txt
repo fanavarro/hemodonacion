@@ -1,0 +1,98 @@
+GRADO DE RECURRENCIA DE VARIANTES EN MET1
+7205 genes
+9591 transcritos afectados
+11261 variaciones
+15296 combinaciones de alelo afectando a transcrito distintas
+¿Contamos cada alelo como una mutación distinta?
+
+Gen mas afectado -> PAX5
+8 transcritos afectados
+9 mutaciones
+64 combinaciones de alelo afectando a transcrito distintas
+
+Segundo gen mas afectado -> DTNA
+8 transcritos afectados
+8 mutaciones
+38 combinaciones de alelo afectando a transcrito distintas
+
+tercer gen mas afectado -> MAX
+5 transcritos afectados
+7 mutaciones
+35 combinaciones de alelo afectando a transcrito distintas
+
+TIPO DE VARIANTE
+deletion: 499
+indel: 5
+insertion: 272
+sequence_alteration: 26 
+SNP: 10685
+somatic_sequence_alteration: 3816
+substituition: 1
+
+COMPARATIVA ENTRE MARCOS DE LECTURA CONSERVADOS ENTRE PRIMERA MET CON MET EN CONTEXTO KOZAK FUERTE (ESTA VEZ SI)
+                        Conserved                Lost
+  First Met         4894  (45.23%)         5930 (54.77%)
+  Kozak Met         5206  (48.91%)         5579 (51.73%)
+  Chi cuadrado, p=7.161e-06
+
+DIVISION DE VARIANTES EN POLIMORFISMO Y MUTACION (Cuento variantes, no alelos ni transcritos)
+11261 totales
+	1070 con maf
+		62 polimorfismos (afectando a 75 transcritos)
+		1008 mutaciones (afectando a 1190 transcritos)
+
+	10191 sin maf
+
+De los 75 transcritos afectados por polimorfismos en MET1, 63 carecen de peptido señal (porque no tiene o porque no se ha detectado).
+De los 1190 transcritos afectados por mutaciones en MET 1, 959 carecen de peptido señal (porque no tiene o porque no se ha detectado).
+
+COMPARACION DE LA POSICION DE LA METIONINA ALTERNATIVA
+Ver boxplot_altmet.png.
+Test de wilcoxon significativo en los 3 casos.
+
+MANTENIMIENTO DEL MARCO DE LECTURA
+Primera metionina usada:
+GRUPO      CONSERVED LOST
+  MAF BAJA       701  742
+  MAF ALTA        53   32
+Chi cuadrado p=0.01844
+
+Metionina predicha por ATGpr:
+GRUPO      CONSERVED LOST
+  MAF BAJA      1064   51
+  MAF ALTA        69    1
+Chi cuadrado p=0.3444
+
+Metionina en contexto Kozak:
+GRUPO      CONSERVED LOST
+  MAF BAJA       737  700
+  MAF ALTA        59   26
+Chi cuadrado p=0.001695
+
+ESTADO DEL PEPTIDO SEÑAL (GRADO DE CONSERVACION)
+Ver boxplots de boxplot_signal_peptide
+Según primera metionina encontrada:
+	Grupo de MAF alta:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+   0.00    0.00   45.71   51.02   88.46  100.00      74 
+	Grupo de MAF baja:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+   0.00    0.00    0.00   32.15   71.46  100.00    1158
+
+
+Según la met predicha por ATGpr:
+	Grupo de MAF alta:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+   0.00   60.36   75.00   70.82  100.00  100.00      80 
+	Grupo de MAF baja:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+   0.00    0.00    0.00   30.14   73.08  100.00    1222
+
+
+Según la met en contexto de kozak:
+	Grupo MAF alta:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+   0.00    0.00   45.71   44.94   88.46  100.00      74 
+	Grupo MAF baja:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+   0.00    0.00    0.00   25.72   63.75  100.00    1162 

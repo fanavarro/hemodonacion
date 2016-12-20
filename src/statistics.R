@@ -48,40 +48,57 @@ add_mutation_type = function(csv){
 }
 
 # Leer el csv sin filtros
-csv = read.csv("final_out_no_filter.csv", sep="\t",stringsAsFactors=FALSE)
-csv[,"MUTATED_SEQUENCE_LENGTH"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH))
-csv[,"KOZAK_MUTATED_SEQUENCE_LENGTH"]=as.numeric(gsub("%","",csv$KOZAK_MUTATED_SEQUENCE_LENGTH))
-csv = add_signal_lost_sup_info(csv)
-csv = add_mutation_type(csv)
+csv = read.csv("11_12_2016.csv", sep="\t",stringsAsFactors=FALSE)
+csv[,"MUTATED_SEQUENCE_LENGTH_1"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH_1))
+csv[,"MUTATED_SEQUENCE_LENGTH_2"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH_2))
+csv[,"MUTATED_SEQUENCE_LENGTH_3"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH_3))
+csv[,"SIGNAL_PEPTIDE_CONSERVATION_1"]=as.numeric(gsub("%","",csv$SIGNAL_PEPTIDE_CONSERVATION_1))
+csv[,"SIGNAL_PEPTIDE_CONSERVATION_2"]=as.numeric(gsub("%","",csv$SIGNAL_PEPTIDE_CONSERVATION_2))
+csv[,"SIGNAL_PEPTIDE_CONSERVATION_3"]=as.numeric(gsub("%","",csv$SIGNAL_PEPTIDE_CONSERVATION_3))
+#csv = add_signal_lost_sup_info(csv)
+#csv = add_mutation_type(csv)
 
 # Generar el fichero con las columnas suplementarias
-write.table(csv, file = "final_out_no_filter_sup.csv", na="", sep="\t", row.names = F)
+#write.table(csv, file = "final_out_no_filter_sup.csv", na="", sep="\t", row.names = F)
 
 
-csv$READING_FRAME_STATUS = factor(csv$READING_FRAME_STATUS)
-csv$KOZAK_READING_FRAME_STATUS = factor(csv$KOZAK_READING_FRAME_STATUS)
-csv$KOZAK_STOP_CODON = factor(csv$KOZAK_STOP_CODON)
-csv$STOP_CODON_POSITION = factor(csv$STOP_CODON_POSITION)
+csv$READING_FRAME_STATUS_1 = factor(csv$READING_FRAME_STATUS_1)
+csv$READING_FRAME_STATUS_2 = factor(csv$READING_FRAME_STATUS_2)
+csv$READING_FRAME_STATUS_3 = factor(csv$READING_FRAME_STATUS_3)
+csv$STOP_CODON_POSITION_1 = factor(csv$STOP_CODON_POSITION_1)
+csv$STOP_CODON_POSITION_2 = factor(csv$STOP_CODON_POSITION_2)
+csv$STOP_CODON_POSITION_3 = factor(csv$STOP_CODON_POSITION_3)
 csv$GENE_NAME = factor(csv$GENE_NAME)
-csv$SIGNAL_FIRST_MET_AFFECTED = factor(csv$SIGNAL_FIRST_MET_AFFECTED)
-csv$SIGNAL_FIRST_KOZAK_AFFECTED = factor(csv$SIGNAL_FIRST_KOZAK_AFFECTED)
+#csv$SIGNAL_PEPTIDE_CONSERVATION_1 = factor(csv$SIGNAL_PEPTIDE_CONSERVATION_1)
+#csv$SIGNAL_PEPTIDE_CONSERVATION_2 = factor(csv$SIGNAL_PEPTIDE_CONSERVATION_2)
+#csv$SIGNAL_PEPTIDE_CONSERVATION_3 = factor(csv$SIGNAL_PEPTIDE_CONSERVATION_3)
+
 
 
 
 
 # Eliminar los casos en los que hay errores en las regiones 5' o 3'
-csv = csv[csv$CDS_ERRORS == '',]
+#csv = csv[csv$CDS_ERRORS == '',]
 
 # Eliminar los casos en los que el biotipo es "non_stop_decay" o "nonsense_mediated_decay"
-csv = csv[csv$TRANSCRIPT_BIOTYPE != 'non_stop_decay' & csv$TRANSCRIPT_BIOTYPE != 'nonsense_mediated_decay',]
+#csv = csv[csv$TRANSCRIPT_BIOTYPE != 'non_stop_decay' & csv$TRANSCRIPT_BIOTYPE != 'nonsense_mediated_decay',]
 
 # Generar el fichero filtrado
-write.table(csv, file = "final_out_filter.csv", na="", sep="\t", row.names = F)
+#write.table(csv, file = "final_out_filter.csv", na="", sep="\t", row.names = F)
 
 # Numero de genes con mutaciones afectando en el codon de inicio
 length(unique(csv$GENE_NAME))
 View(table(csv$GENE_NAME))
 nrow(csv)/length(unique(csv$GENE_NAME))
+
+# Numero de transcritos afectados
+length(unique(csv$TRANSCRIPT_ID))
+
+# Numero de variaciones
+length(unique(csv$VARIATION_NAME))
+
+# Numero de alelos distintos
+length(unique(csv$TRANSCRIPT_VARIATION_ALLELE_DBID))
 
 # Transcritos afectados de TP53, CACNA1C y TP53
 length(unique(csv[csv$GENE_NAME=="TP53",]$TRANSCRIPT_ID))
@@ -93,10 +110,10 @@ View(table(csv$VARIATION_TYPE))
 
 # El uso de la metionina en kozak fuerte provoca la conservacion del marco
 # de lectura en mayor medida que la primera metionina encontrada?
-rf_met_conserved = nrow(csv[csv$READING_FRAME_STATUS == "Conserved" & csv$MUTATED_SEQUENCE_LENGTH > 1,]); rf_met_conserved
-rf_met_lost = nrow(csv[csv$READING_FRAME_STATUS == "Lost",]) + nrow(csv[csv$READING_FRAME_STATUS == "Conserved" & csv$MUTATED_SEQUENCE_LENGTH <= 1,]); rf_met_lost
-rf_kozak_conserved = nrow(csv[csv$KOZAK_READING_FRAME_STATUS == "Conserved" & csv$KOZAK_MUTATED_SEQUENCE_LENGTH > 1,]); rf_kozak_conserved
-rf_kozak_lost = nrow(csv[csv$KOZAK_READING_FRAME_STATUS == "Lost",]) + nrow(csv[csv$KOZAK_READING_FRAME_STATUS == "Conserved" & !is.na(csv$KOZAK_MUTATED_SEQUENCE_LENGTH) & csv$KOZAK_MUTATED_SEQUENCE_LENGTH <= 1,]); rf_kozak_lost
+rf_met_conserved = nrow(csv[csv$READING_FRAME_STATUS_1 == "Conserved",]); rf_met_conserved
+rf_met_lost = nrow(csv[csv$READING_FRAME_STATUS_1 == "Lost",]); rf_met_lost
+rf_kozak_conserved = nrow(csv[csv$READING_FRAME_STATUS_3 == "Conserved",]); rf_kozak_conserved
+rf_kozak_lost = nrow(csv[csv$READING_FRAME_STATUS_3 == "Lost",]); rf_kozak_lost
 m = as.table(rbind(c(rf_met_conserved, rf_met_lost), c(rf_kozak_conserved, rf_kozak_lost)))
 dimnames(m) = list(alt_met=c("First Met", "Kozak Met"),
                    reading_frame=c("Conserved", "Lost"))
@@ -106,106 +123,149 @@ chisq.test(m) # Muy significativo. El uso de la metionina en una secuencia de ko
 # Obtener un conjunto en el que existe MAF definida y otro en el que no.
 csvWithMaf = csv[!is.na(csv$MINOR_ALLELE_FREQUENCY),]
 csvNoMaf = csv[is.na(csv$MINOR_ALLELE_FREQUENCY),]
+# Numero de variantes
+length(unique(csvWithMaf$VARIATION_NAME))
+length(unique(csvNoMaf$VARIATION_NAME))
+
 
 # Dividir el subconjunto con MAF definida en MAF alta y baja
 highMaf = csvWithMaf[csvWithMaf$MINOR_ALLELE_FREQUENCY >= 0.01,]
 lowMaf = csvWithMaf[csvWithMaf$MINOR_ALLELE_FREQUENCY < 0.01,]
+# Numero de variantes
+length(unique(highMaf$VARIATION_NAME))
+length(unique(lowMaf$VARIATION_NAME))
+# Numero de transcritos afectados
+length(unique(highMaf$TRANSCRIPT_ID))
+length(unique(lowMaf$TRANSCRIPT_ID))
+# Numero de transcritos sin peptido senal detectado
+length(unique(highMaf[is.na(highMaf$SIGNAL_PEPTIDE_START),]$TRANSCRIPT_ID))
+length(unique(lowMaf[is.na(lowMaf$SIGNAL_PEPTIDE_START),]$TRANSCRIPT_ID))
 
 # Resumen de cada subconjunto de datos segun la maf
-summary(lowMaf$FIRST_MET_POSITION)
-summary(lowMaf$SIGNAL_FIRST_MET_AFFECTED)
-summary(lowMaf$READING_FRAME_STATUS)
-# Marco de lectura conservado si, ademas de tener "Conserved" tiene una longitud mayor al 1% de la seq original
-rf_conserved_met_low_maf = nrow(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH > 1 & lowMaf$READING_FRAME_STATUS == 'Conserved',])
-rf_lost_met_low_maf = nrow(lowMaf[lowMaf$MUTATED_SEQUENCE_LENGTH <= 1 & lowMaf$READING_FRAME_STATUS == 'Conserved',]) + nrow(lowMaf[lowMaf$READING_FRAME_STATUS == 'Lost',])
-summary(lowMaf$SIGNAL_FIRST_MET_AFFECTED)
+summary(lowMaf$MET_POSITION_1)
+summary(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1)
+summary(lowMaf$READING_FRAME_STATUS_1)
 
-summary(highMaf$FIRST_MET_POSITION)
-summary(highMaf$SIGNAL_FIRST_MET_AFFECTED)
-summary(highMaf$READING_FRAME_STATUS)
-rf_conserved_met_high_maf = nrow(highMaf[highMaf$MUTATED_SEQUENCE_LENGTH > 1 & highMaf$READING_FRAME_STATUS == 'Conserved',])
-rf_lost_met_high_maf = nrow(highMaf[highMaf$MUTATED_SEQUENCE_LENGTH <= 1 & highMaf$READING_FRAME_STATUS == 'Conserved',]) + nrow(highMaf[highMaf$READING_FRAME_STATUS == 'Lost',])
-summary(highMaf$SIGNAL_FIRST_MET_AFFECTED)
 
-summary(lowMaf$KOZAK_START)
-summary(lowMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
-summary(lowMaf$KOZAK_READING_FRAME_STATUS)
-rf_conserved_kozak_low_maf = nrow(lowMaf[lowMaf$KOZAK_MUTATED_SEQUENCE_LENGTH > 1 & lowMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',])
-rf_lost_kozak_low_maf = nrow(lowMaf[lowMaf$KOZAK_MUTATED_SEQUENCE_LENGTH <= 1 & !is.na(lowMaf$KOZAK_MUTATED_SEQUENCE_LENGTH) & lowMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',]) + nrow(lowMaf[lowMaf$KOZAK_READING_FRAME_STATUS == 'Lost',])
-summary(lowMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
+summary(highMaf$MET_POSITION_1)
+summary(highMaf$SIGNAL_PEPTIDE_CONSERVARION_1)
+summary(highMaf$READING_FRAME_STATUS_1)
+summary(highMaf$SIGNAL_PEPTIDE_CONSERVARION_1)
 
-summary(highMaf$KOZAK_START)
-summary(highMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
-summary(highMaf$KOZAK_READING_FRAME_STATUS)
-rf_conserved_kozak_high_maf = nrow(highMaf[highMaf$KOZAK_MUTATED_SEQUENCE_LENGTH > 1 & highMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',])
-rf_lost_kozak_high_maf = nrow(highMaf[highMaf$KOZAK_MUTATED_SEQUENCE_LENGTH <= 1 & highMaf$KOZAK_READING_FRAME_STATUS == 'Conserved',]) + nrow(highMaf[highMaf$KOZAK_READING_FRAME_STATUS == 'Lost',])
-summary(highMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
+summary(lowMaf$MET_POSITION_2)
+summary(lowMaf$SIGNAL_PEPTIDE_CONSERVARION_2)
+summary(lowMaf$READING_FRAME_STATUS_2)
+rf_conserved_met2_low_maf = nrow(lowMaf[lowMaf$READING_FRAME_STATUS_2 == 'Conserved',])
+rf_lost_met2_low_maf = nrow(lowMaf[lowMaf$READING_FRAME_STATUS_2 == 'Lost',])
+summary(lowMaf$SIGNAL_PEPTIDE_CONSERVARION_2)
+
+summary(highMaf$MET_POSITION_2)
+summary(highMaf$SIGNAL_PEPTIDE_CONSERVARION_2)
+summary(highMaf$READING_FRAME_STATUS_2)
+rf_conserved_met2_high_maf = nrow(highMaf[highMaf$READING_FRAME_STATUS_2 == 'Conserved',])
+rf_lost_met2_high_maf = nrow(highMaf[highMaf$READING_FRAME_STATUS_2 == 'Lost',])
+summary(highMaf$SIGNAL_PEPTIDE_CONSERVARION_2)
+
 
 # Histogramas de la posición de la primera metionina
-hist(highMaf$FIRST_MET_POSITION, xlim = c(0,1000))
-hist(lowMaf$FIRST_MET_POSITION, xlim = c(0,1000))
+hist(highMaf$MET_POSITION_1, xlim = c(0,1000))
+hist(lowMaf$MET_POSITION_1, xlim = c(0,1000))
 
 # Histogramas de la posición de la metionina de la primera secuencia Kozak
 # con puntuacion mayor a 25%
-hist(highMaf$KOZAK_START)
-hist(lowMaf$KOZAK_START)
+hist(highMaf$MET_POSITION_2)
+hist(lowMaf$MET_POSITION_2)
 
 # Comprobar homogeneidad de varianzas
-var.test(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION) # Varianzas distintas
-var.test(highMaf$KOZAK_START, lowMaf$KOZAK_START) # Varianzas distintas
+var.test(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1) # Varianzas distintas
+var.test(highMaf$MET_POSITION_2, lowMaf$MET_POSITION_2) # Varianzas distintas
+var.test(highMaf$MET_POSITION_3, lowMaf$MET_POSITION_3) # Varianzas distintas
 
 #Test de normalidad
-shapiro.test(highMaf$FIRST_MET_POSITION) # No normal
-shapiro.test(lowMaf$FIRST_MET_POSITION) # No normal
-shapiro.test(highMaf$KOZAK_START) # No normal
-shapiro.test(lowMaf$KOZAK_START) # No normal
+shapiro.test(highMaf$MET_POSITION_1) # No normal
+shapiro.test(lowMaf$MET_POSITION_1) # No normal
+shapiro.test(highMaf$MET_POSITION_2) # No normal
+shapiro.test(lowMaf$MET_POSITION_2) # No normal
 
 # Test de wilcoxon para comparar medias
-wilcox.test(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, paired = F, conf.level = 0.95) # Distribuciones diferentes
-wilcox.test(highMaf$KOZAK_START, lowMaf$KOZAK_START, paired = F, conf.level = 0.95) # Distribuciones diferentes
+wilcox.test(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1, paired = F, conf.level = 0.95) # Distribuciones diferentes
+wilcox.test(highMaf$MET_POSITION_2, lowMaf$MET_POSITION_2, paired = F, conf.level = 0.95) # Distribuciones diferentes
+wilcox.test(highMaf$MET_POSITION_3, lowMaf$MET_POSITION_3, paired = F, conf.level = 0.95) # Distribuciones diferentes
 
 # Boxplots
-boxplot(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, ylim=c(0,3000))
-boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START, ylim=c(0,1500))
+boxplot(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1, ylim=c(0,3000))
+boxplot(highMaf$MET_POSITION_2, lowMaf$MET_POSITION_2, ylim=c(0,1500))
 
-op <- par(mfrow = c(1, 2))
-boxplot(highMaf$FIRST_MET_POSITION, lowMaf$FIRST_MET_POSITION, ylim=c(0,250), ylab="Posición del codón inicial (en pares de bases)",names=c("MAF alta", "MAF baja"),
+op <- par(mfrow = c(1, 3))
+boxplot(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1, ylim=c(0,250), ylab="Posición del codón inicial (en pares de bases)",names=c("MAF alta", "MAF baja"),
         main="Comparativa de la posición del primer codón de inicio\nencontrado entre los grupos de MAF alta y baja.")
-boxplot(highMaf$KOZAK_START, lowMaf$KOZAK_START, ylim=c(0,600), ylab="Posición del codón inicial (en pares de bases)", names = c("MAF alta", "MAF baja"),
+boxplot(highMaf$MET_POSITION_2, lowMaf$MET_POSITION_2, ylim=c(0,600), ylab="Posición del codón inicial (en pares de bases)", names = c("MAF alta", "MAF baja"),
+        main="Comparativa de la posición del primer codón de inicio\npredicho por ATGpr con score > 0.25\nentre los grupos de MAF alta y baja.")
+boxplot(highMaf$MET_POSITION_3, lowMaf$MET_POSITION_3, ylim=c(0,600), ylab="Posición del codón inicial (en pares de bases)", names = c("MAF alta", "MAF baja"),
         main="Comparativa de la posición del primer codón de inicio\nencontrado en un contexto de Kozak fuerte\nentre los grupos de MAF alta y baja.")
+
 par(op)
 
 # Test de Chi Cuadrado para comparar las variables cualitativas
-# READING FRAME STATUS
-m = as.table(rbind(c(rf_conserved_met_low_maf,rf_lost_met_low_maf), c(rf_conserved_met_high_maf,rf_lost_met_high_maf)))
+# MET1 READING FRAME STATUS
+rf_conserved_met1_low_maf = nrow(lowMaf[lowMaf$READING_FRAME_STATUS_1 == 'Conserved',])
+rf_lost_met1_low_maf = nrow(lowMaf[lowMaf$READING_FRAME_STATUS_1 == 'Lost',])
+rf_conserved_met1_high_maf = nrow(highMaf[highMaf$READING_FRAME_STATUS_1 == 'Conserved',])
+rf_lost_met1_high_maf = nrow(highMaf[highMaf$READING_FRAME_STATUS_1 == 'Lost',])
+m = as.table(rbind(c(rf_conserved_met1_low_maf,rf_lost_met1_low_maf), c(rf_conserved_met1_high_maf,rf_lost_met1_high_maf)))
 dimnames(m)=list(GRUPO = c("MAF BAJA", "MAF ALTA"),
                  READING_FRAME_STATUS = c("CONSERVED", "LOST"))
 m
 chisq.test(m) # p-value menor que 0.05 indica que cada grupo de mutaciones presenta diferencias significativas
 ###
 
-# KOZAK READING FRAME STATUS
-m = as.table(rbind(c(rf_conserved_kozak_low_maf,rf_lost_kozak_low_maf), c(rf_conserved_kozak_high_maf,rf_lost_kozak_high_maf)))
+# MET2 READING FRAME STATUS
+rf_conserved_met2_low_maf = nrow(lowMaf[lowMaf$READING_FRAME_STATUS_2 == 'Conserved',])
+rf_lost_met2_low_maf = nrow(lowMaf[lowMaf$READING_FRAME_STATUS_2 == 'Lost',])
+rf_conserved_met2_high_maf = nrow(highMaf[highMaf$READING_FRAME_STATUS_2 == 'Conserved',])
+rf_lost_met2_high_maf = nrow(highMaf[highMaf$READING_FRAME_STATUS_2 == 'Lost',])
+m = as.table(rbind(c(rf_conserved_met2_low_maf,rf_lost_met2_low_maf), c(rf_conserved_met2_high_maf,rf_lost_met2_high_maf)))
 dimnames(m)=list(GRUPO = c("MAF BAJA", "MAF ALTA"),
                  READING_FRAME_STATUS = c("CONSERVED", "LOST"))
 m
 chisq.test(m) # p-value mayor que 0.05 indica que cada grupo de mutaciones no presenta diferencias significativas
 
-# SIGNAL FIRST MET AFFECTED
-high_maf_signal_values_met = table(highMaf$SIGNAL_FIRST_MET_AFFECTED)
-low_maf_signal_values_met = table(lowMaf$SIGNAL_FIRST_MET_AFFECTED)
-m = as.table(rbind(c(low_maf_signal_values_met), c(high_maf_signal_values_met)))
-rownames(m) = c("MAF BAJA","MAF ALTA")
+# MET3 READING FRAME STATUS
+rf_conserved_met3_high_maf = nrow(highMaf[highMaf$READING_FRAME_STATUS_3 == 'Conserved',])
+rf_lost_met3_high_maf = nrow(highMaf[highMaf$READING_FRAME_STATUS_3 == 'Lost',])
+rf_conserved_met3_low_maf = nrow(lowMaf[lowMaf$READING_FRAME_STATUS_3 == 'Conserved',])
+rf_lost_met3_low_maf = nrow(lowMaf[lowMaf$READING_FRAME_STATUS_3 == 'Lost',])
+m = as.table(rbind(c(rf_conserved_met3_low_maf,rf_lost_met3_low_maf), c(rf_conserved_met3_high_maf,rf_lost_met3_high_maf)))
+dimnames(m)=list(GRUPO = c("MAF BAJA", "MAF ALTA"),
+                 READING_FRAME_STATUS = c("CONSERVED", "LOST"))
 m
-chisq.test(m) # p-value menor que 0.05 indica que cada grupo de mutaciones presenta diferencias significativas
+chisq.test(m) # p-value mayor que 0.05 indica que cada grupo de mutaciones no presenta diferencias significativas
 
-# SIGNAL KOZAK MET AFFECTED
-high_maf_signal_values_kozak = table(highMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
-low_maf_signal_values_kozak = table(lowMaf$SIGNAL_FIRST_KOZAK_AFFECTED)
-m = as.table(rbind(c(low_maf_signal_values_kozak), c(high_maf_signal_values_kozak)))
-rownames(m) = c("MAF BAJA","MAF ALTA")
-m
-chisq.test(m) # p-value menor que 0.05 indica que cada grupo de mutaciones presenta diferencias significativas
+# PEPTIDE SIGNAL AFFECTED MET1
+summary(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1)
+length(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1)
+summary(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1)
+length(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1)
+# PEPTIDE SIGNAL AFFECTED MET2
+summary(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2)
+length(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2)
+summary(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2)
+length(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2)
+# PEPTIDE SIGNAL AFFECTED MET3
+summary(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
+length(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
+summary(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
+length(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
+
+# PEPTIDE SIGNAL BOXPLOTS
+op <- par(mfrow = c(1, 3))
+boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1, ylab="Conservacion del peptido señal (en %)",names=c("MAF alta", "MAF baja"),
+        main="Comparativa de la conservacion del peptido senal\nencontrado entre los grupos de MAF alta y baja.")
+boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2, ylab="Conservacion del peptido señal (en %)", names = c("MAF alta", "MAF baja"),
+        main="Comparativa de la conservacion del peptido señal\ncon la met de ATGpr con score > 0.25\nentre los grupos de MAF alta y baja.")
+boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3, ylab="Conservacion del peptido señal (en %)", names = c("MAF alta", "MAF baja"),
+        main="Comparativa de la conservacion del peptido señal\nusando la MET en contexto de Kozak fuerte\nentre los grupos de MAF alta y baja.")
+par(op)
 
 
 # select variables v1, v2, v3
@@ -228,17 +288,3 @@ View(csv[csv$GENE_NAME=="ZNF827",])
 csv = add_kozak_mutated_seq_length(csv)
 myvars=c("FIRST_MET_POSITION","STOP_CODON_POSIION","MUTATED_SEQUENCE_LENGTH", "KOZAK_START", "KOZAK_END", "KOZAK_MUTATED_SEQUENCE_LENGTH")
 View(csv[myvars])
-
-# Comprobar marco de lectura segun kozak fuerte
-strong = csv[csv$KOZAK_IDENTITY!="",]
-strong=strong[strong$KOZAK_IDENTITY=="GXXATGG" | strong$KOZAK_IDENTITY=="AXXATGG",]
-weak = csv[csv$KOZAK_IDENTITY!="",]
-weak = weak[weak$KOZAK_IDENTITY != "GXXATGG" & weak$KOZAK_IDENTITY != "AXXATGG",]
-#Check
-nrow(weak) + nrow(strong) == nrow(csv[csv$KOZAK_IDENTITY!="",])
-
-strongConserved=nrow(strong[strong$KOZAK_READING_FRAME_STATUS == "Conserved",])
-strongLost=nrow(strong[strong$KOZAK_READING_FRAME_STATUS == "Lost",])
-
-weakConserved=nrow(weak[weak$KOZAK_READING_FRAME_STATUS == "Conserved",])
-weakLost=nrow(weak[weak$KOZAK_READING_FRAME_STATUS == "Lost",])
