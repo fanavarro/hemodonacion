@@ -154,3 +154,8 @@ nrow(exome_tables[["2064.xlsx"]])
 nrow(exome_tables[["ABGP.xlsx"]])
 nrow(exome_tables[["Exoma 2166 nuevo.xlsx"]])
 nrow(exome_tables[["Paqui.xlsx"]])
+
+
+# tests
+abs_file_dir = paste(exomes_dir, "PRL.GATK.snp.annovar.hg19_multianno.xls", sep="")
+nuevo = read.xls("/home/fabad/hemodonacion/data/exomes/PRL.GATK.snp.annovar.hg19_multianno.xls")

@@ -73,26 +73,53 @@ ESTADO DEL PEPTIDO SEÑAL (GRADO DE CONSERVACION)
 Ver boxplots de boxplot_signal_peptide
 Según primera metionina encontrada:
 	Grupo de MAF alta:
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-   0.00    0.00   45.71   51.02   88.46  100.00      74 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's    No NA's
+   0.00    0.00   45.71   51.02   88.46  100.00      74        13
 	Grupo de MAF baja:
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-   0.00    0.00    0.00   32.15   71.46  100.00    1158
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's    No NA's
+   0.00    0.00    0.00   32.15   71.46  100.00    1158       288
+	Wilcoxon test p = 0.06596
 
 
 Según la met predicha por ATGpr:
 	Grupo de MAF alta:
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-   0.00   60.36   75.00   70.82  100.00  100.00      80 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's    No NA's
+   0.00   60.36   75.00   70.82  100.00  100.00      80         7
 	Grupo de MAF baja:
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-   0.00    0.00    0.00   30.14   73.08  100.00    1222
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's    No NA's
+   0.00    0.00    0.00   30.14   73.08  100.00    1222       224
+	Wilcoxon test p = 0.007447
 
 
 Según la met en contexto de kozak:
 	Grupo MAF alta:
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-   0.00    0.00   45.71   44.94   88.46  100.00      74 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's    No NA's
+   0.00    0.00   45.71   44.94   88.46  100.00      74        13
 	Grupo MAF baja:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's    No NA's 
+   0.00    0.00    0.00   25.72   63.75  100.00    1162       284
+	Wilcoxon test p = 0.1173
+
+MAF DEPENDIENDO DEL CODON AFECTADO
+En el grupo de frecuencia alta hay 53 variantes que implican cambio de un sólo nucleotido afectando a 67 transcritos.
+En el grupo de frecuencia baja hay 989 variantes que implican cambio o deleción de un sólo nucleotido afectando a 1161 transcritos.
+
+          AFFECTED_CODON
+GROUP        A   T   G
+  MAF BAJA  28  28  18
+  MAF ALTA 654 444 303
+	Chi cuadrado p = 0.3241
+
+
+NUMERO DE METIONINAS EN 5' UTR
+Ver nmet5utr_density.png, nmet5utr_boxplot.png
+Grupo de frecuencia alta
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-   0.00    0.00    0.00   25.72   63.75  100.00    1162 
+  0.000   0.000   1.000   1.895   2.000  14.000       1 
+
+Grupo de frecuencia baja
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+  0.000   0.000   0.000   1.791   2.000  47.000      93 
+
+En el grupo de frecuencia alta hay un caso en el que el transcrito no tiene definida una region 5'.
+En el grupo de frecuencia baja hay 93 casos en el que el transcrito no tiene definida una region 5'.

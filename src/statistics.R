@@ -1,51 +1,5 @@
 setwd("~/hemodonacion/data/tsv")
-add_signal_lost_sup_info = function(csv){
-  for (i in 1:nrow(csv)){
-    signal_start = csv[i,"SIGNAL_PEPTIDE_START"]
-    # Sumamos dos ya que en el csv se indica el inicio del ultimo codon
-    # De esta forma, signal_end tiene el nucleotido exacto donde
-    # termina el peptido señal. 
-    signal_end = (csv[i,"SIGNAL_PEPTIDE_END"]) + 2
-    first_met = csv[i,"FIRST_MET_POSITION"]
-    first_kozak = csv[i,"KOZAK_START"]
-    signal_first_met_affected = NA
-    signal_first_kozak_affected = NA
-    if (!is.na(signal_start) && !is.na(signal_end)){
-      if(!is.na(first_met)){
-        if (first_met == signal_start){signal_first_met_affected = "Totally conserved"}
-        if (first_met > signal_start && first_met <= signal_end){signal_first_met_affected = "Partially conserved"}
-        if (first_met >= (signal_end + 1)){signal_first_met_affected = "Lost"}
-      }
-      if (!is.na(first_kozak)){
-        if (first_kozak == signal_start){signal_first_kozak_affected = "Totally conserved"}
-        if (first_kozak > signal_start && first_kozak <= signal_end){signal_first_kozak_affected = "Partially conserved"}
-        if (first_kozak >= (signal_end + 1)){signal_first_kozak_affected = "Lost"}
-      }
-    }
-    csv[i, "SIGNAL_FIRST_MET_AFFECTED"] = signal_first_met_affected
-    csv[i, "SIGNAL_FIRST_KOZAK_AFFECTED"] = signal_first_kozak_affected
-  }
-  return(csv)
-}
 
-add_mutation_type = function(csv){
-  for (i in 1:nrow(csv)){
-    codon_change = trimws(csv[i, "CODON_CHANGE"])
-    if (!is.na(codon_change) && "" != codon_change){
-      splitted = strsplit(codon_change, "/")
-      original = splitted[[1]][1]
-      mutated = splitted[[1]][2]
-      if(nchar(original) > nchar(mutated)){
-        csv[i, "VARIATION_TYPE"] = "Deletion"
-      } else if(nchar(original) < nchar(mutated)){
-        csv[i, "VARIATION_TYPE"] = "Insertion"
-      } else {
-        csv[i, "VARIATION_TYPE"] = "Nucleotid change"
-      }
-    }
-  }
-  return(csv)
-}
 
 # Leer el csv sin filtros
 csv = read.csv("11_12_2016.csv", sep="\t",stringsAsFactors=FALSE)
@@ -55,11 +9,6 @@ csv[,"MUTATED_SEQUENCE_LENGTH_3"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LE
 csv[,"SIGNAL_PEPTIDE_CONSERVATION_1"]=as.numeric(gsub("%","",csv$SIGNAL_PEPTIDE_CONSERVATION_1))
 csv[,"SIGNAL_PEPTIDE_CONSERVATION_2"]=as.numeric(gsub("%","",csv$SIGNAL_PEPTIDE_CONSERVATION_2))
 csv[,"SIGNAL_PEPTIDE_CONSERVATION_3"]=as.numeric(gsub("%","",csv$SIGNAL_PEPTIDE_CONSERVATION_3))
-#csv = add_signal_lost_sup_info(csv)
-#csv = add_mutation_type(csv)
-
-# Generar el fichero con las columnas suplementarias
-#write.table(csv, file = "final_out_no_filter_sup.csv", na="", sep="\t", row.names = F)
 
 
 csv$READING_FRAME_STATUS_1 = factor(csv$READING_FRAME_STATUS_1)
@@ -73,18 +22,6 @@ csv$GENE_NAME = factor(csv$GENE_NAME)
 #csv$SIGNAL_PEPTIDE_CONSERVATION_2 = factor(csv$SIGNAL_PEPTIDE_CONSERVATION_2)
 #csv$SIGNAL_PEPTIDE_CONSERVATION_3 = factor(csv$SIGNAL_PEPTIDE_CONSERVATION_3)
 
-
-
-
-
-# Eliminar los casos en los que hay errores en las regiones 5' o 3'
-#csv = csv[csv$CDS_ERRORS == '',]
-
-# Eliminar los casos en los que el biotipo es "non_stop_decay" o "nonsense_mediated_decay"
-#csv = csv[csv$TRANSCRIPT_BIOTYPE != 'non_stop_decay' & csv$TRANSCRIPT_BIOTYPE != 'nonsense_mediated_decay',]
-
-# Generar el fichero filtrado
-#write.table(csv, file = "final_out_filter.csv", na="", sep="\t", row.names = F)
 
 # Numero de genes con mutaciones afectando en el codon de inicio
 length(unique(csv$GENE_NAME))
@@ -150,21 +87,18 @@ summary(lowMaf$READING_FRAME_STATUS_1)
 summary(highMaf$MET_POSITION_1)
 summary(highMaf$SIGNAL_PEPTIDE_CONSERVARION_1)
 summary(highMaf$READING_FRAME_STATUS_1)
-summary(highMaf$SIGNAL_PEPTIDE_CONSERVARION_1)
 
 summary(lowMaf$MET_POSITION_2)
 summary(lowMaf$SIGNAL_PEPTIDE_CONSERVARION_2)
 summary(lowMaf$READING_FRAME_STATUS_2)
-rf_conserved_met2_low_maf = nrow(lowMaf[lowMaf$READING_FRAME_STATUS_2 == 'Conserved',])
-rf_lost_met2_low_maf = nrow(lowMaf[lowMaf$READING_FRAME_STATUS_2 == 'Lost',])
-summary(lowMaf$SIGNAL_PEPTIDE_CONSERVARION_2)
 
 summary(highMaf$MET_POSITION_2)
 summary(highMaf$SIGNAL_PEPTIDE_CONSERVARION_2)
 summary(highMaf$READING_FRAME_STATUS_2)
-rf_conserved_met2_high_maf = nrow(highMaf[highMaf$READING_FRAME_STATUS_2 == 'Conserved',])
-rf_lost_met2_high_maf = nrow(highMaf[highMaf$READING_FRAME_STATUS_2 == 'Lost',])
-summary(highMaf$SIGNAL_PEPTIDE_CONSERVARION_2)
+
+summary(highMaf$MET_POSITION_3)
+summary(highMaf$SIGNAL_PEPTIDE_CONSERVARION_3)
+summary(highMaf$READING_FRAME_STATUS_3)
 
 
 # Histogramas de la posición de la primera metionina
@@ -241,17 +175,17 @@ dimnames(m)=list(GRUPO = c("MAF BAJA", "MAF ALTA"),
 m
 chisq.test(m) # p-value mayor que 0.05 indica que cada grupo de mutaciones no presenta diferencias significativas
 
-# PEPTIDE SIGNAL AFFECTED MET1
+# SIGNAL PEPTIDE AFFECTED MET1
 summary(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1)
 length(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1)
 summary(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1)
 length(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1)
-# PEPTIDE SIGNAL AFFECTED MET2
+# SIGNAL PEPTIDE AFFECTED MET2
 summary(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2)
 length(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2)
 summary(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2)
 length(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2)
-# PEPTIDE SIGNAL AFFECTED MET3
+# SIGNAL PEPTIDE AFFECTED MET3
 summary(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
 length(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
 summary(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
@@ -267,12 +201,72 @@ boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3, lowMaf$SIGNAL_PEPTIDE_CONSERVATIO
         main="Comparativa de la conservacion del peptido señal\nusando la MET en contexto de Kozak fuerte\nentre los grupos de MAF alta y baja.")
 par(op)
 
+# SIGNAL PEPTIDE COMPARATION
+wilcox.test(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1, paired = F, conf.level = 0.95) # Distribuciones diferentes
+wilcox.test(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2, paired = F, conf.level = 0.95) # Distribuciones diferentes
+wilcox.test(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3, paired = F, conf.level = 0.95) # Distribuciones diferentes
+
+# POSICIONES AFECTADAS
+# Nos quedamos con las mutaciones que solo afectan a una posicion.
+affectedPosHighMaf = c()
+for (i in 1:(nrow(highMaf))){
+  if (is.na(highMaf$CDS_COORDS[i]) || highMaf$CDS_COORDS[i] == ""){
+    next
+  }
+  interval = strsplit(highMaf$CDS_COORDS[i], "-")
+  begin = as.numeric(interval[[1]][[1]])
+  end = as.numeric(interval[[1]][[2]])
+  if(begin == end){
+    affectedPosHighMaf = rbind(affectedPosHighMaf, cbind(highMaf[i,], AFFECTED_POS = begin))
+  }
+}
+
+affectedPosLowMaf = c()
+for (i in 1:(nrow(lowMaf))){
+  if (is.na(lowMaf$CDS_COORDS[i]) || lowMaf$CDS_COORDS[i] == ""){
+    next
+  }
+  interval = strsplit(lowMaf$CDS_COORDS[i], "-")
+  begin = as.numeric(interval[[1]][[1]])
+  end = as.numeric(interval[[1]][[2]])
+  if(begin == end){
+    affectedPosLowMaf = rbind(affectedPosLowMaf, cbind(lowMaf[i,], AFFECTED_POS = begin))
+  }
+}
+
+# Numero de variantes
+length(unique(affectedPosHighMaf$VARIATION_NAME))
+length(unique(affectedPosLowMaf$VARIATION_NAME))
+# Numero de transcritos afectados
+length(unique(affectedPosHighMaf$TRANSCRIPT_ID))
+length(unique(affectedPosLowMaf$TRANSCRIPT_ID))
+
+tableAffectedPosHM= table(affectedPosHighMaf$AFFECTED_POS)
+tableAffectedPosLM = table(affectedPosLowMaf$AFFECTED_POS)
+m = as.table(rbind(c(tableAffectedPosHM[1], tableAffectedPosHM[2], tableAffectedPosHM[3]), c(tableAffectedPosLM[1], tableAffectedPosLM[2], tableAffectedPosLM[3])))
+dimnames(m)=list(GROUP = c("MAF BAJA", "MAF ALTA"),
+                 AFFECTED_CODON = c("A", "T", "G"))
+m
+chisq.test(m)
+
+
+# CODONES DE INICIO PREVIOS AL CODON DE INICIO ORIGINAL
+op <- par(mfrow = c(1, 2))
+plot(density(highMaf$METS_IN_5_UTR, na.rm = T), main = "Densidad numero de metioninas en 5' UTR en MAF alta.", xlab = "Numero de metioninas en 5'UTR")
+plot(density(lowMaf$METS_IN_5_UTR, na.rm = T), main = "Densidad numero de metioninas en 5' UTR en MAF baja.", xlab = "Numero de metioninas en 5'UTR")
+par(op)
+boxplot(highMaf$METS_IN_5_UTR, lowMaf$METS_IN_5_UTR, main = "Numero de metioninas en 5' UTR segun MAF", names = c("MAF alta", "MAF baja"), ylab = "Numero de metioninas en 5' UTR", ylim=c(0, 20))
+summary(highMaf$METS_IN_5_UTR)
+summary(lowMaf$METS_IN_5_UTR)
+
 
 # select variables v1, v2, v3
 myvars <- c("TRANSCRIPT_ID","FIRST_MET_POSITION","STOP_CODON_POSITION","MUTATED_SEQUENCE_LENGTH", "KOZAK_START", "KOZAK_END", "KOZAK_MUTATED_SEQUENCE_LENGTH", "KOZAK_STOP_CODON", "KOZAK_READING_FRAME_STATUS")
-myvars=c("GENE_NAME","VARIATION_NAME","MINOR_ALLELE_FREQUENCY", "FIRST_MET_POSITION","READING_FRAME_STATUS", "KOZAK_START", "KOZAK_READING_FRAME_STATUS", "CODON_CHANGE")
-View(highMaf[myvars])
+myvars=c("TRANSCRIPT_ID", "VARIATION_NAME", "VARIATION_TYPE", "CDS_COORDS", "AFFECTED_POS")
+View(affectedPosLowMaf[myvars])
+View(affectedPosHighMaf[myvars])
 myvars = c("CHROMOSOME", "GENE_ID", "GENE_NAME", "TRANSCRIPT_ID", "TRANSCRIPT_REFSEQ_ID", "TRANSCRIPT_BIOTYPE", "CDS_ERRORS", "PROTEIN_ID", "VARIATION_NAME", "SOURCE", "TRANSCRIPT_VARIATION_ALLELE_DBID", "MINOR_ALLELE_FREQUENCY", "CODON_CHANGE", "AMINOACID_CHANGE", "FIRST_MET_POSITION", "STOP_CODON_POSITION", "MUTATED_SEQUENCE_LENGTH", "READING_FRAME_STATUS", "KOZAK_START", "KOZAK_END", "KOZAK_STOP_CODON", "KOZAK_MUTATED_SEQUENCE_LENGTH", "KOZAK_ORF_AA_LENGTH", "KOZAK_IDENTITY", "KOZAK_RELIABILITY", "KOZAK_READING_FRAME_STATUS", "KOZAK_PROTEIN_SEQ", "SIGNAL_PEPTIDE_START", "SIGNAL_PEPTIDE_END", "CONSEQUENCE", "PHENOTYPE", "SO_TERM", "SIFT", "POLYPHEN", "PUBLICATIONS")
+
 nrow(csv[csv$GENE_NAME=="AADACL3",])
 nrow(csv[csv$GENE_NAME=="C6orf7",])
 View(csv[csv$GENE_NAME=="GP6",])
@@ -285,6 +279,11 @@ View(csv[csv$GENE_NAME=="ZNF682",])
 View(csv[csv$GENE_NAME=="ZNF827",])
 
 
-csv = add_kozak_mutated_seq_length(csv)
 myvars=c("FIRST_MET_POSITION","STOP_CODON_POSIION","MUTATED_SEQUENCE_LENGTH", "KOZAK_START", "KOZAK_END", "KOZAK_MUTATED_SEQUENCE_LENGTH")
 View(csv[myvars])
+
+m = as.table(rbind(c(tableAffectedPosHM[1], tableAffectedPosHM[2], tableAffectedPosHM[3]), c(tableAffectedPosLM[1], tableAffectedPosLM[2], tableAffectedPosLM[3])))
+dimnames(m)=list(GROUP = c("MAF BAJA", "MAF ALTA"),
+                 AFFECTED_CODON = c("A", "T", "G"))
+m
+chisq.test(m)
