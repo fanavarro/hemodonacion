@@ -100,6 +100,10 @@ summary(highMaf$MET_POSITION_3)
 summary(highMaf$SIGNAL_PEPTIDE_CONSERVARION_3)
 summary(highMaf$READING_FRAME_STATUS_3)
 
+summary(lowMaf$MET_POSITION_3)
+summary(lowMaf$SIGNAL_PEPTIDE_CONSERVARION_3)
+summary(lowMaf$READING_FRAME_STATUS_3)
+
 
 # Histogramas de la posición de la primera metionina
 hist(highMaf$MET_POSITION_1, xlim = c(0,1000))
@@ -130,13 +134,13 @@ wilcox.test(highMaf$MET_POSITION_3, lowMaf$MET_POSITION_3, paired = F, conf.leve
 boxplot(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1, ylim=c(0,3000))
 boxplot(highMaf$MET_POSITION_2, lowMaf$MET_POSITION_2, ylim=c(0,1500))
 
-op <- par(mfrow = c(1, 3))
-boxplot(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1, ylim=c(0,250), ylab="Posición del codón inicial (en pares de bases)",names=c("MAF alta", "MAF baja"),
-        main="Comparativa de la posición del primer codón de inicio\nencontrado entre los grupos de MAF alta y baja.")
+op <- par(mfrow = c(1, 2))
+boxplot(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1,  ylab="First AUG position (bp)",names=c("Polymorphisms", "Mutations"),
+        main="Comparison of the position of the first initiation codon found\nbetween polymorphisms and mutations")
 boxplot(highMaf$MET_POSITION_2, lowMaf$MET_POSITION_2, ylim=c(0,600), ylab="Posición del codón inicial (en pares de bases)", names = c("MAF alta", "MAF baja"),
         main="Comparativa de la posición del primer codón de inicio\npredicho por ATGpr con score > 0.25\nentre los grupos de MAF alta y baja.")
-boxplot(highMaf$MET_POSITION_3, lowMaf$MET_POSITION_3, ylim=c(0,600), ylab="Posición del codón inicial (en pares de bases)", names = c("MAF alta", "MAF baja"),
-        main="Comparativa de la posición del primer codón de inicio\nencontrado en un contexto de Kozak fuerte\nentre los grupos de MAF alta y baja.")
+boxplot(highMaf$MET_POSITION_3, lowMaf$MET_POSITION_3, ylab="First AUG position (bp)", names = c("Polymorphisms", "Mutations"),
+        main="Comparison of the position of the first initiation codon found\nin a strong Kozak context\nbetween polymorphisms and mutations")
 
 par(op)
 
@@ -192,13 +196,13 @@ summary(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
 length(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
 
 # PEPTIDE SIGNAL BOXPLOTS
-op <- par(mfrow = c(1, 3))
-boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1, ylab="Conservacion del peptido señal (en %)",names=c("MAF alta", "MAF baja"),
-        main="Comparativa de la conservacion del peptido senal\nencontrado entre los grupos de MAF alta y baja.")
+op <- par(mfrow = c(1, 2))
+boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1, ylab="Conservation percentage of the signal peptide",names=c("Polymorphisms", "Mutations"),
+        main="Signal peptide conservation\nusing the first \"AUG\"\nfound as initiation codon.")
 boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2, ylab="Conservacion del peptido señal (en %)", names = c("MAF alta", "MAF baja"),
         main="Comparativa de la conservacion del peptido señal\ncon la met de ATGpr con score > 0.25\nentre los grupos de MAF alta y baja.")
-boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3, ylab="Conservacion del peptido señal (en %)", names = c("MAF alta", "MAF baja"),
-        main="Comparativa de la conservacion del peptido señal\nusando la MET en contexto de Kozak fuerte\nentre los grupos de MAF alta y baja.")
+boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3, ylab="ConservationPercentage of the signal peptide", names = c("Polymorphisms", "Mutations"),
+        main="Signal peptide conservation\nusing using the first \"AUG\" found\nin a strong Kozak context.")
 par(op)
 
 # SIGNAL PEPTIDE COMPARATION
@@ -251,13 +255,15 @@ chisq.test(m)
 
 
 # CODONES DE INICIO PREVIOS AL CODON DE INICIO ORIGINAL
-op <- par(mfrow = c(1, 2))
-plot(density(highMaf$METS_IN_5_UTR, na.rm = T), main = "Densidad numero de metioninas en 5' UTR en MAF alta.", xlab = "Numero de metioninas en 5'UTR")
-plot(density(lowMaf$METS_IN_5_UTR, na.rm = T), main = "Densidad numero de metioninas en 5' UTR en MAF baja.", xlab = "Numero de metioninas en 5'UTR")
-par(op)
-boxplot(highMaf$METS_IN_5_UTR, lowMaf$METS_IN_5_UTR, main = "Numero de metioninas en 5' UTR segun MAF", names = c("MAF alta", "MAF baja"), ylab = "Numero de metioninas en 5' UTR", ylim=c(0, 20))
+plot(density(lowMaf$METS_IN_5_UTR, na.rm = T), col="red", main = "Number of \"AUG\" codons in 5' UTR", xlab = "Number of \"AUG\" codons in 5' UTR")
+lines(density(highMaf$METS_IN_5_UTR, na.rm = T), col ="blue")
+legend(35, 0.6, c("Mutations","Polymorphisms"), lty=c(1,1), col = c("red","blue"))
+
+boxplot(highMaf$METS_IN_5_UTR, lowMaf$METS_IN_5_UTR, main = "Numero de metioninas en 5' UTR segun MAF", names = c("MAF alta", "MAF baja"), ylab = "Numero de metioninas en 5' UTR")
 summary(highMaf$METS_IN_5_UTR)
 summary(lowMaf$METS_IN_5_UTR)
+
+wilcox.test(lowMaf$METS_IN_5_UTR, highMaf$METS_IN_5_UTR, paired = F, conf.level = 0.95) # Distribuciones diferentes
 
 
 # select variables v1, v2, v3

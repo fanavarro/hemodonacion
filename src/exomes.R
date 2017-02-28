@@ -54,7 +54,7 @@ filter_protein_pos_xls = function(xls){
 
 get_gene_names = function(xls){
   if("gene" %in% colnames(xls)){
-    return(sort(xls$gene))
+    return(sort(paste(xls$gene," (", xls$protein,") ","MAF = ", xls$maf, sep = "")))
   }
 }
 
@@ -107,14 +107,29 @@ nrow(exome_tables[["2064.xlsx"]])
 nrow(exome_tables[["ABGP.xlsx"]])
 nrow(exome_tables[["Exoma 2166 nuevo.xlsx"]])
 nrow(exome_tables[["Paqui.xlsx"]])
-mean(c(nrow(exome_tables[["14-173.xlsx"]]),nrow(exome_tables[["2064.xlsx"]]),nrow(exome_tables[["ABGP.xlsx"]]),nrow(exome_tables[["Exoma 2166 nuevo.xlsx"]]),nrow(exome_tables[["Paqui.xlsx"]])))
+median(c(nrow(exome_tables[["14-173.xlsx"]]),nrow(exome_tables[["2064.xlsx"]]),nrow(exome_tables[["ABGP.xlsx"]]),nrow(exome_tables[["Exoma 2166 nuevo.xlsx"]]),nrow(exome_tables[["Paqui.xlsx"]])))
 
 # get genes
 genes = c()
 for (file in exome_files){
   genes = c(genes, as.vector(get_gene_names(exome_tables[[file]])))
 }
-
+# manual normalization
+genes[41]="LENG9 (p.Met1Lys) MAF = 0.448" 
+genes[53]="LENG9 (p.Met1Lys) MAF = 0.448" 
+genes[40] ="KRTAP4-8 (p.Met1Asn) MAF = 0.419" 
+genes[52] ="KRTAP4-8 (p.Met1Asn) MAF = 0.419" 
+genes[10]="STK11IP (p.Arg1Met) MAF = 0.142"
+genes[22]="STK11IP (p.Arg1Met) MAF = 0.142"
+genes[42]="OR8K1 (p.Met1Thr) MAF = 0.239"
+genes[56]="OR8K1 (p.Met1Thr) MAF = 0.239"
+genes[19]="NARS2 (p.Met1Ser)"
+genes[43]="POLG2 (p.Met1fs)"
+genes[38]="GP6 (p.Met1fs)"
+genes[47]="ZNF827 (p.Met1Val)"
+genes[57]="SAAL1 (p.Met1fs)"
+genes[60]="ZNF682 (p.Met1fs)"
+genes[55]="NUDT11 (p.Met1fs)"
 # get dbsnp ids
 dbsnp_ids = c()
 for (file in exome_files){
@@ -126,19 +141,27 @@ length(unique(genes))
 
 # gene frequency
 op = par(las=2) # make label text perpendicular to axis
-op = par(mar=c(5,8,4,2)) # increase y-axis margin.
-barplot(table(genes), horiz=T)
+op = par(mar=c(5,18,4,2)) # increase y-axis margin.
+barplot(table(genes), horiz=T, axes=F)
+axis(1, at=0:5, labels = 0:5, srt=10, xpd=TRUE)
 par(op)
 View(exome_tables[["14-173.xlsx"]])
 View(exome_tables[["2064.xlsx"]])
 View(exome_tables[["ABGP.xlsx"]])
 View(exome_tables[["Exoma 2166 nuevo.xlsx"]])
 View(exome_tables[["Paqui.xlsx"]])
-View(search(csv, exome_tables[["14-173.xlsx"]]))
-View(search(csv, exome_tables[["2064.xlsx"]]))
-View(search(csv, exome_tables[["ABGP.xlsx"]]))
-View(search(csv, exome_tables[["Exoma 2166 nuevo.xlsx"]]))
-View(search(csv, exome_tables[["Paqui.xlsx"]]))
+p1found=(search(csv, exome_tables[["14-173.xlsx"]]))
+p2found=(search(csv, exome_tables[["2064.xlsx"]]))
+p3found=(search(csv, exome_tables[["ABGP.xlsx"]]))
+p4found=(search(csv, exome_tables[["Exoma 2166 nuevo.xlsx"]]))
+p5found=(search(csv, exome_tables[["Paqui.xlsx"]]))
+mergedVariationsFound = unique(rbind(p1found,p2found,p3found,p4found,p5found))
+View(p1found)
+View(p2found)
+View(p3found)
+View(p4found)
+View(p5found)
+View(data.frame(p1found,p2found))
   
 
 get_gene_names(exome_tables[["14-173.xlsx"]])
@@ -155,7 +178,10 @@ nrow(exome_tables[["ABGP.xlsx"]])
 nrow(exome_tables[["Exoma 2166 nuevo.xlsx"]])
 nrow(exome_tables[["Paqui.xlsx"]])
 
-
+# MAF mean
+mafs = c(0.318,0.401,0.141,0.233,0.197,0.006,0.104,0.239,0.346,0.06,0.419,0.448,0.309,0.123,0.261,0.37,0.133,0.388,0.081,0.123,0.169)
+mean(mafs)
 # tests
 abs_file_dir = paste(exomes_dir, "PRL.GATK.snp.annovar.hg19_multianno.xls", sep="")
 nuevo = read.xls("/home/fabad/hemodonacion/data/exomes/PRL.GATK.snp.annovar.hg19_multianno.xls")
+View(table(genes))

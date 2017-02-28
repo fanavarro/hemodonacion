@@ -5,7 +5,7 @@ GRADO DE RECURRENCIA DE VARIANTES EN MET1
 15296 combinaciones de alelo afectando a transcrito distintas
 ¿Contamos cada alelo como una mutación distinta?
 
-Gen mas afectado -> PAX5
+Gen mas afectado -> PAX5 (buscar transcritos de los genes, importancia del gen, buscar genes por numero de transcritos distintos)
 8 transcritos afectados
 9 mutaciones
 64 combinaciones de alelo afectando a transcrito distintas
@@ -26,8 +26,8 @@ indel: 5
 insertion: 272
 sequence_alteration: 26 
 SNP: 10685
-somatic_sequence_alteration: 3816
-substituition: 1
+somatic_sequence_alteration: 3816 --Eliminar somaticas en los analisis
+substituition: 1 (es un SNP)
 
 COMPARATIVA ENTRE MARCOS DE LECTURA CONSERVADOS ENTRE PRIMERA MET CON MET EN CONTEXTO KOZAK FUERTE (ESTA VEZ SI)
                         Conserved                Lost
@@ -48,6 +48,7 @@ De los 1190 transcritos afectados por mutaciones en MET 1, 959 carecen de peptid
 
 COMPARACION DE LA POSICION DE LA METIONINA ALTERNATIVA
 Ver boxplot_altmet.png.
+Comprobar outliers
 Test de wilcoxon significativo en los 3 casos.
 
 MANTENIMIENTO DEL MARCO DE LECTURA
@@ -100,7 +101,7 @@ Según la met en contexto de kozak:
    0.00    0.00    0.00   25.72   63.75  100.00    1162       284
 	Wilcoxon test p = 0.1173
 
-MAF DEPENDIENDO DEL CODON AFECTADO
+MAF DEPENDIENDO DEL CODON AFECTADO (parte descriptiva inicial. Hacerlo de forma global, sin MAF)
 En el grupo de frecuencia alta hay 53 variantes que implican cambio de un sólo nucleotido afectando a 67 transcritos.
 En el grupo de frecuencia baja hay 989 variantes que implican cambio o deleción de un sólo nucleotido afectando a 1161 transcritos.
 
