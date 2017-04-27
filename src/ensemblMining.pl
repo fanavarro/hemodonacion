@@ -59,8 +59,8 @@ my $slice_adaptor = $registry->get_adaptor( 'Human', 'Core', 'Slice' );
 my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcriptvariation' );
 
 # Chromosomes to be treated
-# my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
-my @chromosomes = qw(8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
+my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
+#my @chromosomes = qw(1);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
@@ -167,28 +167,27 @@ sub get_transcript_variation_info{
     my $count = 1;
     my $n = scalar @{$trvs};
     foreach my $tv ( @{$trvs} ) {
-	print "Chromosome $chromosome\t Transcript Variation: $count/$n\t" . $tv->transcript->display_id . '-' . $tv->variation_feature->variation_name . "\n";
-	$count = $count + 1;
+        print "Chromosome $chromosome\t Transcript Variation: $count/$n\t" . $tv->transcript->display_id . '-' . $tv->variation_feature->variation_name . "\n";
+        $count = $count + 1;
 	
-	my $variation = $tv->variation_feature->variation;
+        my $variation = $tv->variation_feature->variation;
         my $transcript = $tv->transcript;
         my $cds_errors = get_cds_errors($transcript);
         # If there exist errors in cds or variation does not have evidences, we skip the transcript_variation.
         if ($cds_errors ne ""){next};
         if (scalar(@{$variation->get_all_evidence_values}) == 0){next};
-	my $minor_allele_frequency = $tv->variation_feature->minor_allele_frequency ? $tv->variation_feature->minor_allele_frequency : '';
-	my $phenotype_info = get_phenotype_info($variation);
-	my $publications_info = get_publications_info($variation);
+        my $minor_allele_frequency = $tv->variation_feature->minor_allele_frequency ? $tv->variation_feature->minor_allele_frequency : '';
+        my $phenotype_info = get_phenotype_info($variation);
+        my $publications_info = get_publications_info($variation);
         my $ref_seq_mrna_ids = get_ref_seq_mrna_ids($transcript);
         my $signal_peptide_info = get_signal_peptide_info($transcript);
-        my $mets_in_5_utr = myUtils::SeqUtils::count_mets($transcript->five_prime_utr->seq) if (defined $transcript->five_prime_utr);
         my $cds_coords = $tv->cds_start . '-' . $tv->cds_end if (defined $tv->cds_start && defined $tv->cds_end);
-	my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
+        my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
 
-	foreach my $tva ( @{$tvas} ) {
-            if(myUtils::SeqUtils::exists_in_list($tva->dbID, \@IGNORED_TVA_DBID)){
-                next;
-            }
+        foreach my $tva ( @{$tvas} ) {
+            #if(myUtils::SeqUtils::exists_in_list($tva->dbID, \@IGNORED_TVA_DBID)){
+            #    next;
+            #}
             my %entry;
 	    	
             my @ensembl_consequences;
@@ -205,6 +204,7 @@ sub get_transcript_variation_info{
             my $seq_info = get_sequence_info($tva);
             my $atgpr_info = get_atgpr_info($tva);
             my $pwm_info = get_match_pwm_info($tva);
+            my $mets_in_5_utr = get_five_prime_utr_info($tva);
 
             $entry{'CHROMOSOME'} = $chromosome;
             $entry{'GENE_ID'} = $transcript->get_Gene->stable_id;
@@ -737,7 +737,26 @@ sub get_signal_peptide_conservarion{
     return $conservation . '%';
 }
 
-
-
+# Get info about mets in 5' utr region.
+# param 0 -> transcript object
+# return a formatted String with the following format:
+#   met_position1_conserved|lost met_position2_conserved|lost ...
+sub get_five_prime_utr_info{
+    my $formatted_result = '';
+    my $tva = shift;
+    my $transcript = $tva->transcript;
+    my $mutated_seq = get_variation_cdna_seq($tva);
+    my $wild_seq = $transcript->seq->seq;
+    if (defined ($transcript->five_prime_utr) && defined ($wild_seq) && defined ($mutated_seq)){
+        my $number_of_new_or_deleted_nucleotides = abs(length($wild_seq) - length($mutated_seq));
+        my $met_info_list = myUtils::SeqUtils::get_5_utr_mets_info($transcript->five_prime_utr->seq, $number_of_new_or_deleted_nucleotides);
+        foreach my $met_info (@{$met_info_list}){
+            $formatted_result = $formatted_result . $met_info->{'met_position'} . '_';
+            $formatted_result = $formatted_result . $met_info->{'reading_frame'} . ' ';
+        }
+        chop($formatted_result)
+    }
+    return $formatted_result;
+}
 
 

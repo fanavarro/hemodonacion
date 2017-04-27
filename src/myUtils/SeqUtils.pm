@@ -288,6 +288,16 @@ sub get_kozak_context {
     return substr($cdna, $translation_start_pos - $pos_before, $pos_before + $pos_after + 3);    
 }
 
+# Receives a sequence and a position and returns true if
+# there is a met in that position.
+# param 0 -> sequence.
+# param 1 -> position in the sequence.
+sub is_met{
+    my $seq = shift;
+    my $pos = shift;
+    return (substr($seq, $pos, 3) eq $MET);
+}
+
 # Receives a sequence and count the number of initiation codons found.
 sub count_mets{
     my $seq = shift;
@@ -300,6 +310,51 @@ sub count_mets{
         }
     }
     return $count;
+}
+
+# Return a list with the positions of found methionines in a sequence.
+# param 0 -> sequence
+sub get_met_positions{
+    my $seq = shift;
+    my @positions;
+    if (defined $seq){
+        for(my $i = 0 ; $i < length($seq)-2; $i++){
+            if(is_met($seq, $i)){
+                push @positions, $i;
+            }
+        }
+    }
+    return \@positions;
+}
+
+# Return info about methionines found in 5' utr region.
+# param 0 -> 5'utr sequence.
+# param 1 -> Number of new or deleted nucleotides in the original sequence due to the variation.
+# return a list of hashes with the following fields:
+#   met_position -> The position of the methionine found in 5' utr relative to the wild initiation codon.
+#                    It will be a negative number due to the initiation codon is in position 0.
+#   reading_frame -> True if the methionine in 5' utr is in the same reading frame than the wild initiation codon.
+sub get_5_utr_mets_info{
+    my @result_list = ();
+
+    my $five_prime = shift;
+    my $number_of_new_or_deleted_nucleotides = shift;
+    if (defined ($five_prime)){
+        my $met_positions = myUtils::SeqUtils::get_met_positions($five_prime);
+        foreach my $met_position (@{$met_positions}){
+            my $result_hash = {};
+            # Position relative to the natural initiation codon.
+            my $relative_met_position = $met_position - (length($five_prime));
+            $result_hash->{'met_position'} = $relative_met_position;
+            if(($relative_met_position + $number_of_new_or_deleted_nucleotides) % 3 == 0){
+                $result_hash->{'reading_frame'} = 'conserved';
+            } else {
+                $result_hash->{'reading_frame'} = 'lost';
+            }
+            push @result_list, $result_hash;
+        }
+    }
+    return \@result_list;
 }
 
 1;
