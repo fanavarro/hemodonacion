@@ -24,3 +24,4 @@ rbind(data.frame(start=start(hits), end=end(hits), width=width(hits), score=mcol
 # seqlogo necesita una matriz de frecuencias.
 seqLogo(pfm[1:4 , ])
 score(hits)
+(mcols(hits)$score)

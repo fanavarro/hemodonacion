@@ -18,8 +18,6 @@ if (scalar @ARGV == 2){
 my $out_file_name1 = substr($file_name1, 0, index ($file_name1, '.')) . '_uniq.csv';
 my $out_file_name2 = substr($file_name2, 0, index ($file_name2, '.')) . '_uniq.csv';
 
-my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_BIOTYPE CDS_ERRORS PROTEIN_ID VARIATION_NAME SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE AMINOACID_CHANGE FIRST_MET_POSITION STOP_CODON_POSITION MUTATED_SEQUENCE_LENGTH READING_FRAME_STATUS CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
-
 my %params1 = (
 #fields    => \@fields,
 csv_separator   => "\t",

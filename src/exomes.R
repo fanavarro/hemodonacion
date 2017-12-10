@@ -142,8 +142,10 @@ length(unique(genes))
 # gene frequency
 op = par(las=2) # make label text perpendicular to axis
 op = par(mar=c(5,18,4,2)) # increase y-axis margin.
-barplot(table(genes), horiz=T, axes=F)
-axis(1, at=0:5, labels = 0:5, srt=10, xpd=TRUE)
+barplot(table(genes), horiz=T, axes=F, xlab = "Number of carriers")
+lablist<-as.vector(c(0:5))
+axis(1, at=0:5, labels = FALSE)
+text(seq(0, 5, by=1), par("usr")[3] - 0.2, labels = lablist, srt = 0, pos = 1, offset = 0.65, xpd = TRUE)
 par(op)
 View(exome_tables[["14-173.xlsx"]])
 View(exome_tables[["2064.xlsx"]])

@@ -2,7 +2,7 @@ setwd("~/hemodonacion/data/tsv")
 
 
 # Leer el csv sin filtros
-csv = read.csv("11_12_2016.csv", sep="\t",stringsAsFactors=FALSE)
+csv = read.csv("26_04_2017.csv", sep="\t",stringsAsFactors=FALSE)
 csv[,"MUTATED_SEQUENCE_LENGTH_1"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH_1))
 csv[,"MUTATED_SEQUENCE_LENGTH_2"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH_2))
 csv[,"MUTATED_SEQUENCE_LENGTH_3"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH_3))
@@ -37,7 +37,7 @@ length(unique(csv$VARIATION_NAME))
 # Numero de alelos distintos
 length(unique(csv$TRANSCRIPT_VARIATION_ALLELE_DBID))
 
-# Transcritos afectados de TP53, CACNA1C y TP53
+# Transcritos afectados de TP53, CACNA1C y CDKN2A
 length(unique(csv[csv$GENE_NAME=="TP53",]$TRANSCRIPT_ID))
 length(unique(csv[csv$GENE_NAME=="CACNA1C",]$TRANSCRIPT_ID))
 length(unique(csv[csv$GENE_NAME=="CDKN2A",]$TRANSCRIPT_ID))
@@ -135,12 +135,10 @@ boxplot(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1, ylim=c(0,3000))
 boxplot(highMaf$MET_POSITION_2, lowMaf$MET_POSITION_2, ylim=c(0,1500))
 
 op <- par(mfrow = c(1, 2))
-boxplot(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1,  ylab="First AUG position (bp)",names=c("Polymorphisms", "Mutations"),
-        main="Comparison of the position of the first initiation codon found\nbetween polymorphisms and mutations")
+boxplot(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1,  ylab="First AUG position (bp)",names=c("High MAF", "Low MAF"))
 boxplot(highMaf$MET_POSITION_2, lowMaf$MET_POSITION_2, ylim=c(0,600), ylab="Posición del codón inicial (en pares de bases)", names = c("MAF alta", "MAF baja"),
         main="Comparativa de la posición del primer codón de inicio\npredicho por ATGpr con score > 0.25\nentre los grupos de MAF alta y baja.")
-boxplot(highMaf$MET_POSITION_3, lowMaf$MET_POSITION_3, ylab="First AUG position (bp)", names = c("Polymorphisms", "Mutations"),
-        main="Comparison of the position of the first initiation codon found\nin a strong Kozak context\nbetween polymorphisms and mutations")
+boxplot(highMaf$MET_POSITION_3, lowMaf$MET_POSITION_3, ylab="First AUG position in strong Kozak (bp)", names = c("High MAF", "Low MAF"))
 
 par(op)
 
@@ -197,15 +195,13 @@ length(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
 
 # PEPTIDE SIGNAL BOXPLOTS
 op <- par(mfrow = c(1, 2))
-boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1, ylab="Conservation percentage of the signal peptide",names=c("Polymorphisms", "Mutations"),
-        main="Signal peptide conservation\nusing the first \"AUG\"\nfound as initiation codon.")
+boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1, ylab="Conservation percentage of the signal peptide",names=c("High MAF", "Low MAF"),main="A", ylim=c(0,120))
 boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2, ylab="Conservacion del peptido señal (en %)", names = c("MAF alta", "MAF baja"),
         main="Comparativa de la conservacion del peptido señal\ncon la met de ATGpr con score > 0.25\nentre los grupos de MAF alta y baja.")
-boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3, ylab="ConservationPercentage of the signal peptide", names = c("Polymorphisms", "Mutations"),
-        main="Signal peptide conservation\nusing using the first \"AUG\" found\nin a strong Kozak context.")
+boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3, ylab="Conservation percentage of the signal peptide", names = c("High MAF", "Low MAF"),main="B", ylim=c(0,120))
 par(op)
 
-# SIGNAL PEPTIDE COMPARATION
+# SIGNAL PEPTIDE COMPARISON
 wilcox.test(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1, paired = F, conf.level = 0.95) # Distribuciones diferentes
 wilcox.test(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2, paired = F, conf.level = 0.95) # Distribuciones diferentes
 wilcox.test(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3, paired = F, conf.level = 0.95) # Distribuciones diferentes
@@ -255,17 +251,46 @@ chisq.test(m)
 
 
 # CODONES DE INICIO PREVIOS AL CODON DE INICIO ORIGINAL
-plot(density(lowMaf$METS_IN_5_UTR, na.rm = T), col="red", main = "Number of \"AUG\" codons in 5' UTR", xlab = "Number of \"AUG\" codons in 5' UTR")
-lines(density(highMaf$METS_IN_5_UTR, na.rm = T), col ="blue")
-legend(35, 0.6, c("Mutations","Polymorphisms"), lty=c(1,1), col = c("red","blue"))
-
-boxplot(highMaf$METS_IN_5_UTR, lowMaf$METS_IN_5_UTR, main = "Numero de metioninas en 5' UTR segun MAF", names = c("MAF alta", "MAF baja"), ylab = "Numero de metioninas en 5' UTR")
+op <- par(mfrow = c(2,1))
+numberOfMet5UTRLowMAF=sapply(strsplit(lowMaf$METS_IN_5_UTR, " "), length)
+plot(density(numberOfMet5UTRLowMAF), col=gray(0.4), main="A", xlab = "Number of \"AUG\" codons in 5' UTR")
+numberOfMet5UTRHighMAF=sapply(strsplit(highMaf$METS_IN_5_UTR, " "), length)
+lines(density(numberOfMet5UTRHighMAF), col =gray(0), lty=5)
+legend(34, 0.68, c("Low MAF","High MAF"), lty=c(1,5), col = c(gray(0.4),gray(0)))
 summary(highMaf$METS_IN_5_UTR)
 summary(lowMaf$METS_IN_5_UTR)
 
-wilcox.test(lowMaf$METS_IN_5_UTR, highMaf$METS_IN_5_UTR, paired = F, conf.level = 0.95) # Distribuciones diferentes
+wilcox.test(numberOfMet5UTRLowMAF, numberOfMet5UTRHighMAF, paired = F, conf.level = 0.95)
 
+# Contar los que mantienen fase de lectura
+for (i in 1:nrow(highMaf)) {
+  metUtrCol = highMaf$METS_IN_5_UTR[i]
+  if(is.na(metUtrCol) || metUtrCol == ""){
+    highMaf$CONSERVED_METS_IN_5_UTR[i] = 0
+  } else {
+    highMaf$CONSERVED_METS_IN_5_UTR[i] = length(grep("conserved", strsplit(metUtrCol," ")[[1]]))
+  }
+}
+for (i in 1:nrow(lowMaf)) {
+  metUtrCol = lowMaf$METS_IN_5_UTR[i]
+  if(is.na(metUtrCol) || metUtrCol == ""){
+    lowMaf$CONSERVED_METS_IN_5_UTR[i] = 0
+  } else {
+    lowMaf$CONSERVED_METS_IN_5_UTR[i] = length(grep("conserved", strsplit(metUtrCol," ")[[1]]))
+  }
+}
 
+summary(highMaf$CONSERVED_METS_IN_5_UTR)
+summary(lowMaf$CONSERVED_METS_IN_5_UTR)
+wilcox.test(highMaf$CONSERVED_METS_IN_5_UTR, lowMaf$CONSERVED_METS_IN_5_UTR, paired = F, conf.level = 0.95)
+plot(density(lowMaf$CONSERVED_METS_IN_5_UTR), col=gray(0.4), main="B", xlab = "Number of \"AUG\" codons maintaining the reading frame in 5' UTR")
+lines(density(highMaf$CONSERVED_METS_IN_5_UTR), col =gray(0), lty=5)
+legend(14, 1, c("Low MAF","High MAF"), lty=c(1,5), col = c(gray(0.4),gray(0)))
+par(op)
+
+View(highMaf[highMaf$METS_IN_5_UTR,highMaf$CONSERVED_METS_IN_5_UTR])
+myvars = c("METS_IN_5_UTR", "CONSERVED_METS_IN_5_UTR")
+View(highMaf[myvars])
 # select variables v1, v2, v3
 myvars <- c("TRANSCRIPT_ID","FIRST_MET_POSITION","STOP_CODON_POSITION","MUTATED_SEQUENCE_LENGTH", "KOZAK_START", "KOZAK_END", "KOZAK_MUTATED_SEQUENCE_LENGTH", "KOZAK_STOP_CODON", "KOZAK_READING_FRAME_STATUS")
 myvars=c("TRANSCRIPT_ID", "VARIATION_NAME", "VARIATION_TYPE", "CDS_COORDS", "AFFECTED_POS")
