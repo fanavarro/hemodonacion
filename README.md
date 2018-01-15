@@ -40,7 +40,7 @@ The following libraries are required to execute 'ensemblMining.pl' script:
 Also, R must be installed in the system with bioconductor library and PWMEnrich package, which must be installed through bioconductor (https://www.bioconductor.org/install/).
 
 ## Running the script
-ensemblMining.pl only has one parameter that indicates the name of the generated TSV file you should use Perl v5.22.1:
+ensemblMining.pl only has one parameter that indicates the name of the generated TSV file. You should use Perl v5.22.1:
 ```bash
 perl ensemblMining.pl output.csv
 ```
