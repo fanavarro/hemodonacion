@@ -36,6 +36,7 @@ The following libraries are required to execute 'ensemblMining.pl' script:
   * DateTime
   * File::Path
   * List::Util
+  
 Also, R must be installed in the system with bioconductor library and PWMEnrich package, which must be installed through bioconductor (https://www.bioconductor.org/install/).
 
 ## Running the script
@@ -45,46 +46,47 @@ perl ensemblMining.pl output.csv
 ```
 ## TSV format
 Each row of the generated TSV files represents a TranscriptVariationAllele (tva) object from the EnsEMBL api, which means a concrete allele of a concrete variation affecting a concrete transcript. For each of these Transcript Variation Allele objects, the following information is retrieved:
-	* CHROMOSOME -> The chromosome in which the tva is located.
-	* GENE_ID -> The EnsEMBL identifier of the affected gene.
-	* GENE_NAME -> The name of the affected gene.
-	* TRANSCRIPT_ID -> The EnsEMBL identifier of the affected transcript.
-	* TRANSCRIPT_REFSEQ_ID -> The RefSeq identifier of the affected transcript.
-	* TRANSCRIPT_BIOTYPE -> The annotated biotype of the transcript. All transcripts must have 'protein_coding' biotype due to 'ensemblMining' performs a filter to retrieve only this kind of transcript.
-	* METS_IN_5_UTR -> A list of strings with the format 'position_(lost|conserved)' separated by '-'. Each string indicates a position in 5' UTR of the wild transcript where an 'AUG' codon is found and if it maintains the original reading frame or not. The position should be negative because the position 0 would be the start of the coding region.
-	* SIGNAL_PEPTIDE_START -> The position where the signal peptide starts in the coding region. If the signal peptide have not been recognised, the column will be empty. The scanning for the signal peptide is done by Phobius application (http://phobius.sbc.su.se/).
-	* SIGNAL_PEPTIDE_END -> The position where the signal peptide ends. If the signal peptide have not been recognised, the column will be empty.
-	* CDS_ERRORS -> The errors found in the CDS sequence. This value must be empty so that 'ensemblMining.pl' performs a filter before adding the entry.
-	* PROTEIN_ID -> The EnsEMBL identifier of the affected protein.
-	* VARIATION_NAME -> The variation identifier.
-	* VARIATION_TYPE -> The variation type (SNP, deletion, insertion...).
-	* SOURCE -> The origin of the variation (dbSNP, Cosmic, HGMD...)
-	* TRANSCRIPT_VARIATION_ALLELE_DBID -> The identifier of the tva object.
-	* MINOR_ALLELE_FREQUENCY -> The MAF associated with the variation.
-	* CODON_CHANGE -> A string indicating the change at codon level. For example 'atG/atA' indicates a simple nucleotide polymorphism that changes a G by an A.
-	* CDS_COORDS -> The range of position, in base pairs, affected by the variation. The format is 'startPos-endPos' where the position 1 is the first nucleotide of the coding region of the transcript.
-	* AMINOACID_CHANGE -> A string indicating the change at amino acid level. For example, 'M/I' indicates that a methionine has been changed by an isoleucine.
-	* MET_POSITION_1 -> The position of the first 'aug' codon found in the coding region of the mutated transcript, where position 0 would be occupied by the wild initiation codon. It could be an alternative initiation codon if the wild one has been lost.
-	* STOP_CODON_POSITION_1 -> The position of the first stop codon found in the same reading frame than MET_POSITION_1.
-	* MUTATED_SEQUENCE_LENGTH_1 -> The percentage of the open reading frame length provoked by the use of the 'aug' codon found in the position 'MET_POSITION_1' relative to the wild open reading frame.
-	* READING_FRAME_STATUS_1 -> Indicates if the reading frame of the 'aug' codon located in 'MET_POSITION_1' is the same than the wild initiation codon ('conserved') or not ('lost').
-	* SIGNAL_PEPTIDE_CONSERVATION_1 -> The percentage of signal peptide conservation by using the alternative initiation codon found in 'MET_POSITION_1' if a signal peptide was detected in the transcript.
-	* MET_POSITION_2 -> The position of the first 'aug' codon found in the coding region of the mutated transcript by atgPR application (http://atgpr.dbcls.jp/) with a score equal or greater than 0.25, where position 0 would be occupied by the wild initiation codon. It could be an alternative initiation codon if the wild one has been lost.
-	* STOP_CODON_POSITION_2 -> The position of the first stop codon found in the same reading frame than MET_POSITION_2.
-	* MUTATED_SEQUENCE_LENGTH_2 -> The percentage of the open reading frame length provoked by the use of the 'aug' codon found in the position 'MET_POSITION_2' relative to the wild open reading frame.
-	* SCORE_2 -> The reliability of the 'aug' codon found in 'MET_POSITION_2' was an initiation codon. Calculated by atgPR.
-	* READING_FRAME_STATUS_2 -> Indicates if the reading frame of the 'aug' codon located in 'MET_POSITION_2' is the same than the wild initiation codon ('conserved') or not ('lost').
-	* SIGNAL_PEPTIDE_CONSERVATION_2 -> The percentage of signal peptide conservation by using the alternative initiation codon found in 'MET_POSITION_2' if a signal peptide was detected in the transcript.
-	* MET_POSITION_3 -> The position of the first 'aug' codon found in the coding region of the mutated transcript by the scanning of Kozak context with a minimum score of 0.8 through PWMEnrich R library, where position 0 would be occupied by the wild initiation codon. It could be an alternative initiation codon if the wild one has been lost.
-	* INIT_CODON_3 -> The initiation codon found. It must be 'atg' because the script filter any other option.
-	* STOP_CODON_POSITION_3 -> The position of the first stop codon found in the same reading frame than MET_POSITION_3.
-	* MUTATED_SEQUENCE_LENGTH_3 -> The percentage of the open reading frame length provoked by the use of the 'aug' codon found in the position 'MET_POSITION_3' relative to the wild open reading frame.
-	* SCORE_3 -> The score of the Kozak region found by PWMEnrich.
-	* READING_FRAME_STATUS_3 -> Indicates if the reading frame of the 'aug' codon located in 'MET_POSITION_3' is the same than the wild initiation codon ('conserved') or not ('lost').
-	* SIGNAL_PEPTIDE_CONSERVATION_3 -> The percentage of signal peptide conservation by using the alternative initiation codon found in 'MET_POSITION_3' if a signal peptide was detected in the transcript.
-	* CONSEQUENCE -> The described consequences of the variation.
-	* PHENOTYPE -> The described phenotype of the variation. This contains a list of strings separated by '-' with the format 'phenotype description(source)'
-	* SO_TERM -> Sequence Ontology terms associated with the variation.
-	* SIFT -> Consequences of the variation predicted by SIFT.
-	* POLYPHEN -> Consequences of the variation predicted by PolyPhen.
-	* PUBLICATIONS -> List of strings with the format 'publication title -> url to article' separated with spaces. It contains publications associated with the variation.
+
+  * __CHROMOSOME__ -> The chromosome in which the tva is located.
+  * __GENE_ID__ -> The EnsEMBL identifier of the affected gene.
+  * __GENE_NAME__ -> The name of the affected gene.
+  * __TRANSCRIPT_ID__ -> The EnsEMBL identifier of the affected transcript.
+  * __TRANSCRIPT_REFSEQ_ID__ -> The RefSeq identifier of the affected transcript.
+  * __TRANSCRIPT_BIOTYPE__ -> The annotated biotype of the transcript. All transcripts must have 'protein_coding' biotype due to 'ensemblMining' performs a filter to retrieve only this kind of transcript.
+  * __METS_IN_5_UTR__ -> A list of strings with the format 'position_(lost|conserved)' separated by '-'. Each string indicates a position in 5' UTR of the wild transcript where an 'AUG' codon is found and if it maintains the original reading frame or not. The position should be negative because the position 0 would be the start of the coding region.
+  * __SIGNAL_PEPTIDE_START__ -> The position where the signal peptide starts in the coding region. If the signal peptide have not been recognised, the column will be empty. The scanning for the signal peptide is done by Phobius application (http://phobius.sbc.su.se/).
+  * __SIGNAL_PEPTIDE_END__ -> The position where the signal peptide ends. If the signal peptide have not been recognised, the column will be empty.
+  * __CDS_ERRORS__ -> The errors found in the CDS sequence. This value must be empty so that 'ensemblMining.pl' performs a filter before adding the entry.
+  * __PROTEIN_ID__ -> The EnsEMBL identifier of the affected protein.
+  * __VARIATION_NAME__ -> The variation identifier.
+  * __VARIATION_TYPE__ -> The variation type (SNP, deletion, insertion...).
+  * __SOURCE__ -> The origin of the variation (dbSNP, Cosmic, HGMD...)
+  * __TRANSCRIPT_VARIATION_ALLELE_DBID__ -> The identifier of the tva object.
+  * __MINOR_ALLELE_FREQUENCY__ -> The MAF associated with the variation.
+  * __CODON_CHANGE__ -> A string indicating the change at codon level. For example 'atG/atA' indicates a simple nucleotide polymorphism that changes a G by an A.
+  * __CDS_COORDS__ -> The range of position, in base pairs, affected by the variation. The format is 'startPos-endPos' where the position 1 is the first nucleotide of the coding region of the transcript.
+  * __AMINOACID_CHANGE__ -> A string indicating the change at amino acid level. For example, 'M/I' indicates that a methionine has been changed by an isoleucine.
+  * __MET_POSITION_1__ -> The position of the first 'aug' codon found in the coding region of the mutated transcript, where position 0 would be occupied by the wild initiation codon. It could be an alternative initiation codon if the wild one has been lost.
+  * __STOP_CODON_POSITION_1__ -> The position of the first stop codon found in the same reading frame than MET_POSITION_1.
+  * __MUTATED_SEQUENCE_LENGTH_1__ -> The percentage of the open reading frame length provoked by the use of the 'aug' codon found in the position 'MET_POSITION_1' relative to the wild open reading frame.
+  * __READING_FRAME_STATUS_1__ -> Indicates if the reading frame of the 'aug' codon located in 'MET_POSITION_1' is the same than the wild initiation codon ('conserved') or not ('lost').
+  * __SIGNAL_PEPTIDE_CONSERVATION_1__ -> The percentage of signal peptide conservation by using the alternative initiation codon found in 'MET_POSITION_1' if a signal peptide was detected in the transcript.
+  * __MET_POSITION_2__ -> The position of the first 'aug' codon found in the coding region of the mutated transcript by atgPR application (http://atgpr.dbcls.jp/) with a score equal or greater than 0.25, where position 0 would be occupied by the wild initiation codon. It could be an alternative initiation codon if the wild one has been lost.
+  * __STOP_CODON_POSITION_2__-> The position of the first stop codon found in the same reading frame than MET_POSITION_2.
+  * __MUTATED_SEQUENCE_LENGTH_2__ -> The percentage of the open reading frame length provoked by the use of the 'aug' codon found in the position 'MET_POSITION_2' relative to the wild open reading frame.
+  * __SCORE_2__ -> The reliability of the 'aug' codon found in 'MET_POSITION_2' was an initiation codon. Calculated by atgPR.
+  * __READING_FRAME_STATUS_2__ -> Indicates if the reading frame of the 'aug' codon located in 'MET_POSITION_2' is the same than the wild initiation codon ('conserved') or not ('lost').
+  * __SIGNAL_PEPTIDE_CONSERVATION_2__ -> The percentage of signal peptide conservation by using the alternative initiation codon found in 'MET_POSITION_2' if a signal peptide was detected in the transcript.
+  * __MET_POSITION_3__ -> The position of the first 'aug' codon found in the coding region of the mutated transcript by the scanning of Kozak context with a minimum score of 0.8 through PWMEnrich R library, where position 0 would be occupied by the wild initiation codon. It could be an alternative initiation codon if the wild one has been lost.
+  * __INIT_CODON_3__ -> The initiation codon found. It must be 'atg' because the script filter any other option.
+  * __STOP_CODON_POSITION_3__ -> The position of the first stop codon found in the same reading frame than MET_POSITION_3.
+  * __MUTATED_SEQUENCE_LENGTH_3__ -> The percentage of the open reading frame length provoked by the use of the 'aug' codon found in the position 'MET_POSITION_3' relative to the wild open reading frame.
+  * __SCORE_3__ -> The score of the Kozak region found by PWMEnrich.
+  * __READING_FRAME_STATUS_3__ -> Indicates if the reading frame of the 'aug' codon located in 'MET_POSITION_3' is the same than the wild initiation codon ('conserved') or not ('lost').
+  * __SIGNAL_PEPTIDE_CONSERVATION_3__ -> The percentage of signal peptide conservation by using the alternative initiation codon found in 'MET_POSITION_3' if a signal peptide was detected in the transcript.
+  * __CONSEQUENCE__ -> The described consequences of the variation.
+  * __PHENOTYPE__ -> The described phenotype of the variation. This contains a list of strings separated by '-' with the format 'phenotype description(source)'
+  * __SO_TERM__ -> Sequence Ontology terms associated with the variation.
+  * __SIFT__ -> Consequences of the variation predicted by SIFT.
+  * __POLYPHEN__ -> Consequences of the variation predicted by PolyPhen.
+  * __PUBLICATIONS__ -> List of strings with the format 'publication title -> url to article' separated with spaces. It contains publications associated with the variation.
