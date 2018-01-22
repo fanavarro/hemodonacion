@@ -28,8 +28,6 @@ The following libraries are required to execute 'ensemblMining.pl' script:
   * Try::Tiny
   * XML::LibXML
   * base
-  * myUtils::KozakService
-  * perl
   * strict
   * warnings
   * Bio::EnsEMBL::Registry
