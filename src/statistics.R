@@ -2,8 +2,8 @@ setwd("~/hemodonacion/data/tsv")
 
 
 # Leer el csv sin filtros
-csv = read.csv("26_04_2017.csv", sep="\t",stringsAsFactors=FALSE)
-csv = read.csv("9-12-2017.csv", sep="\t",stringsAsFactors=FALSE)
+# csv = read.csv("26_04_2017.csv", sep="\t",stringsAsFactors=FALSE)
+csv = read.csv("9_12_2017.csv", sep="\t",stringsAsFactors=FALSE)
 csv[,"MUTATED_SEQUENCE_LENGTH_1"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH_1))
 csv[,"MUTATED_SEQUENCE_LENGTH_2"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH_2))
 csv[,"MUTATED_SEQUENCE_LENGTH_3"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH_3))
