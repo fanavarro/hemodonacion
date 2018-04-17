@@ -58,8 +58,8 @@ plotGGO(lowMafGroupGO)
 
 
 # Enriquecimiento molecular function
-pvalueCutoff = 0.05
-qvalueCutoff = 0.05
+pvalueCutoff = 0.1
+qvalueCutoff = 0.1
 highMafEnrichment = enrichGO(gene = highMafEnsemblGenes ,OrgDb = org.Hs.eg.db, keyType = "ENSEMBL", ont = "MF", pAdjustMethod = "BH", pvalueCutoff = pvalueCutoff, qvalueCutoff = qvalueCutoff)
 highMafEnrichment = setReadable(highMafEnrichment, OrgDb = org.Hs.eg.db)
 lowMafEnrichment = enrichGO(gene = lowMafEnsemblGenes ,OrgDb = org.Hs.eg.db, keyType = "ENSEMBL", ont = "MF", pAdjustMethod = "BH", pvalueCutoff = pvalueCutoff, qvalueCutoff = qvalueCutoff)
@@ -70,8 +70,8 @@ dotplot(highMafEnrichment)
 dotplot(lowMafEnrichment)
 
 # Enriquecimiento biological process
-pvalueCutoff = 0.05
-qvalueCutoff = 0.05
+pvalueCutoff = 0.1
+qvalueCutoff = 0.1
 highMafEnrichment = enrichGO(gene = highMafEnsemblGenes ,OrgDb = org.Hs.eg.db, keyType = "ENSEMBL", ont = "BP", pAdjustMethod = "BH", pvalueCutoff = pvalueCutoff, qvalueCutoff = qvalueCutoff)
 highMafEnrichment = setReadable(highMafEnrichment, OrgDb = org.Hs.eg.db)
 lowMafEnrichment = enrichGO(gene = lowMafEnsemblGenes ,OrgDb = org.Hs.eg.db, keyType = "ENSEMBL", ont = "BP", pAdjustMethod = "BH", pvalueCutoff = pvalueCutoff, qvalueCutoff = qvalueCutoff)
