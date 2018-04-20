@@ -10,11 +10,10 @@ use File::Path qw(make_path);
 use List::Util qw[min max];
 use DateTime;
 use myUtils::MatchPWM;
+use myUtils::Noderer;
 
 
 my $MAX_KOZAK_RESULTS = 50000;
-# Ignored transcript variation alleles due to errors in data that crashes the program.
-my @IGNORED_TVA_DBID = qw(518419535 518419533 518419659 518419534 518419489 518348176 518348177 518348175);
 # Needed to write to nohup.out in real time
 STDOUT->autoflush(1);
 
@@ -31,7 +30,7 @@ if (scalar @ARGV == 1){
 print "Results will be printed in $output\n";
 
 # CSV file configuration
-my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE METS_IN_5_UTR SIGNAL_PEPTIDE_START SIGNAL_PEPTIDE_END CDS_ERRORS PROTEIN_ID VARIATION_NAME VARIATION_TYPE SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE CDS_COORDS AMINOACID_CHANGE MET_POSITION_1 STOP_CODON_POSITION_1 MUTATED_SEQUENCE_LENGTH_1 READING_FRAME_STATUS_1 SIGNAL_PEPTIDE_CONSERVATION_1 MET_POSITION_2 STOP_CODON_POSITION_2 MUTATED_SEQUENCE_LENGTH_2 SCORE_2 READING_FRAME_STATUS_2 SIGNAL_PEPTIDE_CONSERVATION_2 MET_POSITION_3 INIT_CODON_3 STOP_CODON_POSITION_3 MUTATED_SEQUENCE_LENGTH_3 SCORE_3 READING_FRAME_STATUS_3 SIGNAL_PEPTIDE_CONSERVATION_3 CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
+my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE METS_IN_5_UTR SIGNAL_PEPTIDE_START SIGNAL_PEPTIDE_END CDS_ERRORS PROTEIN_ID VARIATION_NAME VARIATION_TYPE SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE CDS_COORDS AMINOACID_CHANGE MET_POSITION_1 STOP_CODON_POSITION_1 MUTATED_SEQUENCE_LENGTH_1 READING_FRAME_STATUS_1 SIGNAL_PEPTIDE_CONSERVATION_1 MET_POSITION_2 INIT_CODON_2 STOP_CODON_POSITION_2 MUTATED_SEQUENCE_LENGTH_2 SCORE_2 READING_FRAME_STATUS_2 SIGNAL_PEPTIDE_CONSERVATION_2 MET_POSITION_3 INIT_CODON_3 STOP_CODON_POSITION_3 MUTATED_SEQUENCE_LENGTH_3 SCORE_3 READING_FRAME_STATUS_3 SIGNAL_PEPTIDE_CONSERVATION_3 CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
 my $out_csv = myUtils::CsvManager->new (
 	fields    => \@fields,
 	csv_separator   => "\t",
@@ -60,7 +59,7 @@ my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcri
 
 # Chromosomes to be treated
 my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
-#my @chromosomes = qw(1);
+#my @chromosomes = qw(Y);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
@@ -185,9 +184,6 @@ sub get_transcript_variation_info{
         my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
 
         foreach my $tva ( @{$tvas} ) {
-            #if(myUtils::SeqUtils::exists_in_list($tva->dbID, \@IGNORED_TVA_DBID)){
-            #    next;
-            #}
             my %entry;
 	    	
             my @ensembl_consequences;
@@ -204,6 +200,7 @@ sub get_transcript_variation_info{
             my $seq_info = get_sequence_info($tva);
             my $atgpr_info = get_atgpr_info($tva);
             my $pwm_info = get_match_pwm_info($tva);
+            my $noderer_info = get_noderer_info($tva);
             my $mets_in_5_utr = get_five_prime_utr_info($tva);
 
             $entry{'CHROMOSOME'} = $chromosome;
@@ -223,18 +220,32 @@ sub get_transcript_variation_info{
             $entry{'CODON_CHANGE'} = defined($tva->display_codon_allele_string) ? $tva->display_codon_allele_string : '';
             $entry{'CDS_COORDS'} = $cds_coords;
             $entry{'AMINOACID_CHANGE'} = defined($tva->pep_allele_string) ? $tva->pep_allele_string : '';
+            
+            # method 1 columns (first atg)
             $entry{'MET_POSITION_1'} = $seq_info->{'met_position'};
             $entry{'STOP_CODON_POSITION_1'} = $seq_info->{'stop_codon_position'};
             $entry{'MUTATED_SEQUENCE_LENGTH_1'} = $seq_info->{'seq_length'};
             $entry{'READING_FRAME_STATUS_1'} = $seq_info->{'reading_frame'};
             $entry{'SIGNAL_PEPTIDE_CONSERVATION_1'} = get_signal_peptide_conservarion($signal_peptide_info->{'START'}, $signal_peptide_info->{'END'}, $seq_info->{'met_position'});
-            $entry{'MET_POSITION_2'} = $atgpr_info->{'START'};
-            $entry{'STOP_CODON_POSITION_2'} = $atgpr_info->{'STOP_CODON'} eq 'Yes' ? $atgpr_info->{'FINISH'} : '';
-            $entry{'MUTATED_SEQUENCE_LENGTH_2'} = $atgpr_info->{'KOZAK_MUTATED_SEQUENCE_LENGTH'};
-            $entry{'SCORE_2'} = $atgpr_info->{'RELIABILITY'};
-            $entry{'READING_FRAME_STATUS_2'} = $atgpr_info->{'FRAMESHIFT'};
-            $entry{'SIGNAL_PEPTIDE_CONSERVATION_2'} = get_signal_peptide_conservarion($signal_peptide_info->{'START'}, $signal_peptide_info->{'END'}, $atgpr_info->{'START'});
+            
+            # method 2 columns (noderer scores)
+            $entry{'MET_POSITION_2'} = $noderer_info->{'met_position'};
+            $entry{'INIT_CODON_2'} = $noderer_info->{'init_codon'};
+            $entry{'STOP_CODON_POSITION_2'} = $noderer_info->{'stop_codon_position'};
+            $entry{'MUTATED_SEQUENCE_LENGTH_2'} = $noderer_info->{'seq_length'};
+            $entry{'SCORE_2'} = $noderer_info->{'score'};
+            $entry{'READING_FRAME_STATUS_2'} = $noderer_info->{'reading_frame'};
+            $entry{'SIGNAL_PEPTIDE_CONSERVATION_2'} = get_signal_peptide_conservarion($signal_peptide_info->{'START'}, $signal_peptide_info->{'END'}, $noderer_info->{'met_position'});
 
+            # Old method 2 columns (atgPR)
+            # $entry{'MET_POSITION_2'} = $atgpr_info->{'START'};
+            # $entry{'STOP_CODON_POSITION_2'} = $atgpr_info->{'STOP_CODON'} eq 'Yes' ? $atgpr_info->{'FINISH'} : '';
+            # $entry{'MUTATED_SEQUENCE_LENGTH_2'} = $atgpr_info->{'KOZAK_MUTATED_SEQUENCE_LENGTH'};
+            # $entry{'SCORE_2'} = $atgpr_info->{'RELIABILITY'};
+            # $entry{'READING_FRAME_STATUS_2'} = $atgpr_info->{'FRAMESHIFT'};
+            # $entry{'SIGNAL_PEPTIDE_CONSERVATION_2'} = get_signal_peptide_conservarion($signal_peptide_info->{'START'}, $signal_peptide_info->{'END'}, $atgpr_info->{'START'});
+
+            # method 3 columns (Kozak pwm matches)
             $entry{'MET_POSITION_3'} = $pwm_info->{'met_position'};
             $entry{'INIT_CODON_3'} = $pwm_info->{'init_codon'};
             $entry{'STOP_CODON_POSITION_3'} = $pwm_info->{'stop_codon_position'};
@@ -670,10 +681,55 @@ sub get_match_pwm_info{
            $hash_pwm_info->{'score'} = $hits->{SCORE}->[$index];
            $hash_pwm_info->{'init_codon'} = substr($mutated_cdna, $found_met_pos, 3);
         }
-
-        
     }
     return $hash_pwm_info;
+}
+
+sub get_noderer_info {
+    my $tva = $_[0];
+    my $hash_noderer_info = {};
+    $hash_noderer_info->{'met_position'} = '';
+    $hash_noderer_info->{'reading_frame'} = '';
+    $hash_noderer_info->{'stop_codon_position'} = '';
+    $hash_noderer_info->{'seq_length'} = '';
+    $hash_noderer_info->{'init_codon'} = '';
+    $hash_noderer_info->{'score'} = '';
+
+    my $mutated_cdna = get_variation_cdna_seq($tva);
+    if (defined($mutated_cdna)){
+        my $cdna = $tva->transcript->seq->seq;
+        my $cds = $tva->transcript->translateable_seq;
+        my $translation_start_pos = myUtils::SeqUtils::get_translation_start_pos($cdna, $cds);
+        my $five_prime_affected = !defined($tva->transcript_variation->cds_start);
+
+        my $noderer = myUtils::Noderer->instance();
+        my $min_efficiency = 87; # Kozak sequence lower bound.
+        my $hits = $noderer->myUtils::Noderer::get_kozak_matches($mutated_cdna, $min_efficiency);
+        my $n = 0;
+        if (defined $hits && defined $hits->{INIT_CODON_POS}){
+            $n = scalar @{$hits->{INIT_CODON_POS}};
+        }
+        my $index = 0;
+        # We are looking for a kozak match downstream 5' utr.
+        while ($index < $n){
+            if ($hits->{INIT_CODON_POS}->[$index] >= $translation_start_pos){
+                last;
+            }
+            $index = $index + 1;
+        }
+        # If we have found a kozak sequence after original met
+        if($index < $n){
+           my $found_met_pos = $hits->{INIT_CODON_POS}->[$index];
+           my $hash_seq_info = myUtils::SeqUtils::get_met_mutation_info($cdna, $cds, $mutated_cdna, $five_prime_affected, $found_met_pos);
+           $hash_noderer_info->{'met_position'} = $hash_seq_info->{'met_position'};
+           $hash_noderer_info->{'reading_frame'} = $hash_seq_info->{'reading_frame'};
+           $hash_noderer_info->{'stop_codon_position'} = $hash_seq_info->{'stop_codon_position'};
+           $hash_noderer_info->{'seq_length'} = $hash_seq_info->{'seq_length'};
+           $hash_noderer_info->{'score'} = $hits->{SCORE}->[$index];
+           $hash_noderer_info->{'init_codon'} = substr($mutated_cdna, $found_met_pos, 3);
+        }
+    }
+    return $hash_noderer_info;
 }
 
 # Receives a transcript object and return information
@@ -752,7 +808,8 @@ sub get_five_prime_utr_info{
         my $met_info_list = myUtils::SeqUtils::get_5_utr_mets_info($transcript->five_prime_utr->seq, $number_of_new_or_deleted_nucleotides);
         foreach my $met_info (@{$met_info_list}){
             $formatted_result = $formatted_result . $met_info->{'met_position'} . '_';
-            $formatted_result = $formatted_result . $met_info->{'reading_frame'} . ' ';
+            $formatted_result = $formatted_result . $met_info->{'reading_frame'} . '_';
+            $formatted_result = $formatted_result . $met_info->{'termination_codon'} . ' ';
         }
         chop($formatted_result)
     }

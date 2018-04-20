@@ -333,7 +333,8 @@ sub get_met_positions{
 # return a list of hashes with the following fields:
 #   met_position -> The position of the methionine found in 5' utr relative to the wild initiation codon.
 #                    It will be a negative number due to the initiation codon is in position 0.
-#   reading_frame -> True if the methionine in 5' utr is in the same reading frame than the wild initiation codon.
+#   reading_frame -> 'maintained' if the methionine in 5' utr is in the same reading frame than the wild initiation codon or 'lost' if not.
+#   termination_codon -> 'premature-termination' if a termination codon found is in 5' utr in the orf or no-premature-termination if not.
 sub get_5_utr_mets_info{
     my @result_list = ();
 
@@ -347,10 +348,18 @@ sub get_5_utr_mets_info{
             my $relative_met_position = $met_position - (length($five_prime));
             $result_hash->{'met_position'} = $relative_met_position;
             if(($relative_met_position + $number_of_new_or_deleted_nucleotides) % 3 == 0){
-                $result_hash->{'reading_frame'} = 'conserved';
+                $result_hash->{'reading_frame'} = 'maintained';
             } else {
                 $result_hash->{'reading_frame'} = 'lost';
             }
+            
+            my $stop_codon_pos = get_stop_codon_position($five_prime, $met_position);
+            if($stop_codon_pos == -1){
+              $result_hash->{'termination_codon'} = 'no-premature-termination';
+            } else {
+              $result_hash->{'termination_codon'} = 'premature-termination';
+            }
+            
             push @result_list, $result_hash;
         }
     }
