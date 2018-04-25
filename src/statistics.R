@@ -3,7 +3,7 @@ setwd("~/hemodonacion/data/tsv")
 
 # Leer el csv sin filtros
 # csv = read.csv("26_04_2017.csv", sep="\t",stringsAsFactors=FALSE)
-csv = read.csv("9_12_2017.csv", sep="\t",stringsAsFactors=FALSE)
+csv = read.csv("19_04_2018.tsv", sep="\t",stringsAsFactors=FALSE)
 csv[,"MUTATED_SEQUENCE_LENGTH_1"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH_1))
 csv[,"MUTATED_SEQUENCE_LENGTH_2"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH_2))
 csv[,"MUTATED_SEQUENCE_LENGTH_3"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH_3))
@@ -35,29 +35,31 @@ csv$GENE_NAME = factor(csv$GENE_NAME)
 
 # Calcular metioninas en 5' utr
 csv$NMETS_5_UTR = sapply(strsplit(csv$METS_IN_5_UTR, " "), length)
-# Contar los que mantienen fase de lectura
+# Contar los que mantienen fase de lectura y no existe codon de fin en el mismo reading frame
 for (i in 1:nrow(csv)) {
   metUtrCol = csv$METS_IN_5_UTR[i]
   if(is.na(metUtrCol) || metUtrCol == ""){
     csv$CONSERVED_METS_IN_5_UTR[i] = 0
   } else {
-    csv$CONSERVED_METS_IN_5_UTR[i] = length(grep("conserved", strsplit(metUtrCol," ")[[1]]))
+    csv$CONSERVED_METS_IN_5_UTR[i] = length(grep("maintained_no-premature-termination", strsplit(metUtrCol," ")[[1]]))
   }
 }
-#Contar las que pierden la fase de lectura
+#Contar las que no puedan usarse como tis alternativo (reading frame perdido o reading frame mantenido con un codon de fin encontrado en el mismo)
 for (i in 1:nrow(csv)) {
   metUtrCol = csv$METS_IN_5_UTR[i]
   if(is.na(metUtrCol) || metUtrCol == ""){
     csv$LOST_METS_IN_5_UTR[i] = 0
   } else {
-    csv$LOST_METS_IN_5_UTR[i] = length(grep("lost", strsplit(metUtrCol," ")[[1]]))
+    lostReadingFrame = length(grep("lost", strsplit(metUtrCol," ")[[1]]))
+    maintainedReadingFrameWithTermCodon = length(grep("maintained_premature-termination", strsplit(metUtrCol," ")[[1]]))
+    csv$LOST_METS_IN_5_UTR[i] = lostReadingFrame + maintainedReadingFrameWithTermCodon
   }
 }
 myvars=c('NMETS_5_UTR','METS_IN_5_UTR', 'CONSERVED_METS_IN_5_UTR', 'LOST_METS_IN_5_UTR')
 View(csv[myvars])
 
 # Ordenar variables
-myvars=c('CHROMOSOME','GENE_ID', 'GENE_NAME', 'TRANSCRIPT_ID', 'TRANSCRIPT_REFSEQ_ID', 'TRANSCRIPT_BIOTYPE', 'METS_IN_5_UTR', 'NMETS_5_UTR', 'CONSERVED_METS_IN_5_UTR', 'LOST_METS_IN_5_UTR', 'SIGNAL_PEPTIDE_START', 'SIGNAL_PEPTIDE_END', 'CDS_ERRORS', 'PROTEIN_ID', 'VARIATION_NAME', 'VARIATION_TYPE', 'SOURCE', 'TRANSCRIPT_VARIATION_ALLELE_DBID', 'MINOR_ALLELE_FREQUENCY', 'CODON_CHANGE', 'CDS_COORDS', 'AMINOACID_CHANGE' ,'MET_POSITION_1' ,'STOP_CODON_POSITION_1' ,'MUTATED_SEQUENCE_LENGTH_1' ,'READING_FRAME_STATUS_1', 'SIGNAL_PEPTIDE_CONSERVATION_1', 'MET_POSITION_2', 'STOP_CODON_POSITION_2', 'MUTATED_SEQUENCE_LENGTH_2', 'SCORE_2', 'READING_FRAME_STATUS_2', 'SIGNAL_PEPTIDE_CONSERVATION_2', 'MET_POSITION_3', 'INIT_CODON_3', 'STOP_CODON_POSITION_3', 'MUTATED_SEQUENCE_LENGTH_3', 'SCORE_3', 'READING_FRAME_STATUS_3', 'SIGNAL_PEPTIDE_CONSERVATION_3', 'CONSEQUENCE', 'PHENOTYPE', 'SO_TERM', 'SIFT', 'POLYPHEN', 'PUBLICATIONS')
+myvars=c('CHROMOSOME','GENE_ID', 'GENE_NAME', 'TRANSCRIPT_ID', 'TRANSCRIPT_REFSEQ_ID', 'TRANSCRIPT_BIOTYPE', 'METS_IN_5_UTR', 'NMETS_5_UTR', 'CONSERVED_METS_IN_5_UTR', 'LOST_METS_IN_5_UTR', 'SIGNAL_PEPTIDE_START', 'SIGNAL_PEPTIDE_END', 'CDS_ERRORS', 'PROTEIN_ID', 'VARIATION_NAME', 'VARIATION_TYPE', 'SOURCE', 'TRANSCRIPT_VARIATION_ALLELE_DBID', 'MINOR_ALLELE_FREQUENCY', 'CODON_CHANGE', 'CDS_COORDS', 'AMINOACID_CHANGE' ,'MET_POSITION_1' ,'STOP_CODON_POSITION_1' ,'MUTATED_SEQUENCE_LENGTH_1' ,'READING_FRAME_STATUS_1', 'SIGNAL_PEPTIDE_CONSERVATION_1', 'MET_POSITION_2', 'INIT_CODON_2', 'STOP_CODON_POSITION_2', 'MUTATED_SEQUENCE_LENGTH_2', 'SCORE_2', 'READING_FRAME_STATUS_2', 'SIGNAL_PEPTIDE_CONSERVATION_2', 'MET_POSITION_3', 'INIT_CODON_3', 'STOP_CODON_POSITION_3', 'MUTATED_SEQUENCE_LENGTH_3', 'SCORE_3', 'READING_FRAME_STATUS_3', 'SIGNAL_PEPTIDE_CONSERVATION_3', 'CONSEQUENCE', 'PHENOTYPE', 'SO_TERM', 'SIFT', 'POLYPHEN', 'PUBLICATIONS')
 csv = csv[myvars]
 # Insertar clase
 for (i in 1:nrow(csv)) {
@@ -160,16 +162,6 @@ summary(lowMaf$MET_POSITION_3)
 summary(lowMaf$SIGNAL_PEPTIDE_CONSERVARION_3)
 summary(lowMaf$READING_FRAME_STATUS_3)
 
-
-# Histogramas de la posición de la primera metionina
-hist(highMaf$MET_POSITION_1, xlim = c(0,1000))
-hist(lowMaf$MET_POSITION_1, xlim = c(0,1000))
-
-# Histogramas de la posición de la metionina de la primera secuencia Kozak
-# con puntuacion mayor a 25%
-hist(highMaf$MET_POSITION_2)
-hist(lowMaf$MET_POSITION_2)
-
 # Comprobar homogeneidad de varianzas
 var.test(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1) # Varianzas distintas
 var.test(highMaf$MET_POSITION_2, lowMaf$MET_POSITION_2) # Varianzas distintas
@@ -180,6 +172,8 @@ shapiro.test(highMaf$MET_POSITION_1) # No normal
 shapiro.test(lowMaf$MET_POSITION_1) # No normal
 shapiro.test(highMaf$MET_POSITION_2) # No normal
 shapiro.test(lowMaf$MET_POSITION_2) # No normal
+shapiro.test(highMaf$MET_POSITION_3) # No normal
+shapiro.test(lowMaf$MET_POSITION_3) # No normal
 
 # Test de wilcoxon para comparar medias
 wilcox.test(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1, paired = F, conf.level = 0.95) # Distribuciones diferentes
@@ -187,16 +181,28 @@ wilcox.test(highMaf$MET_POSITION_2, lowMaf$MET_POSITION_2, paired = F, conf.leve
 wilcox.test(highMaf$MET_POSITION_3, lowMaf$MET_POSITION_3, paired = F, conf.level = 0.95) # Distribuciones diferentes
 
 # Boxplots
-boxplot(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1, ylim=c(0,3000))
-boxplot(highMaf$MET_POSITION_2, lowMaf$MET_POSITION_2, ylim=c(0,1500))
+#op <- par(mfrow = c(1, 3))
+highMAFMedian = summary(highMaf$MET_POSITION_1)[['Median']]
+lowMAFMedian = summary(lowMaf$MET_POSITION_1)[['Median']]
+pValue = wilcox.test(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1, paired = F, conf.level = 0.95)$p.value
+pValue = formatC(pValue, format = "e", digits = 2)
+boxplot(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1, ylab="AUG position (bp)",names=c("High MAF", "Low MAF"))
+legend("topleft", c(paste("High MAF median:",highMAFMedian), paste("Low MAF median:",lowMAFMedian), paste("P =",pValue)), cex=0.85, bty="n")
 
-op <- par(mfrow = c(1, 2))
-boxplot(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1,  ylab="First AUG position (bp)",names=c("High MAF", "Low MAF"))
-boxplot(highMaf$MET_POSITION_2, lowMaf$MET_POSITION_2, ylim=c(0,600), ylab="Posición del codón inicial (en pares de bases)", names = c("MAF alta", "MAF baja"),
-        main="Comparativa de la posición del primer codón de inicio\npredicho por ATGpr con score > 0.25\nentre los grupos de MAF alta y baja.")
-boxplot(highMaf$MET_POSITION_3, lowMaf$MET_POSITION_3, ylab="First AUG position in strong Kozak (bp)", names = c("High MAF", "Low MAF"))
+highMAFMedian = summary(highMaf$MET_POSITION_2)[['Median']]
+lowMAFMedian = summary(lowMaf$MET_POSITION_2)[['Median']]
+pValue = wilcox.test(highMaf$MET_POSITION_2, lowMaf$MET_POSITION_2, paired = F, conf.level = 0.95)$p.value
+pValue = formatC(pValue, format = "e", digits = 2)
+boxplot(highMaf$MET_POSITION_2, lowMaf$MET_POSITION_2, ylab="AUG position (bp)", names = c("High MAF", "Low MAF"))
+legend("topleft", c(paste("High MAF median:",highMAFMedian), paste("Low MAF median:",lowMAFMedian), paste("P =",pValue)), cex=0.85, bty="n")
 
-par(op)
+highMAFMedian = summary(highMaf$MET_POSITION_3)[['Median']]
+lowMAFMedian = summary(lowMaf$MET_POSITION_3)[['Median']]
+pValue = wilcox.test(highMaf$MET_POSITION_3, lowMaf$MET_POSITION_3, paired = F, conf.level = 0.95)$p.value
+pValue = formatC(pValue, format = "e", digits = 2)
+boxplot(highMaf$MET_POSITION_3, lowMaf$MET_POSITION_3, ylab="AUG position (bp)", names = c("High MAF", "Low MAF"))
+legend("topleft", c(paste("High MAF median:",highMAFMedian), paste("Low MAF median:",lowMAFMedian), paste("P =",pValue)), cex=0.85, bty="n")
+#par(op)
 
 # Test de Chi Cuadrado para comparar las variables cualitativas
 # MET1 READING FRAME STATUS
@@ -250,11 +256,10 @@ summary(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
 length(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
 
 # PEPTIDE SIGNAL BOXPLOTS
-op <- par(mfrow = c(1, 2))
-boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1, ylab="Conservation percentage of the signal peptide",names=c("High MAF", "Low MAF"),main="A", ylim=c(0,120))
-boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2, ylab="Conservacion del peptido señal (en %)", names = c("MAF alta", "MAF baja"),
-        main="Comparativa de la conservacion del peptido señal\ncon la met de ATGpr con score > 0.25\nentre los grupos de MAF alta y baja.")
-boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3, ylab="Conservation percentage of the signal peptide", names = c("High MAF", "Low MAF"),main="B", ylim=c(0,120))
+op <- par(mfrow = c(1, 3))
+boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1, ylab="Conservation percentage of the signal peptide",names=c("High MAF", "Low MAF"), ylim=c(0,120))
+boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2, ylab="Conservation percentage of the signal peptide", names = c("High MAF", "Low MAF"), ylim=c(0,120))
+boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3, ylab="Conservation percentage of the signal peptide", names = c("High MAF", "Low MAF"), ylim=c(0,120))
 par(op)
 
 # SIGNAL PEPTIDE COMPARISON
@@ -308,9 +313,9 @@ chisq.test(m)
 
 # CODONES DE INICIO PREVIOS AL CODON DE INICIO ORIGINAL
 op <- par(mfrow = c(2,1))
-numberOfMet5UTRLowMAF=sapply(strsplit(lowMaf$METS_IN_5_UTR, " "), length)
+numberOfMet5UTRLowMAF=lowMaf$NMETS_5_UTR
 plot(density(numberOfMet5UTRLowMAF), col=gray(0.4), main="", xlab = "Number of \"AUG\" codons in 5' UTR")
-numberOfMet5UTRHighMAF=sapply(strsplit(highMaf$METS_IN_5_UTR, " "), length)
+numberOfMet5UTRHighMAF=highMaf$NMETS_5_UTR
 lines(density(numberOfMet5UTRHighMAF), col =gray(0), lty=5)
 legend(34, 0.68, c("Low MAF","High MAF"), lty=c(1,5), col = c(gray(0.4),gray(0)))
 summary(highMaf$METS_IN_5_UTR)
@@ -318,23 +323,6 @@ summary(lowMaf$METS_IN_5_UTR)
 
 wilcox.test(numberOfMet5UTRLowMAF, numberOfMet5UTRHighMAF, paired = F, conf.level = 0.95)
 
-# Contar los que mantienen fase de lectura
-for (i in 1:nrow(highMaf)) {
-  metUtrCol = highMaf$METS_IN_5_UTR[i]
-  if(is.na(metUtrCol) || metUtrCol == ""){
-    highMaf$CONSERVED_METS_IN_5_UTR[i] = 0
-  } else {
-    highMaf$CONSERVED_METS_IN_5_UTR[i] = length(grep("conserved", strsplit(metUtrCol," ")[[1]]))
-  }
-}
-for (i in 1:nrow(lowMaf)) {
-  metUtrCol = lowMaf$METS_IN_5_UTR[i]
-  if(is.na(metUtrCol) || metUtrCol == ""){
-    lowMaf$CONSERVED_METS_IN_5_UTR[i] = 0
-  } else {
-    lowMaf$CONSERVED_METS_IN_5_UTR[i] = length(grep("conserved", strsplit(metUtrCol," ")[[1]]))
-  }
-}
 
 summary(highMaf$CONSERVED_METS_IN_5_UTR)
 summary(lowMaf$CONSERVED_METS_IN_5_UTR)
