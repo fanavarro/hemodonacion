@@ -2,7 +2,7 @@ setwd("~/hemodonacion/data/tsv")
 
 
 # Leer el csv sin filtros
-# csv = read.csv("26_04_2017.csv", sep="\t",stringsAsFactors=FALSE)
+#csv = read.csv("26_04_2017.csv", sep="\t",stringsAsFactors=FALSE)
 csv = read.csv("19_04_2018.tsv", sep="\t",stringsAsFactors=FALSE)
 csv[,"MUTATED_SEQUENCE_LENGTH_1"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH_1))
 csv[,"MUTATED_SEQUENCE_LENGTH_2"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH_2))
@@ -206,10 +206,10 @@ legend("topleft", c(paste("High MAF median:",highMAFMedian), paste("Low MAF medi
 
 # Test de Chi Cuadrado para comparar las variables cualitativas
 # MET1 READING FRAME STATUS
-rf_conserved_met1_low_maf = nrow(lowMaf[lowMaf$READING_FRAME_STATUS_1 == 'Conserved',])
-rf_lost_met1_low_maf = nrow(lowMaf[lowMaf$READING_FRAME_STATUS_1 == 'Lost',])
-rf_conserved_met1_high_maf = nrow(highMaf[highMaf$READING_FRAME_STATUS_1 == 'Conserved',])
-rf_lost_met1_high_maf = nrow(highMaf[highMaf$READING_FRAME_STATUS_1 == 'Lost',])
+rf_conserved_met1_low_maf = summary(lowMaf$READING_FRAME_STATUS_1)[['Conserved']]
+rf_lost_met1_low_maf = summary(lowMaf$READING_FRAME_STATUS_1)[['Lost']]
+rf_conserved_met1_high_maf = summary(highMaf$READING_FRAME_STATUS_1)[['Conserved']]
+rf_lost_met1_high_maf = summary(highMaf$READING_FRAME_STATUS_1)[['Lost']]
 m = as.table(rbind(c(rf_conserved_met1_low_maf,rf_lost_met1_low_maf), c(rf_conserved_met1_high_maf,rf_lost_met1_high_maf)))
 dimnames(m)=list(GRUPO = c("MAF BAJA", "MAF ALTA"),
                  READING_FRAME_STATUS = c("CONSERVED", "LOST"))
@@ -218,10 +218,10 @@ chisq.test(m) # p-value menor que 0.05 indica que cada grupo de mutaciones prese
 ###
 
 # MET2 READING FRAME STATUS
-rf_conserved_met2_low_maf = nrow(lowMaf[lowMaf$READING_FRAME_STATUS_2 == 'Conserved',])
-rf_lost_met2_low_maf = nrow(lowMaf[lowMaf$READING_FRAME_STATUS_2 == 'Lost',])
-rf_conserved_met2_high_maf = nrow(highMaf[highMaf$READING_FRAME_STATUS_2 == 'Conserved',])
-rf_lost_met2_high_maf = nrow(highMaf[highMaf$READING_FRAME_STATUS_2 == 'Lost',])
+rf_conserved_met2_low_maf = summary(lowMaf$READING_FRAME_STATUS_2)[['Conserved']]
+rf_lost_met2_low_maf = summary(lowMaf$READING_FRAME_STATUS_2)[['Lost']]
+rf_conserved_met2_high_maf = summary(highMaf$READING_FRAME_STATUS_2)[['Conserved']]
+rf_lost_met2_high_maf = summary(highMaf$READING_FRAME_STATUS_2)[['Lost']]
 m = as.table(rbind(c(rf_conserved_met2_low_maf,rf_lost_met2_low_maf), c(rf_conserved_met2_high_maf,rf_lost_met2_high_maf)))
 dimnames(m)=list(GRUPO = c("MAF BAJA", "MAF ALTA"),
                  READING_FRAME_STATUS = c("CONSERVED", "LOST"))
@@ -229,10 +229,10 @@ m
 chisq.test(m) # p-value mayor que 0.05 indica que cada grupo de mutaciones no presenta diferencias significativas
 
 # MET3 READING FRAME STATUS
-rf_conserved_met3_high_maf = nrow(highMaf[highMaf$READING_FRAME_STATUS_3 == 'Conserved',])
-rf_lost_met3_high_maf = nrow(highMaf[highMaf$READING_FRAME_STATUS_3 == 'Lost',])
-rf_conserved_met3_low_maf = nrow(lowMaf[lowMaf$READING_FRAME_STATUS_3 == 'Conserved',])
-rf_lost_met3_low_maf = nrow(lowMaf[lowMaf$READING_FRAME_STATUS_3 == 'Lost',])
+rf_conserved_met3_high_maf = summary(lowMaf$READING_FRAME_STATUS_3)[['Conserved']]
+rf_lost_met3_high_maf = summary(lowMaf$READING_FRAME_STATUS_3)[['Lost']]
+rf_conserved_met3_low_maf = summary(highMaf$READING_FRAME_STATUS_3)[['Conserved']]
+rf_lost_met3_low_maf = summary(highMaf$READING_FRAME_STATUS_3)[['Lost']]
 m = as.table(rbind(c(rf_conserved_met3_low_maf,rf_lost_met3_low_maf), c(rf_conserved_met3_high_maf,rf_lost_met3_high_maf)))
 dimnames(m)=list(GRUPO = c("MAF BAJA", "MAF ALTA"),
                  READING_FRAME_STATUS = c("CONSERVED", "LOST"))
@@ -255,17 +255,27 @@ length(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
 summary(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
 length(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
 
-# PEPTIDE SIGNAL BOXPLOTS
-op <- par(mfrow = c(1, 3))
-boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1, ylab="Conservation percentage of the signal peptide",names=c("High MAF", "Low MAF"), ylim=c(0,120))
-boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2, ylab="Conservation percentage of the signal peptide", names = c("High MAF", "Low MAF"), ylim=c(0,120))
-boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3, ylab="Conservation percentage of the signal peptide", names = c("High MAF", "Low MAF"), ylim=c(0,120))
-par(op)
-
 # SIGNAL PEPTIDE COMPARISON
 wilcox.test(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1, paired = F, conf.level = 0.95) # Distribuciones diferentes
 wilcox.test(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2, paired = F, conf.level = 0.95) # Distribuciones diferentes
 wilcox.test(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3, paired = F, conf.level = 0.95) # Distribuciones diferentes
+
+# PEPTIDE SIGNAL BOXPLOTS
+pValue = wilcox.test(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1, paired = F, conf.level = 0.95)$p.value
+pValue = formatC(pValue, format = "e", digits = 2)
+boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1, ylab="Conservation percentage of the signal peptide",names=c("High MAF", "Low MAF"), ylim=c(0,120))
+legend("topleft", c(paste("P =",pValue)), cex=0.85, bty="n")
+
+pValue = wilcox.test(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2, paired = F, conf.level = 0.95)$p.value
+pValue = formatC(pValue, format = "e", digits = 2)
+boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2, ylab="Conservation percentage of the signal peptide", names = c("High MAF", "Low MAF"), ylim=c(0,120))
+legend("topleft", c(paste("P =",pValue)), cex=0.85, bty="n")
+
+pValue = wilcox.test(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3, paired = F, conf.level = 0.95)$p.value
+pValue = formatC(pValue, format = "e", digits = 2)
+boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3, ylab="Conservation percentage of the signal peptide", names = c("High MAF", "Low MAF"), ylim=c(0,120))
+legend("topleft", c(paste("P =",pValue)), cex=0.85, bty="n")
+
 
 # POSICIONES AFECTADAS
 # Nos quedamos con las mutaciones que solo afectan a una posicion.
@@ -363,4 +373,43 @@ dimnames(m)=list(GROUP = c("MAF BAJA", "MAF ALTA"),
 m
 chisq.test(m)
 
-
+# Aciertos y errores de sift y polyphen
+aciertosSift = 0
+fallosSift = 0
+aciertosPolyphen = 0
+fallosPolyphen = 0
+for (i in 1:nrow(csvWithMaf)) {
+  class = csvWithMaf$CLASS[i]
+  sift = csvWithMaf$SIFT[i]
+  polyphen = csvWithMaf$POLYPHEN[i]
+  
+  if(class == 'BENIGN'){
+    if(grepl('tolerated', sift, ignore.case = T)){
+      aciertosSift = aciertosSift +1
+    } else{
+      fallosSift = fallosSift+1
+    }
+    
+    if(grepl('benign', polyphen, ignore.case = T)){
+      aciertosPolyphen = aciertosPolyphen + 1
+    } else {
+      fallosPolyphen = fallosPolyphen + 1
+    }
+  } else if (class == 'DELETERIOUS'){
+    if(grepl('deleterious', sift, ignore.case = T)){
+      aciertosSift = aciertosSift +1
+    } else{
+      fallosSift = fallosSift+1
+    }
+    
+    if(grepl('damaging', polyphen, ignore.case = T)){
+      aciertosPolyphen = aciertosPolyphen + 1
+    } else {
+      fallosPolyphen = fallosPolyphen + 1
+    }
+  }
+}
+porcentajeAciertoSift = aciertosSift/(aciertosSift+fallosSift)
+porcentajeAciertoPolyphen = aciertosPolyphen/(aciertosPolyphen+fallosPolyphen)
+myvars=c( "MINOR_ALLELE_FREQUENCY", "SIFT","POLYPHEN","CLASS")
+View(highMaf[myvars])
