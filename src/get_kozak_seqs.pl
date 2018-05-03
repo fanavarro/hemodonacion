@@ -51,6 +51,7 @@ foreach my $chromosome (@chromosomes){
         my $cds = $transcript->translateable_seq;
         my $kozak_context = myUtils::SeqUtils::get_kozak_context($cdna, $cds, $positions_before, $positions_after);
         if (defined $kozak_context){
+            print $fd ">" . $transcript->display_id . "\n";
             print $fd $kozak_context . "\n";
         }
         if (!$transcript->is_canonical){

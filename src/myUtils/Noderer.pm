@@ -39,11 +39,11 @@ sub get_kozak_matches {
   my $min_efficiency = shift;
   my $hits;
 	
-	my @starts = [];
-	my @ends = [];
-	my @widths = [];
-	my @scores = [];
-	my @init_codon_positions = [];
+	my @starts = ();
+	my @ends = ();
+	my @widths = ();
+	my @scores = ();
+	my @init_codon_positions = ();
 	
 	my $atg_positions = myUtils::SeqUtils::get_met_positions($cdna);
 	my $index = 0;

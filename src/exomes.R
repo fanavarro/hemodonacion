@@ -96,9 +96,14 @@ nrow(exome_tables[["ABGP.xlsx"]])
 nrow(exome_tables[["Exoma 2166 nuevo.xlsx"]])
 nrow(exome_tables[["Paqui.xlsx"]])
 mean(c(nrow(exome_tables[["14-173.xlsx"]]),nrow(exome_tables[["2064.xlsx"]]),nrow(exome_tables[["ABGP.xlsx"]]),nrow(exome_tables[["Exoma 2166 nuevo.xlsx"]]),nrow(exome_tables[["Paqui.xlsx"]])))
-# filter protein pos 
+# filter protein pos
 for (file in exome_files){
   exome_tables[file] = filter_protein_pos_xls(exome_tables[[file]])
+}
+
+# Crear csv con mtuaciones en met1
+for (file in exome_files){
+  write.table(exome_tables[[file]], file = paste(exomes_dir, file, ".tsv", sep = ""), sep = "\t", row.names = F)
 }
 
 # Mutaciones en met1 por paciente

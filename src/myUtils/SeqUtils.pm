@@ -227,7 +227,7 @@ sub get_met_mutation_info{
         my $mutated_orf = get_orf($mutated_cdna, $used_met_pos);
         #say $mutated_orf;
         #say $cds;
-        my $reading_frame = is_in_frame($cds, $mutated_orf) ? 'Conserved' : 'Lost';
+        my $reading_frame = is_in_frame($cds, $mutated_orf) ? 'Maintained' : 'Lost';
         
         # If mutated and original met are different, apply the pos correction
         if ($used_met_pos != $translation_start_pos){

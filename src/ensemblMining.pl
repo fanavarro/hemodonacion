@@ -30,7 +30,7 @@ if (scalar @ARGV == 1){
 print "Results will be printed in $output\n";
 
 # CSV file configuration
-my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE METS_IN_5_UTR SIGNAL_PEPTIDE_START SIGNAL_PEPTIDE_END CDS_ERRORS PROTEIN_ID VARIATION_NAME VARIATION_TYPE SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE CDS_COORDS AMINOACID_CHANGE MET_POSITION_1 STOP_CODON_POSITION_1 MUTATED_SEQUENCE_LENGTH_1 READING_FRAME_STATUS_1 SIGNAL_PEPTIDE_CONSERVATION_1 MET_POSITION_2 INIT_CODON_2 STOP_CODON_POSITION_2 MUTATED_SEQUENCE_LENGTH_2 SCORE_2 READING_FRAME_STATUS_2 SIGNAL_PEPTIDE_CONSERVATION_2 MET_POSITION_3 INIT_CODON_3 STOP_CODON_POSITION_3 MUTATED_SEQUENCE_LENGTH_3 SCORE_3 READING_FRAME_STATUS_3 SIGNAL_PEPTIDE_CONSERVATION_3 CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
+my @fields = qw(CHROMOSOME GENE_ID GENE_NAME TRANSCRIPT_ID TRANSCRIPT_REFSEQ_ID TRANSCRIPT_BIOTYPE METS_IN_5_UTR SIGNAL_PEPTIDE_START SIGNAL_PEPTIDE_END CDS_ERRORS PROTEIN_ID VARIATION_NAME VARIATION_TYPE SOURCE TRANSCRIPT_VARIATION_ALLELE_DBID MINOR_ALLELE_FREQUENCY CODON_CHANGE CDS_COORDS AMINOACID_CHANGE APPROACH1_MET_POSITION APPROACH1_STOP_CODON_POSITION APPROACH1_MUTATED_SEQUENCE_LENGTH APPROACH1_READING_FRAME_STATUS APPROACH1_SIGNAL_PEPTIDE_CONSERVATION APPROACH2_MET_POSITION APPROACH2_INIT_CODON APPROACH2_STOP_CODON_POSITION APPROACH2_MUTATED_SEQUENCE_LENGTH APPROACH2_SCORE APPROACH2_READING_FRAME_STATUS APPROACH2_SIGNAL_PEPTIDE_CONSERVATION APPROACH3_MET_POSITION APPROACH3_INIT_CODON APPROACH3_STOP_CODON_POSITION APPROACH3_MUTATED_SEQUENCE_LENGTH APPROACH3_SCORE APPROACH3_READING_FRAME_STATUS APPROACH3_SIGNAL_PEPTIDE_CONSERVATION CONSEQUENCE PHENOTYPE SO_TERM SIFT POLYPHEN PUBLICATIONS);
 my $out_csv = myUtils::CsvManager->new (
 	fields    => \@fields,
 	csv_separator   => "\t",
@@ -59,7 +59,7 @@ my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcri
 
 # Chromosomes to be treated
 my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
-#my @chromosomes = qw(Y);
+#my @chromosomes = qw(22);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
@@ -180,7 +180,7 @@ sub get_transcript_variation_info{
         my $publications_info = get_publications_info($variation);
         my $ref_seq_mrna_ids = get_ref_seq_mrna_ids($transcript);
         my $signal_peptide_info = get_signal_peptide_info($transcript);
-        my $cds_coords = $tv->cds_start . '-' . $tv->cds_end if (defined $tv->cds_start && defined $tv->cds_end);
+        my $cds_coords = '[' . $tv->cds_start . ', ' . $tv->cds_end . ']' if (defined $tv->cds_start && defined $tv->cds_end) ;
         my $tvas = $tv->get_all_alternate_TranscriptVariationAlleles();
 
         foreach my $tva ( @{$tvas} ) {
@@ -222,20 +222,20 @@ sub get_transcript_variation_info{
             $entry{'AMINOACID_CHANGE'} = defined($tva->pep_allele_string) ? $tva->pep_allele_string : '';
             
             # method 1 columns (first atg)
-            $entry{'MET_POSITION_1'} = $seq_info->{'met_position'};
-            $entry{'STOP_CODON_POSITION_1'} = $seq_info->{'stop_codon_position'};
-            $entry{'MUTATED_SEQUENCE_LENGTH_1'} = $seq_info->{'seq_length'};
-            $entry{'READING_FRAME_STATUS_1'} = $seq_info->{'reading_frame'};
-            $entry{'SIGNAL_PEPTIDE_CONSERVATION_1'} = get_signal_peptide_conservarion($signal_peptide_info->{'START'}, $signal_peptide_info->{'END'}, $seq_info->{'met_position'});
+            $entry{'APPROACH1_MET_POSITION'} = $seq_info->{'met_position'};
+            $entry{'APPROACH1_STOP_CODON_POSITION'} = $seq_info->{'stop_codon_position'};
+            $entry{'APPROACH1_MUTATED_SEQUENCE_LENGTH'} = $seq_info->{'seq_length'};
+            $entry{'APPROACH1_READING_FRAME_STATUS'} = $seq_info->{'reading_frame'};
+            $entry{'APPROACH1_SIGNAL_PEPTIDE_CONSERVATION'} = get_signal_peptide_conservarion($signal_peptide_info->{'START'}, $signal_peptide_info->{'END'}, $seq_info->{'met_position'});
             
             # method 2 columns (noderer scores)
-            $entry{'MET_POSITION_2'} = $noderer_info->{'met_position'};
-            $entry{'INIT_CODON_2'} = $noderer_info->{'init_codon'};
-            $entry{'STOP_CODON_POSITION_2'} = $noderer_info->{'stop_codon_position'};
-            $entry{'MUTATED_SEQUENCE_LENGTH_2'} = $noderer_info->{'seq_length'};
-            $entry{'SCORE_2'} = $noderer_info->{'score'};
-            $entry{'READING_FRAME_STATUS_2'} = $noderer_info->{'reading_frame'};
-            $entry{'SIGNAL_PEPTIDE_CONSERVATION_2'} = get_signal_peptide_conservarion($signal_peptide_info->{'START'}, $signal_peptide_info->{'END'}, $noderer_info->{'met_position'});
+            $entry{'APPROACH2_MET_POSITION'} = $noderer_info->{'met_position'};
+            $entry{'APPROACH2_INIT_CODON'} = $noderer_info->{'init_codon'};
+            $entry{'APPROACH2_STOP_CODON_POSITION'} = $noderer_info->{'stop_codon_position'};
+            $entry{'APPROACH2_MUTATED_SEQUENCE_LENGTH'} = $noderer_info->{'seq_length'};
+            $entry{'APPROACH2_SCORE'} = $noderer_info->{'score'};
+            $entry{'APPROACH2_READING_FRAME_STATUS'} = $noderer_info->{'reading_frame'};
+            $entry{'APPROACH2_SIGNAL_PEPTIDE_CONSERVATION'} = get_signal_peptide_conservarion($signal_peptide_info->{'START'}, $signal_peptide_info->{'END'}, $noderer_info->{'met_position'});
 
             # Old method 2 columns (atgPR)
             # $entry{'MET_POSITION_2'} = $atgpr_info->{'START'};
@@ -246,13 +246,13 @@ sub get_transcript_variation_info{
             # $entry{'SIGNAL_PEPTIDE_CONSERVATION_2'} = get_signal_peptide_conservarion($signal_peptide_info->{'START'}, $signal_peptide_info->{'END'}, $atgpr_info->{'START'});
 
             # method 3 columns (Kozak pwm matches)
-            $entry{'MET_POSITION_3'} = $pwm_info->{'met_position'};
-            $entry{'INIT_CODON_3'} = $pwm_info->{'init_codon'};
-            $entry{'STOP_CODON_POSITION_3'} = $pwm_info->{'stop_codon_position'};
-            $entry{'MUTATED_SEQUENCE_LENGTH_3'} = $pwm_info->{'seq_length'};
-            $entry{'SCORE_3'} = $pwm_info->{'score'};
-            $entry{'READING_FRAME_STATUS_3'} = $pwm_info->{'reading_frame'};
-            $entry{'SIGNAL_PEPTIDE_CONSERVATION_3'} = get_signal_peptide_conservarion($signal_peptide_info->{'START'}, $signal_peptide_info->{'END'}, $pwm_info->{'met_position'});
+            $entry{'APPROACH3_MET_POSITION'} = $pwm_info->{'met_position'};
+            $entry{'APPROACH3_INIT_CODON'} = $pwm_info->{'init_codon'};
+            $entry{'APPROACH3_STOP_CODON_POSITION'} = $pwm_info->{'stop_codon_position'};
+            $entry{'APPROACH3_MUTATED_SEQUENCE_LENGTH'} = $pwm_info->{'seq_length'};
+            $entry{'APPROACH3_SCORE'} = $pwm_info->{'score'};
+            $entry{'APPROACH3_READING_FRAME_STATUS'} = $pwm_info->{'reading_frame'};
+            $entry{'APPROACH3_SIGNAL_PEPTIDE_CONSERVATION'} = get_signal_peptide_conservarion($signal_peptide_info->{'START'}, $signal_peptide_info->{'END'}, $pwm_info->{'met_position'});
 
             $entry{'SIGNAL_PEPTIDE_START'} = $signal_peptide_info->{'START'} if (defined($signal_peptide_info));
             $entry{'SIGNAL_PEPTIDE_END'} = $signal_peptide_info->{'END'} if (defined($signal_peptide_info));

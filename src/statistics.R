@@ -3,35 +3,35 @@ setwd("~/hemodonacion/data/tsv")
 
 # Leer el csv sin filtros
 #csv = read.csv("26_04_2017.csv", sep="\t",stringsAsFactors=FALSE)
-csv = read.csv("19_04_2018.tsv", sep="\t",stringsAsFactors=FALSE)
-csv[,"MUTATED_SEQUENCE_LENGTH_1"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH_1))
-csv[,"MUTATED_SEQUENCE_LENGTH_2"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH_2))
-csv[,"MUTATED_SEQUENCE_LENGTH_3"]=as.numeric(gsub("%","",csv$MUTATED_SEQUENCE_LENGTH_3))
-csv[,"SIGNAL_PEPTIDE_CONSERVATION_1"]=as.numeric(gsub("%","",csv$SIGNAL_PEPTIDE_CONSERVATION_1))
-csv[,"SIGNAL_PEPTIDE_CONSERVATION_2"]=as.numeric(gsub("%","",csv$SIGNAL_PEPTIDE_CONSERVATION_2))
-csv[,"SIGNAL_PEPTIDE_CONSERVATION_3"]=as.numeric(gsub("%","",csv$SIGNAL_PEPTIDE_CONSERVATION_3))
+csv = read.csv("30_04_2018.tsv", sep="\t",stringsAsFactors=FALSE)
+csv[,"APPROACH1_MUTATED_SEQUENCE_LENGTH"]=as.numeric(gsub("%","",csv$APPROACH1_MUTATED_SEQUENCE_LENGTH))
+csv[,"APPROACH2_MUTATED_SEQUENCE_LENGTH"]=as.numeric(gsub("%","",csv$APPROACH2_MUTATED_SEQUENCE_LENGTH))
+csv[,"APPROACH3_MUTATED_SEQUENCE_LENGTH"]=as.numeric(gsub("%","",csv$APPROACH3_MUTATED_SEQUENCE_LENGTH))
+csv[,"APPROACH1_SIGNAL_PEPTIDE_CONSERVATION"]=as.numeric(gsub("%","",csv$APPROACH1_SIGNAL_PEPTIDE_CONSERVATION))
+csv[,"APPROACH2_SIGNAL_PEPTIDE_CONSERVATION"]=as.numeric(gsub("%","",csv$APPROACH2_SIGNAL_PEPTIDE_CONSERVATION))
+csv[,"APPROACH3_SIGNAL_PEPTIDE_CONSERVATION"]=as.numeric(gsub("%","",csv$APPROACH3_SIGNAL_PEPTIDE_CONSERVATION))
 
 for(i in 1:nrow(csv)){
-  if(csv$READING_FRAME_STATUS_1[i] == ''){
-    csv$READING_FRAME_STATUS_1[i] = NA
+  if(csv$APPROACH1_READING_FRAME_STATUS[i] == ''){
+    csv$APPROACH1_READING_FRAME_STATUS[i] = NA
   }
-  if(csv$READING_FRAME_STATUS_2[i] == ''){
-    csv$READING_FRAME_STATUS_2[i] = NA
+  if(csv$APPROACH2_READING_FRAME_STATUS[i] == ''){
+    csv$APPROACH2_READING_FRAME_STATUS[i] = NA
   }
-  if(csv$READING_FRAME_STATUS_3[i] == ''){
-    csv$READING_FRAME_STATUS_3[i] = NA
+  if(csv$APPROACH3_READING_FRAME_STATUS[i] == ''){
+    csv$APPROACH3_READING_FRAME_STATUS[i] = NA
   }
 }
-csv$READING_FRAME_STATUS_1 = factor(csv$READING_FRAME_STATUS_1)
-csv$READING_FRAME_STATUS_2 = factor(csv$READING_FRAME_STATUS_2)
-csv$READING_FRAME_STATUS_3 = factor(csv$READING_FRAME_STATUS_3)
-csv$STOP_CODON_POSITION_1 = factor(csv$STOP_CODON_POSITION_1)
-csv$STOP_CODON_POSITION_2 = factor(csv$STOP_CODON_POSITION_2)
-csv$STOP_CODON_POSITION_3 = factor(csv$STOP_CODON_POSITION_3)
+csv$APPROACH1_READING_FRAME_STATUS = factor(csv$APPROACH1_READING_FRAME_STATUS)
+csv$APPROACH2_READING_FRAME_STATUS = factor(csv$APPROACH2_READING_FRAME_STATUS)
+csv$APPROACH3_READING_FRAME_STATUS = factor(csv$APPROACH3_READING_FRAME_STATUS)
+csv$APPROACH1_STOP_CODON_POSITION = factor(csv$APPROACH1_STOP_CODON_POSITION)
+csv$APPROACH2_STOP_CODON_POSITION = factor(csv$APPROACH2_STOP_CODON_POSITION)
+csv$APPROACH3_STOP_CODON_POSITION = factor(csv$APPROACH3_STOP_CODON_POSITION)
 csv$GENE_NAME = factor(csv$GENE_NAME)
-#csv$SIGNAL_PEPTIDE_CONSERVATION_1 = factor(csv$SIGNAL_PEPTIDE_CONSERVATION_1)
-#csv$SIGNAL_PEPTIDE_CONSERVATION_2 = factor(csv$SIGNAL_PEPTIDE_CONSERVATION_2)
-#csv$SIGNAL_PEPTIDE_CONSERVATION_3 = factor(csv$SIGNAL_PEPTIDE_CONSERVATION_3)
+#csv$APPROACH1_SIGNAL_PEPTIDE_CONSERVATION = factor(csv$APPROACH1_SIGNAL_PEPTIDE_CONSERVATION)
+#csv$APPROACH2_SIGNAL_PEPTIDE_CONSERVATION = factor(csv$APPROACH2_SIGNAL_PEPTIDE_CONSERVATION)
+#csv$APPROACH3_SIGNAL_PEPTIDE_CONSERVATION = factor(csv$APPROACH3_SIGNAL_PEPTIDE_CONSERVATION)
 
 # Calcular metioninas en 5' utr
 csv$NMETS_5_UTR = sapply(strsplit(csv$METS_IN_5_UTR, " "), length)
@@ -59,7 +59,7 @@ myvars=c('NMETS_5_UTR','METS_IN_5_UTR', 'CONSERVED_METS_IN_5_UTR', 'LOST_METS_IN
 View(csv[myvars])
 
 # Ordenar variables
-myvars=c('CHROMOSOME','GENE_ID', 'GENE_NAME', 'TRANSCRIPT_ID', 'TRANSCRIPT_REFSEQ_ID', 'TRANSCRIPT_BIOTYPE', 'METS_IN_5_UTR', 'NMETS_5_UTR', 'CONSERVED_METS_IN_5_UTR', 'LOST_METS_IN_5_UTR', 'SIGNAL_PEPTIDE_START', 'SIGNAL_PEPTIDE_END', 'CDS_ERRORS', 'PROTEIN_ID', 'VARIATION_NAME', 'VARIATION_TYPE', 'SOURCE', 'TRANSCRIPT_VARIATION_ALLELE_DBID', 'MINOR_ALLELE_FREQUENCY', 'CODON_CHANGE', 'CDS_COORDS', 'AMINOACID_CHANGE' ,'MET_POSITION_1' ,'STOP_CODON_POSITION_1' ,'MUTATED_SEQUENCE_LENGTH_1' ,'READING_FRAME_STATUS_1', 'SIGNAL_PEPTIDE_CONSERVATION_1', 'MET_POSITION_2', 'INIT_CODON_2', 'STOP_CODON_POSITION_2', 'MUTATED_SEQUENCE_LENGTH_2', 'SCORE_2', 'READING_FRAME_STATUS_2', 'SIGNAL_PEPTIDE_CONSERVATION_2', 'MET_POSITION_3', 'INIT_CODON_3', 'STOP_CODON_POSITION_3', 'MUTATED_SEQUENCE_LENGTH_3', 'SCORE_3', 'READING_FRAME_STATUS_3', 'SIGNAL_PEPTIDE_CONSERVATION_3', 'CONSEQUENCE', 'PHENOTYPE', 'SO_TERM', 'SIFT', 'POLYPHEN', 'PUBLICATIONS')
+myvars=c('CHROMOSOME','GENE_ID', 'GENE_NAME', 'TRANSCRIPT_ID', 'TRANSCRIPT_REFSEQ_ID', 'TRANSCRIPT_BIOTYPE', 'METS_IN_5_UTR', 'NMETS_5_UTR', 'CONSERVED_METS_IN_5_UTR', 'LOST_METS_IN_5_UTR', 'SIGNAL_PEPTIDE_START', 'SIGNAL_PEPTIDE_END', 'CDS_ERRORS', 'PROTEIN_ID', 'VARIATION_NAME', 'VARIATION_TYPE', 'SOURCE', 'TRANSCRIPT_VARIATION_ALLELE_DBID', 'MINOR_ALLELE_FREQUENCY', 'CODON_CHANGE', 'CDS_COORDS', 'AMINOACID_CHANGE' ,'APPROACH1_MET_POSITION' ,'APPROACH1_STOP_CODON_POSITION' ,'APPROACH1_MUTATED_SEQUENCE_LENGTH' ,'APPROACH1_READING_FRAME_STATUS', 'APPROACH1_SIGNAL_PEPTIDE_CONSERVATION', 'APPROACH2_MET_POSITION', 'APPROACH2_INIT_CODON', 'APPROACH2_STOP_CODON_POSITION', 'APPROACH2_MUTATED_SEQUENCE_LENGTH', 'APPROACH2_SCORE', 'APPROACH2_READING_FRAME_STATUS', 'APPROACH2_SIGNAL_PEPTIDE_CONSERVATION', 'APPROACH3_MET_POSITION', 'APPROACH3_INIT_CODON', 'APPROACH3_STOP_CODON_POSITION', 'APPROACH3_MUTATED_SEQUENCE_LENGTH', 'APPROACH3_SCORE', 'APPROACH3_READING_FRAME_STATUS', 'APPROACH3_SIGNAL_PEPTIDE_CONSERVATION', 'CONSEQUENCE', 'PHENOTYPE', 'SO_TERM', 'SIFT', 'POLYPHEN', 'PUBLICATIONS')
 csv = csv[myvars]
 # Insertar clase
 for (i in 1:nrow(csv)) {
@@ -105,10 +105,10 @@ View(table(csv$VARIATION_TYPE))
 
 # El uso de la metionina en kozak fuerte provoca la conservacion del marco
 # de lectura en mayor medida que la primera metionina encontrada?
-rf_met_conserved = nrow(csv[csv$READING_FRAME_STATUS_1 == "Conserved",]); rf_met_conserved
-rf_met_lost = nrow(csv[csv$READING_FRAME_STATUS_1 == "Lost",]); rf_met_lost
-rf_kozak_conserved = nrow(csv[csv$READING_FRAME_STATUS_3 == "Conserved",]); rf_kozak_conserved
-rf_kozak_lost = nrow(csv[csv$READING_FRAME_STATUS_3 == "Lost",]); rf_kozak_lost
+rf_met_conserved = nrow(csv[csv$APPROACH1_READING_FRAME_STATUS == "Conserved",]); rf_met_conserved
+rf_met_lost = nrow(csv[csv$APPROACH1_READING_FRAME_STATUS == "Lost",]); rf_met_lost
+rf_kozak_conserved = nrow(csv[csv$APPROACH3_READING_FRAME_STATUS == "Conserved",]); rf_kozak_conserved
+rf_kozak_lost = nrow(csv[csv$APPROACH3_READING_FRAME_STATUS == "Lost",]); rf_kozak_lost
 m = as.table(rbind(c(rf_met_conserved, rf_met_lost), c(rf_kozak_conserved, rf_kozak_lost)))
 dimnames(m) = list(alt_met=c("First Met", "Kozak Met"),
                    reading_frame=c("Conserved", "Lost"))
@@ -137,145 +137,146 @@ length(unique(highMaf[is.na(highMaf$SIGNAL_PEPTIDE_START),]$TRANSCRIPT_ID))
 length(unique(lowMaf[is.na(lowMaf$SIGNAL_PEPTIDE_START),]$TRANSCRIPT_ID))
 
 # Resumen de cada subconjunto de datos segun la maf
-summary(lowMaf$MET_POSITION_1)
-summary(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1)
-summary(lowMaf$READING_FRAME_STATUS_1)
+summary(lowMaf$APPROACH1_MET_POSITION)
+summary(lowMaf$APPROACH1_SIGNAL_PEPTIDE_CONSERVATION)
+summary(lowMaf$APPROACH1_READING_FRAME_STATUS)
 
 
-summary(highMaf$MET_POSITION_1)
-summary(highMaf$SIGNAL_PEPTIDE_CONSERVARION_1)
-summary(highMaf$READING_FRAME_STATUS_1)
+summary(highMaf$APPROACH1_MET_POSITION)
+summary(highMaf$APPROACH1_SIGNAL_PEPTIDE_CONSERVARION)
+summary(highMaf$APPROACH1_READING_FRAME_STATUS)
 
-summary(lowMaf$MET_POSITION_2)
-summary(lowMaf$SIGNAL_PEPTIDE_CONSERVARION_2)
-summary(lowMaf$READING_FRAME_STATUS_2)
+summary(lowMaf$APPROACH2_MET_POSITION)
+summary(lowMaf$APPROACH2_SIGNAL_PEPTIDE_CONSERVARION)
+summary(lowMaf$APPROACH2_READING_FRAME_STATUS)
 
-summary(highMaf$MET_POSITION_2)
-summary(highMaf$SIGNAL_PEPTIDE_CONSERVARION_2)
-summary(highMaf$READING_FRAME_STATUS_2)
+summary(highMaf$APPROACH2_MET_POSITION)
+summary(highMaf$APPROACH2_SIGNAL_PEPTIDE_CONSERVARION)
+summary(highMaf$APPROACH2_READING_FRAME_STATUS)
 
-summary(highMaf$MET_POSITION_3)
-summary(highMaf$SIGNAL_PEPTIDE_CONSERVARION_3)
-summary(highMaf$READING_FRAME_STATUS_3)
+summary(highMaf$APPROACH3_MET_POSITION)
+summary(highMaf$APPROACH3_SIGNAL_PEPTIDE_CONSERVARION)
+summary(highMaf$APPROACH3_READING_FRAME_STATUS)
 
-summary(lowMaf$MET_POSITION_3)
-summary(lowMaf$SIGNAL_PEPTIDE_CONSERVARION_3)
-summary(lowMaf$READING_FRAME_STATUS_3)
+summary(lowMaf$APPROACH3_MET_POSITION)
+summary(lowMaf$APPROACH3_SIGNAL_PEPTIDE_CONSERVARION)
+summary(lowMaf$APPROACH3_READING_FRAME_STATUS)
 
 # Comprobar homogeneidad de varianzas
-var.test(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1) # Varianzas distintas
-var.test(highMaf$MET_POSITION_2, lowMaf$MET_POSITION_2) # Varianzas distintas
-var.test(highMaf$MET_POSITION_3, lowMaf$MET_POSITION_3) # Varianzas distintas
+var.test(highMaf$APPROACH1_MET_POSITION, lowMaf$APPROACH1_MET_POSITION) # Varianzas distintas
+var.test(highMaf$APPROACH2_MET_POSITION, lowMaf$APPROACH2_MET_POSITION) # Varianzas distintas
+var.test(highMaf$APPROACH3_MET_POSITION, lowMaf$APPROACH3_MET_POSITION) # Varianzas distintas
 
 #Test de normalidad
-shapiro.test(highMaf$MET_POSITION_1) # No normal
-shapiro.test(lowMaf$MET_POSITION_1) # No normal
-shapiro.test(highMaf$MET_POSITION_2) # No normal
-shapiro.test(lowMaf$MET_POSITION_2) # No normal
-shapiro.test(highMaf$MET_POSITION_3) # No normal
-shapiro.test(lowMaf$MET_POSITION_3) # No normal
+shapiro.test(highMaf$APPROACH1_MET_POSITION) # No normal
+shapiro.test(lowMaf$APPROACH1_MET_POSITION) # No normal
+shapiro.test(highMaf$APPROACH2_MET_POSITION) # No normal
+shapiro.test(lowMaf$APPROACH2_MET_POSITION) # No normal
+shapiro.test(highMaf$APPROACH3_MET_POSITION) # No normal
+shapiro.test(lowMaf$APPROACH3_MET_POSITION) # No normal
 
 # Test de wilcoxon para comparar medias
-wilcox.test(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1, paired = F, conf.level = 0.95) # Distribuciones diferentes
-wilcox.test(highMaf$MET_POSITION_2, lowMaf$MET_POSITION_2, paired = F, conf.level = 0.95) # Distribuciones diferentes
-wilcox.test(highMaf$MET_POSITION_3, lowMaf$MET_POSITION_3, paired = F, conf.level = 0.95) # Distribuciones diferentes
+wilcox.test(highMaf$APPROACH1_MET_POSITION, lowMaf$APPROACH1_MET_POSITION, paired = F, conf.level = 0.95) # Distribuciones diferentes
+wilcox.test(highMaf$APPROACH2_MET_POSITION, lowMaf$APPROACH2_MET_POSITION, paired = F, conf.level = 0.95) # Distribuciones diferentes
+wilcox.test(highMaf$APPROACH3_MET_POSITION, lowMaf$APPROACH3_MET_POSITION, paired = F, conf.level = 0.95) # Distribuciones diferentes
 
-# Boxplots
-#op <- par(mfrow = c(1, 3))
-highMAFMedian = summary(highMaf$MET_POSITION_1)[['Median']]
-lowMAFMedian = summary(lowMaf$MET_POSITION_1)[['Median']]
-pValue = wilcox.test(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1, paired = F, conf.level = 0.95)$p.value
+# Boxplots met position
+op <- par(mfrow = c(1, 3))
+highMAFMedian = summary(highMaf$APPROACH1_MET_POSITION)[['Median']]
+lowMAFMedian = summary(lowMaf$APPROACH1_MET_POSITION)[['Median']]
+pValue = wilcox.test(highMaf$APPROACH1_MET_POSITION, lowMaf$APPROACH1_MET_POSITION, paired = F, conf.level = 0.95)$p.value
 pValue = formatC(pValue, format = "e", digits = 2)
-boxplot(highMaf$MET_POSITION_1, lowMaf$MET_POSITION_1, ylab="AUG position (bp)",names=c("High MAF", "Low MAF"))
+boxplot(highMaf$APPROACH1_MET_POSITION, lowMaf$APPROACH1_MET_POSITION, ylab="AUG position (bp)",names=c("High MAF", "Low MAF"), main="A")
 legend("topleft", c(paste("High MAF median:",highMAFMedian), paste("Low MAF median:",lowMAFMedian), paste("P =",pValue)), cex=0.85, bty="n")
 
-highMAFMedian = summary(highMaf$MET_POSITION_2)[['Median']]
-lowMAFMedian = summary(lowMaf$MET_POSITION_2)[['Median']]
-pValue = wilcox.test(highMaf$MET_POSITION_2, lowMaf$MET_POSITION_2, paired = F, conf.level = 0.95)$p.value
+highMAFMedian = summary(highMaf$APPROACH2_MET_POSITION)[['Median']]
+lowMAFMedian = summary(lowMaf$APPROACH2_MET_POSITION)[['Median']]
+pValue = wilcox.test(highMaf$APPROACH2_MET_POSITION, lowMaf$APPROACH2_MET_POSITION, paired = F, conf.level = 0.95)$p.value
 pValue = formatC(pValue, format = "e", digits = 2)
-boxplot(highMaf$MET_POSITION_2, lowMaf$MET_POSITION_2, ylab="AUG position (bp)", names = c("High MAF", "Low MAF"))
+boxplot(highMaf$APPROACH2_MET_POSITION, lowMaf$APPROACH2_MET_POSITION, ylab="AUG position (bp)", names = c("High MAF", "Low MAF"), main="B", ylim=c(0, 1350))
 legend("topleft", c(paste("High MAF median:",highMAFMedian), paste("Low MAF median:",lowMAFMedian), paste("P =",pValue)), cex=0.85, bty="n")
 
-highMAFMedian = summary(highMaf$MET_POSITION_3)[['Median']]
-lowMAFMedian = summary(lowMaf$MET_POSITION_3)[['Median']]
-pValue = wilcox.test(highMaf$MET_POSITION_3, lowMaf$MET_POSITION_3, paired = F, conf.level = 0.95)$p.value
+highMAFMedian = summary(highMaf$APPROACH3_MET_POSITION)[['Median']]
+lowMAFMedian = summary(lowMaf$APPROACH3_MET_POSITION)[['Median']]
+pValue = wilcox.test(highMaf$APPROACH3_MET_POSITION, lowMaf$APPROACH3_MET_POSITION, paired = F, conf.level = 0.95)$p.value
 pValue = formatC(pValue, format = "e", digits = 2)
-boxplot(highMaf$MET_POSITION_3, lowMaf$MET_POSITION_3, ylab="AUG position (bp)", names = c("High MAF", "Low MAF"))
+boxplot(highMaf$APPROACH3_MET_POSITION, lowMaf$APPROACH3_MET_POSITION, ylab="AUG position (bp)", names = c("High MAF", "Low MAF"), main="C")
 legend("topleft", c(paste("High MAF median:",highMAFMedian), paste("Low MAF median:",lowMAFMedian), paste("P =",pValue)), cex=0.85, bty="n")
-#par(op)
+par(op)
 
 # Test de Chi Cuadrado para comparar las variables cualitativas
 # MET1 READING FRAME STATUS
-rf_conserved_met1_low_maf = summary(lowMaf$READING_FRAME_STATUS_1)[['Conserved']]
-rf_lost_met1_low_maf = summary(lowMaf$READING_FRAME_STATUS_1)[['Lost']]
-rf_conserved_met1_high_maf = summary(highMaf$READING_FRAME_STATUS_1)[['Conserved']]
-rf_lost_met1_high_maf = summary(highMaf$READING_FRAME_STATUS_1)[['Lost']]
+rf_conserved_met1_low_maf = summary(lowMaf$APPROACH1_READING_FRAME_STATUS)[['Maintained']]
+rf_lost_met1_low_maf = summary(lowMaf$APPROACH1_READING_FRAME_STATUS)[['Lost']]
+rf_conserved_met1_high_maf = summary(highMaf$APPROACH1_READING_FRAME_STATUS)[['Maintained']]
+rf_lost_met1_high_maf = summary(highMaf$APPROACH1_READING_FRAME_STATUS)[['Lost']]
 m = as.table(rbind(c(rf_conserved_met1_low_maf,rf_lost_met1_low_maf), c(rf_conserved_met1_high_maf,rf_lost_met1_high_maf)))
 dimnames(m)=list(GRUPO = c("MAF BAJA", "MAF ALTA"),
-                 READING_FRAME_STATUS = c("CONSERVED", "LOST"))
+                 READING_FRAME_STATUS = c("MAINTAINED", "LOST"))
 m
 chisq.test(m) # p-value menor que 0.05 indica que cada grupo de mutaciones presenta diferencias significativas
 ###
 
 # MET2 READING FRAME STATUS
-rf_conserved_met2_low_maf = summary(lowMaf$READING_FRAME_STATUS_2)[['Conserved']]
-rf_lost_met2_low_maf = summary(lowMaf$READING_FRAME_STATUS_2)[['Lost']]
-rf_conserved_met2_high_maf = summary(highMaf$READING_FRAME_STATUS_2)[['Conserved']]
-rf_lost_met2_high_maf = summary(highMaf$READING_FRAME_STATUS_2)[['Lost']]
+rf_conserved_met2_low_maf = summary(lowMaf$APPROACH2_READING_FRAME_STATUS)[['Maintained']]
+rf_lost_met2_low_maf = summary(lowMaf$APPROACH2_READING_FRAME_STATUS)[['Lost']]
+rf_conserved_met2_high_maf = summary(highMaf$APPROACH2_READING_FRAME_STATUS)[['Maintained']]
+rf_lost_met2_high_maf = summary(highMaf$APPROACH2_READING_FRAME_STATUS)[['Lost']]
 m = as.table(rbind(c(rf_conserved_met2_low_maf,rf_lost_met2_low_maf), c(rf_conserved_met2_high_maf,rf_lost_met2_high_maf)))
 dimnames(m)=list(GRUPO = c("MAF BAJA", "MAF ALTA"),
-                 READING_FRAME_STATUS = c("CONSERVED", "LOST"))
+                 READING_FRAME_STATUS = c("MAINTAINED", "LOST"))
 m
 chisq.test(m) # p-value mayor que 0.05 indica que cada grupo de mutaciones no presenta diferencias significativas
 
 # MET3 READING FRAME STATUS
-rf_conserved_met3_high_maf = summary(lowMaf$READING_FRAME_STATUS_3)[['Conserved']]
-rf_lost_met3_high_maf = summary(lowMaf$READING_FRAME_STATUS_3)[['Lost']]
-rf_conserved_met3_low_maf = summary(highMaf$READING_FRAME_STATUS_3)[['Conserved']]
-rf_lost_met3_low_maf = summary(highMaf$READING_FRAME_STATUS_3)[['Lost']]
+rf_conserved_met3_high_maf = summary(lowMaf$APPROACH3_READING_FRAME_STATUS)[['Maintained']]
+rf_lost_met3_high_maf = summary(lowMaf$APPROACH3_READING_FRAME_STATUS)[['Lost']]
+rf_conserved_met3_low_maf = summary(highMaf$APPROACH3_READING_FRAME_STATUS)[['Maintained']]
+rf_lost_met3_low_maf = summary(highMaf$APPROACH3_READING_FRAME_STATUS)[['Lost']]
 m = as.table(rbind(c(rf_conserved_met3_low_maf,rf_lost_met3_low_maf), c(rf_conserved_met3_high_maf,rf_lost_met3_high_maf)))
 dimnames(m)=list(GRUPO = c("MAF BAJA", "MAF ALTA"),
-                 READING_FRAME_STATUS = c("CONSERVED", "LOST"))
+                 READING_FRAME_STATUS = c("MAINTAINED", "LOST"))
 m
 chisq.test(m) # p-value mayor que 0.05 indica que cada grupo de mutaciones no presenta diferencias significativas
 
 # SIGNAL PEPTIDE AFFECTED MET1
-summary(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1)
-length(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1)
-summary(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1)
-length(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1)
+summary(highMaf$APPROACH1_SIGNAL_PEPTIDE_CONSERVATION)
+length(highMaf$APPROACH1_SIGNAL_PEPTIDE_CONSERVATION)
+summary(lowMaf$APPROACH1_SIGNAL_PEPTIDE_CONSERVATION)
+length(lowMaf$APPROACH1_SIGNAL_PEPTIDE_CONSERVATION)
 # SIGNAL PEPTIDE AFFECTED MET2
-summary(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2)
-length(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2)
-summary(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2)
-length(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2)
+summary(highMaf$APPROACH2_SIGNAL_PEPTIDE_CONSERVATION)
+length(highMaf$APPROACH2_SIGNAL_PEPTIDE_CONSERVATION)
+summary(lowMaf$APPROACH2_SIGNAL_PEPTIDE_CONSERVATION)
+length(lowMaf$APPROACH2_SIGNAL_PEPTIDE_CONSERVATION)
 # SIGNAL PEPTIDE AFFECTED MET3
-summary(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
-length(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
-summary(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
-length(lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3)
+summary(highMaf$APPROACH3_SIGNAL_PEPTIDE_CONSERVATION)
+length(highMaf$APPROACH3_SIGNAL_PEPTIDE_CONSERVATION)
+summary(lowMaf$APPROACH3_SIGNAL_PEPTIDE_CONSERVATION)
+length(lowMaf$APPROACH3_SIGNAL_PEPTIDE_CONSERVATION)
 
 # SIGNAL PEPTIDE COMPARISON
-wilcox.test(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1, paired = F, conf.level = 0.95) # Distribuciones diferentes
-wilcox.test(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2, paired = F, conf.level = 0.95) # Distribuciones diferentes
-wilcox.test(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3, paired = F, conf.level = 0.95) # Distribuciones diferentes
+wilcox.test(highMaf$APPROACH1_SIGNAL_PEPTIDE_CONSERVATION, lowMaf$APPROACH1_SIGNAL_PEPTIDE_CONSERVATION, paired = F, conf.level = 0.95) # Distribuciones diferentes
+wilcox.test(highMaf$APPROACH2_SIGNAL_PEPTIDE_CONSERVATION, lowMaf$APPROACH2_SIGNAL_PEPTIDE_CONSERVATION, paired = F, conf.level = 0.95) # Distribuciones diferentes
+wilcox.test(highMaf$APPROACH3_SIGNAL_PEPTIDE_CONSERVATION, lowMaf$APPROACH3_SIGNAL_PEPTIDE_CONSERVATION, paired = F, conf.level = 0.95) # Distribuciones diferentes
 
-# PEPTIDE SIGNAL BOXPLOTS
-pValue = wilcox.test(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1, paired = F, conf.level = 0.95)$p.value
+# SIGNAL PEPTIDE BOXPLOTS
+op <- par(mfrow = c(1, 3))
+pValue = wilcox.test(highMaf$APPROACH1_SIGNAL_PEPTIDE_CONSERVATION, lowMaf$APPROACH1_SIGNAL_PEPTIDE_CONSERVATION, paired = F, conf.level = 0.95)$p.value
 pValue = formatC(pValue, format = "e", digits = 2)
-boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_1, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_1, ylab="Conservation percentage of the signal peptide",names=c("High MAF", "Low MAF"), ylim=c(0,120))
+boxplot(highMaf$APPROACH1_SIGNAL_PEPTIDE_CONSERVATION, lowMaf$APPROACH1_SIGNAL_PEPTIDE_CONSERVATION, ylab="Conservation percentage of the signal peptide",names=c("High MAF", "Low MAF"), ylim=c(0,105), main="A")
 legend("topleft", c(paste("P =",pValue)), cex=0.85, bty="n")
 
-pValue = wilcox.test(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2, paired = F, conf.level = 0.95)$p.value
+pValue = wilcox.test(highMaf$APPROACH2_SIGNAL_PEPTIDE_CONSERVATION, lowMaf$APPROACH2_SIGNAL_PEPTIDE_CONSERVATION, paired = F, conf.level = 0.95)$p.value
 pValue = formatC(pValue, format = "e", digits = 2)
-boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_2, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_2, ylab="Conservation percentage of the signal peptide", names = c("High MAF", "Low MAF"), ylim=c(0,120))
+boxplot(highMaf$APPROACH2_SIGNAL_PEPTIDE_CONSERVATION, lowMaf$APPROACH2_SIGNAL_PEPTIDE_CONSERVATION, ylab="Conservation percentage of the signal peptide", names = c("High MAF", "Low MAF"), ylim=c(0,105), main="B")
 legend("topleft", c(paste("P =",pValue)), cex=0.85, bty="n")
 
-pValue = wilcox.test(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3, paired = F, conf.level = 0.95)$p.value
+pValue = wilcox.test(highMaf$APPROACH3_SIGNAL_PEPTIDE_CONSERVATION, lowMaf$APPROACH3_SIGNAL_PEPTIDE_CONSERVATION, paired = F, conf.level = 0.95)$p.value
 pValue = formatC(pValue, format = "e", digits = 2)
-boxplot(highMaf$SIGNAL_PEPTIDE_CONSERVATION_3, lowMaf$SIGNAL_PEPTIDE_CONSERVATION_3, ylab="Conservation percentage of the signal peptide", names = c("High MAF", "Low MAF"), ylim=c(0,120))
+boxplot(highMaf$APPROACH3_SIGNAL_PEPTIDE_CONSERVATION, lowMaf$APPROACH3_SIGNAL_PEPTIDE_CONSERVATION, ylab="Conservation percentage of the signal peptide", names = c("High MAF", "Low MAF"), ylim=c(0,105), main="C")
 legend("topleft", c(paste("P =",pValue)), cex=0.85, bty="n")
-
+par(op)
 
 # POSICIONES AFECTADAS
 # Nos quedamos con las mutaciones que solo afectan a una posicion.
@@ -284,9 +285,15 @@ for (i in 1:(nrow(highMaf))){
   if (is.na(highMaf$CDS_COORDS[i]) || highMaf$CDS_COORDS[i] == ""){
     next
   }
-  interval = strsplit(highMaf$CDS_COORDS[i], "-")
-  begin = as.numeric(interval[[1]][[1]])
-  end = as.numeric(interval[[1]][[2]])
+  interval = strsplit(highMaf$CDS_COORDS[i], ",")
+  
+  begin = interval[[1]][[1]]
+  begin = substr(begin, 2, nchar(begin))
+  begin = as.numeric(begin)
+  
+  end = interval[[1]][[2]]
+  end = substr(end, 2, nchar(end) - 1)
+  end = as.numeric(end)
   if(begin == end){
     affectedPosHighMaf = rbind(affectedPosHighMaf, cbind(highMaf[i,], AFFECTED_POS = begin))
   }
@@ -297,9 +304,15 @@ for (i in 1:(nrow(lowMaf))){
   if (is.na(lowMaf$CDS_COORDS[i]) || lowMaf$CDS_COORDS[i] == ""){
     next
   }
-  interval = strsplit(lowMaf$CDS_COORDS[i], "-")
-  begin = as.numeric(interval[[1]][[1]])
-  end = as.numeric(interval[[1]][[2]])
+  interval = strsplit(lowMaf$CDS_COORDS[i], ",")
+  
+  begin = interval[[1]][[1]]
+  begin = substr(begin, 2, nchar(begin))
+  begin = as.numeric(begin)
+  
+  end = interval[[1]][[2]]
+  end = substr(end, 2, nchar(end) - 1)
+  end = as.numeric(end)
   if(begin == end){
     affectedPosLowMaf = rbind(affectedPosLowMaf, cbind(lowMaf[i,], AFFECTED_POS = begin))
   }
@@ -327,7 +340,7 @@ numberOfMet5UTRLowMAF=lowMaf$NMETS_5_UTR
 plot(density(numberOfMet5UTRLowMAF), col=gray(0.4), main="", xlab = "Number of \"AUG\" codons in 5' UTR")
 numberOfMet5UTRHighMAF=highMaf$NMETS_5_UTR
 lines(density(numberOfMet5UTRHighMAF), col =gray(0), lty=5)
-legend(34, 0.68, c("Low MAF","High MAF"), lty=c(1,5), col = c(gray(0.4),gray(0)))
+legend(30, 0.68, c("Low MAF","High MAF"), lty=c(1,5), col = c(gray(0.4),gray(0)))
 summary(highMaf$METS_IN_5_UTR)
 summary(lowMaf$METS_IN_5_UTR)
 
