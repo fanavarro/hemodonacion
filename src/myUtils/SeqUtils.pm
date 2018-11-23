@@ -50,13 +50,13 @@ sub is_in_frame{
     my $original_orf_seq = shift;
     my $mutated_orf_seq = shift;
     my $relative_length = (length($mutated_orf_seq) * 100 / length($original_orf_seq));
-
     # If the mutated orf has less than 1% of original orf, it cant be in frame.
     if ($relative_length <= 1.0){
         return 0;
     }
     my $original_aa = get_translation($original_orf_seq);
     my $mutated_aa = get_translation($mutated_orf_seq);
+    
 
     
     # if mutation is a deletion is possible that first met in the
@@ -65,11 +65,15 @@ sub is_in_frame{
     # after that met are deleted, so we have to check from GGATGA...
     if (length($mutated_aa) < length($original_aa)){
         my $difference = length($original_aa) - length($mutated_aa);
+        #print "diferencia de " . $difference . " aminoacidos.\n\n";
         $original_aa = substr($original_aa, $difference + 1);
     } elsif(length($mutated_aa) > length($original_aa)){
         my $difference = length($mutated_aa) - length($original_aa);
         $mutated_aa = substr($mutated_aa, $difference + 1);
     }
+    
+    #print "original:\n" . $original_aa . "\n\n";
+    #print "mutado:\n" . $mutated_aa . "\n\n";
     return (index($original_aa, $mutated_aa) != -1) || (index($mutated_aa, $original_aa) != -1);
 }
 
@@ -108,6 +112,11 @@ sub get_orf{
     }
 
     return $orf;
+}
+
+sub is_stop_codon{
+  my $codon = shift;
+  return exists_in_list($codon, \@STOP_CODONS)
 }
 
 # Return the position in which the translation
@@ -224,6 +233,7 @@ sub get_met_mutation_info{
     # if a met is found and it is inside cds region, fill result hash
     if ($used_met_pos != -1 &&  max($used_met_pos - $reference + $position_correction, 0) < length($cds)){
         my $stop_codon_pos = get_stop_codon_position($mutated_cdna, $used_met_pos);
+        my $original_stop_codon_pos = get_stop_codon_position($cdna, $translation_start_pos);
         my $mutated_orf = get_orf($mutated_cdna, $used_met_pos);
         #say $mutated_orf;
         #say $cds;
@@ -240,20 +250,14 @@ sub get_met_mutation_info{
         }
         
         $hash_seq_info->{'stop_codon_position'} = $stop_codon_pos != -1 ? $stop_codon_pos - $reference +  $position_correction : '';
+        $hash_seq_info->{'premature_stop_codon'} = $hash_seq_info->{'stop_codon_position'} eq ($original_stop_codon_pos - $reference) ? 'NO' : 'YES';
+        $hash_seq_info->{'no_stop_codon'} = $stop_codon_pos == -1 ? 'YES' : 'NO';
         $hash_seq_info->{'reading_frame'} = $reading_frame;
         $hash_seq_info->{'seq_length'} = (length($mutated_orf) * 100 / length($cds)) . '%';
-        # Print warnings if first met pos calculated is not a MET in the original cds sequence.
-        if (substr($cds, $hash_seq_info->{'met_position'}, $CODON_LENGTH) ne $MET){
-            print ("Error\nfirst met pos = " . $hash_seq_info->{'met_position'} . " in $cds\n");
-        }
+        #print "stop_codon_pos = $stop_codon_pos \nreference = $reference \nposition_correction = $position_correction\n";
+        #print 'Original stop codon position = ' . ($original_stop_codon_pos - $reference) . "\n";
+        #print 'mutated stop codon position = ' . $hash_seq_info->{'stop_codon_position'} . "\n";
         
-        # Print warnings if stop codon pos calculated is not a stop codon in the original cds sequence.
-        # End codon can be in 3' utr region. This cases are not checked.
-        if ($hash_seq_info->{'stop_codon_position'} ne '' && $hash_seq_info->{'stop_codon_position'} <= length($cds) - $CODON_LENGTH){
-            if (!exists_in_list(substr($cds, $hash_seq_info->{'stop_codon_position'}, $CODON_LENGTH), \@STOP_CODONS)){
-                print ("Error\nstop codon pos = " . $hash_seq_info->{'stop_codon_position'} . " in $cds\n");
-            }
-        }
     }
     return $hash_seq_info;
 }

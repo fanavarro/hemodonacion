@@ -1,0 +1,2298 @@
+GENERATING SUBSETS
+oct 11, 2018 6:27:06 PM com.github.fommil.jni.JniLoader liberalLoad
+INFORMACIÓN: successfully loaded /tmp/jniloader7819298586572838760netlib-native_system-linux-x86_64.so
+CfsSubsetEval-BestFirst
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Best first.
+	Start set: no attributes
+	Search direction: forward
+	Stale search after 5 node expansions
+	Total number of subsets evaluated: 83
+	Merit of best subset found:    0.065
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	CFS Subset Evaluator
+	Including locally predictive attributes
+
+Selected attributes: 1,3,7,11 : 4
+                     NMETS_5_UTR
+                     LOST_METS_IN_5_UTR
+                     CODON_CHANGE
+                     PREMATURE_STOP_CODON
+
+CfsSubsetEval-GreedyStepwise
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Greedy Stepwise (forwards).
+	Start set: no attributes
+	Merit of best subset found:    0.065
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	CFS Subset Evaluator
+	Including locally predictive attributes
+
+Selected attributes: 1,3,7,11 : 4
+                     NMETS_5_UTR
+                     LOST_METS_IN_5_UTR
+                     CODON_CHANGE
+                     PREMATURE_STOP_CODON
+
+CfsSubsetEval-MultiObjectiveEvolutionarySearch
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Multi-Objective Evolutionary Search.
+	Start set: no attributes
+
+	Number of generations: 10	Population size: 100
+	Seed: 1
+	Algorithm: ENORA
+	Report frequency: 10
+	Log file: /home/fabad/hemodonacionML
+
+	Initial population
+	Time: 0.0 ms
+	Current mean acc: 0.0164
+	Normalizated non-dominated space ratio: 0.9481
+
+	d -> dominated Individuals
+	nd -> Non-dominated Individuals
+	s -> Selected Individual
+	acc                      attribute set            
+	0.0204                   [6]                       nd
+	0.0581                   [1, 3, 6]                 nd s
+	0.0191                   [9]                       d
+	0.0385                   [1, 3, 7, 8]              d
+	0.0                      [10]                      d
+	0.0161                   [5, 9]                    d
+	0.0174                   [2, 3, 10]                d
+	0.0241                   [3, 4, 5, 11]             d
+	0.0266                   [1, 2, 3, 9, 12]          d
+	0.0095                   [2, 9]                    d
+	0.0114                   [2, 5, 7]                 d
+	0.0213                   [1, 2, 5, 6]              d
+	0.0247                   [3, 4, 5, 9, 11]          d
+	0.0253                   [1, 2, 3, 6, 7, 8, 9, 10, 11] d
+	0.0091                   [4, 5, 11]                d
+	0.0184                   [1, 4, 10, 11]            d
+	0.0201                   [2, 3, 8, 9, 11]          d
+	0.0201                   [3, 9, 10, 11, 13]        d
+	0.022                    [3, 6, 9, 10, 11, 12]     d
+	0.0221                   [1, 3, 8, 9, 10, 11, 13]  d
+	0.023                    [1, 3, 5, 6, 7, 8, 11, 12, 13] d
+	0.0068                   [8, 11, 12]               d
+	0.0068                   [4, 10, 11]               d
+	0.0149                   [3, 5, 12, 13]            d
+	0.0175                   [5, 6, 7, 11, 13]         d
+	0.0179                   [1, 4, 7, 8, 10, 11]      d
+	0.0214                   [3, 5, 6, 7, 9, 12, 13]   d
+	0.022                    [1, 3, 5, 6, 9, 10, 11, 12, 13] d
+	0.0131                   [5, 6, 10, 11]            d
+	0.0143                   [1, 2, 6, 10, 13]         d
+	0.0145                   [1, 2, 5, 7, 12, 13]      d
+	0.0149                   [1, 2, 4, 5, 6, 11, 12]   d
+	0.0204                   [2, 3, 6, 7, 8, 9, 10, 11] d
+	0.0219                   [1, 2, 3, 6, 7, 8, 9, 10, 11, 12] d
+	0.0219                   [1, 3, 4, 6, 7, 9, 10, 11, 12, 13] d
+	0.0099                   [4, 8, 9, 11]             d
+	0.0114                   [3, 5, 8, 9, 10, 12, 13]  d
+	0.0204                   [1, 3, 4, 7, 8, 9, 10, 12] d
+	0.0207                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12] d
+	0.0207                   [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12] d
+	0.0207                   [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] d
+	0.0084                   [2, 5, 7, 13]             d
+	0.0091                   [4, 5, 6, 7, 8, 12]       d
+	0.0181                   [2, 3, 5, 7, 9, 10, 11, 12] d
+	0.0193                   [1, 2, 3, 5, 7, 8, 10, 11, 13] d
+	0.0198                   [1, 2, 3, 4, 5, 6, 7, 9, 10, 12] d
+	0.0073                   [7, 8, 10, 12]            d
+	0.0083                   [4, 7, 8, 9, 10, 13]      d
+	0.0159                   [1, 4, 6, 7, 8, 9, 12, 13] d
+	0.0179                   [1, 2, 3, 4, 5, 8, 9, 11, 13] d
+	0.0179                   [1, 3, 4, 5, 8, 9, 11, 12, 13] d
+	0.0185                   [1, 2, 3, 4, 6, 7, 9, 10, 12, 13] d
+	0.0193                   [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 13] d
+	0.0061                   [4, 5, 6, 12]             d
+	0.0078                   [2, 5, 7, 9, 10, 12, 13]  d
+	0.0143                   [3, 4, 5, 7, 8, 9, 12, 13] d
+	0.0175                   [3, 4, 6, 7, 8, 9, 10, 11, 13] d
+	0.0177                   [1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13] d
+	0.0184                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13] d
+	0.0184                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13] d
+	0.0184                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13] d
+	0.0184                   [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.0056                   [4, 5, 7, 8, 10, 12]      d
+	0.0094                   [1, 4, 5, 6, 8, 10, 12, 13] d
+	0.0139                   [1, 4, 6, 7, 8, 9, 10, 12, 13] d
+	0.0159                   [1, 2, 3, 4, 5, 6, 8, 10, 11, 13] d
+	0.0174                   [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.0138                   [1, 2, 3, 4, 8, 10, 11, 12, 13] d
+	0.0158                   [1, 2, 3, 5, 8, 9, 10, 11, 12, 13] d
+	0.0158                   [1, 3, 4, 5, 8, 9, 10, 11, 12, 13] d
+	0.0159                   [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13] d
+	0.0159                   [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13] d
+	0.0159                   [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13] d
+	0.0166                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.0166                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.0166                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.0166                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.0166                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.0166                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.0166                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.0115                   [2, 3, 5, 6, 8, 10, 11, 12, 13] d
+	0.0154                   [3, 4, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.0105                   [2, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.015                    [1, 4, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.0151                   [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13] d
+	0.0147                   [1, 2, 3, 4, 8, 9, 10, 11, 12, 13] d
+	0.015                    [1, 2, 3, 4, 5, 7, 8, 9, 10, 12, 13] d
+	0.0137                   [2, 3, 5, 6, 7, 8, 10, 11, 12, 13] d
+	0.0149                   [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 13] d
+	0.0132                   [1, 2, 4, 5, 7, 8, 9, 10, 11, 13] d
+	0.0147                   [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13] d
+	0.0147                   [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] d
+	0.0114                   [1, 2, 4, 6, 8, 9, 10, 11, 12, 13] d
+	0.0141                   [1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 13] d
+	0.0123                   [2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13] d
+	0.0132                   [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.0132                   [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.0132                   [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.0132                   [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.0129                   [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	
+	Generation number: 10
+	Time: 22.0 ms
+	Current mean acc: 0.0309
+	Normalizated non-dominated space ratio: 0.9373
+
+	d -> dominated Individuals
+	nd -> Non-dominated Individuals
+	s -> Selected Individual
+	acc                      attribute set            
+	0.0522                   [3]                       nd
+	0.0522                   [3]                       nd
+	0.0569                   [3, 7]                    nd
+	0.0569                   [3, 7]                    nd
+	0.0622                   [1, 3, 7]                 nd
+	0.0646                   [1, 3, 7, 11]             nd s
+	0.0483                   [1]                       d
+	0.0483                   [1]                       d
+	0.0543                   [1, 7]                    d
+	0.0585                   [1, 3, 11]                d
+	0.064                    [1, 3, 7, 9]              d
+	0.064                    [1, 3, 7, 9]              d
+	0.0294                   [7]                       d
+	0.0294                   [7]                       d
+	0.0512                   [3, 11]                   d
+	0.0512                   [3, 11]                   d
+	0.0581                   [1, 3, 6]                 d
+	0.0609                   [1, 3, 6, 11]             d
+	0.0204                   [6]                       d
+	0.0204                   [6]                       d
+	0.0502                   [3, 9]                    d
+	0.057                    [3, 7, 9]                 d
+	0.0603                   [1, 3, 6, 9]              d
+	0.0191                   [9]                       d
+	0.0191                   [9]                       d
+	0.0392                   [3, 5]                    d
+	0.0392                   [3, 5]                    d
+	0.055                    [1, 7, 9]                 d
+	0.0557                   [1, 3, 6, 7]              d
+	0.0563                   [1, 3, 6, 7, 9, 11]       d
+	0.0563                   [1, 3, 6, 7, 9, 11]       d
+	0.0038                   [5]                       d
+	0.0038                   [5]                       d
+	0.0366                   [1, 5]                    d
+	0.0366                   [1, 5]                    d
+	0.0529                   [3, 6, 11]                d
+	0.0539                   [1, 3, 5, 11]             d
+	0.0548                   [1, 3, 5, 7, 11]          d
+	0.0                      [10]                      d
+	0.0                      [12]                      d
+	0.0348                   [7, 11]                   d
+	0.0522                   [3, 6, 9]                 d
+	0.0339                   [7, 9]                    d
+	0.0429                   [3, 5, 9]                 d
+	0.0433                   [1, 5, 7, 11]             d
+	0.0508                   [1, 3, 5, 6, 9]           d
+	0.0286                   [6, 11]                   d
+	0.0286                   [6, 11]                   d
+	0.0415                   [3, 9, 11]                d
+	0.0415                   [3, 9, 11]                d
+	0.0261                   [3, 12]                   d
+	0.0385                   [1, 5, 7]                 d
+	0.0392                   [1, 3, 4, 7, 9]           d
+	0.0254                   [6, 7]                    d
+	0.035                    [1, 2, 3]                 d
+	0.035                    [1, 3, 10]                d
+	0.0385                   [1, 3, 6, 7, 8, 9, 11]    d
+	0.0242                   [1, 4]                    d
+	0.0242                   [1, 10]                   d
+	0.0293                   [1, 7, 10]                d
+	0.0293                   [3, 4, 6, 11]             d
+	0.0355                   [1, 2, 3, 5, 7, 9, 11]    d
+	0.0171                   [5, 11]                   d
+	0.0274                   [3, 6, 8]                 d
+	0.0285                   [3, 5, 6, 7, 8, 9, 11]    d
+	0.0161                   [5, 9]                    d
+	0.0211                   [3, 5, 12]                d
+	0.0213                   [3, 4, 6, 8, 11]          d
+	0.0262                   [2, 3, 5, 6, 9, 11]       d
+	0.0147                   [2, 7]                    d
+	0.0202                   [5, 6, 9]                 d
+	0.0212                   [1, 2, 4, 6, 9, 11]       d
+	0.0129                   [5, 6]                    d
+	0.0196                   [5, 9, 11]                d
+	0.02                     [1, 2, 3, 4, 5, 7, 8, 9, 11, 13] d
+	0.0207                   [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12] d
+	0.0102                   [6, 8]                    d
+	0.0149                   [2, 6, 9]                 d
+	0.0193                   [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 13] d
+	0.0095                   [9, 12]                   d
+	0.0109                   [6, 11, 12, 13]           d
+	0.0143                   [1, 4, 10, 11, 12]        d
+	0.0177                   [1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13] d
+	0.0184                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13] d
+	0.0019                   [2, 5]                    d
+	0.0019                   [5, 10]                   d
+	0.0083                   [4, 5, 6]                 d
+	0.0115                   [1, 4, 6, 8, 9, 10, 12, 13] d
+	0.0167                   [1, 2, 3, 4, 6, 7, 8, 10, 11, 12, 13] d
+	0.0174                   [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.0068                   [6, 8, 13]                d
+	0.015                    [1, 2, 3, 4, 5, 7, 8, 9, 10, 12, 13] d
+	0.0159                   [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13] d
+	0.0166                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.0068                   [4, 10, 11]               d
+	0.0151                   [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13] d
+	0.0013                   [2, 5, 13]                d
+	0.0051                   [2, 6, 10, 13]            d
+	0.0132                   [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.0051                   [4, 8, 10, 11]            d
+	
+	Training statistics:
+	Evaluation criteria: acc
+	
+	Best Individual:
+
+	acc                      attribute set            
+	0.0646                   [1, 3, 7, 11]            
+
+	 0.06456390451531469 4.0 0.0 1 0.06456390451531469 4.0 0.0 1 0 1 1 0 1 0 0 0 1 0 0 0 1 0 0
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	CFS Subset Evaluator
+	Including locally predictive attributes
+
+Selected attributes: 1,3,7,11 : 4
+                     NMETS_5_UTR
+                     LOST_METS_IN_5_UTR
+                     CODON_CHANGE
+                     PREMATURE_STOP_CODON
+
+CfsSubsetEval-PSOSearch
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	PSO Search.
+	Start set: no attributes
+	Population size: 20
+	Number of iterations: 20
+	Mutation type: bit-flip
+	Mutation probability: 0.01
+	Inertia weight: 0.33
+	Social weight: 0.33
+	Individual weight: 0.34
+	Report frequency: 20
+	Seed: 1
+	Log file: /home/fabad/hemodonacionML
+
+Initial population
+merit   	scaled  	subset
+ 0.01594	 0.0166 	1 2 4 7 9 11 12 13 
+ 0.01962	 0.01857	1 4 5 6 9 11 12 
+ 0.00931	 0.01305	4 5 7 9 10 12 
+ 0.01909	 0.01829	9 
+ 0.00587	 0.01121	4 7 8 10 13 
+ 0.01922	 0.01836	1 9 10 11 12 
+ 0.01391	 0.01551	1 2 4 6 7 8 9 12 13 
+ 0.04981	 0.03473	3 6 7 11 
+ 0.0284 	 0.02327	1 4 6 7 
+ 0      	 0.00807	12 
+ 0.0216 	 0.01963	1 2 3 4 6 13 
+ 0.00682	 0.01172	6 10 13 
+ 0.02463	 0.02125	3 6 7 8 9 11 12 
+ 0.01939	 0.01845	3 4 8 11 
+ 0.00578	 0.01116	4 5 6 8 10 11 12 13 
+ 0.01681	 0.01707	2 3 4 5 7 9 12 
+ 0.01249	 0.01476	1 2 4 6 7 8 10 11 12 13 
+ 0.02936	 0.02379	7 
+ 0.01916	 0.01833	1 2 3 6 8 9 12 13 
+ 0.01009	 0.01347	4 7 9 10 13 
+
+Generation: 20
+merit   	scaled  	subset
+ 0.06456	 0.07212	1 3 7 11 
+ 0.03543	 0      	1 3 5 7 8 11 
+ 0.05781	 0.05539	3 7 11 
+ 0.06456	 0.07212	1 3 7 11 
+ 0.06456	 0.07212	1 3 7 11 
+ 0.06456	 0.07212	1 3 7 11 
+ 0.05483	 0.04801	1 3 5 7 11 
+ 0.06456	 0.07212	1 3 7 11 
+ 0.06456	 0.07212	1 3 7 11 
+ 0.06456	 0.07212	1 3 7 11 
+ 0.03957	 0.01024	1 2 3 7 11 
+ 0.06456	 0.07212	1 3 7 11 
+ 0.06456	 0.07212	1 3 7 11 
+ 0.06456	 0.07212	1 3 7 11 
+ 0.06456	 0.07212	1 3 7 11 
+ 0.06456	 0.07212	1 3 7 11 
+ 0.06456	 0.07212	1 3 7 11 
+ 0.05781	 0.05539	3 7 11 
+ 0.03957	 0.01024	1 3 4 7 11 
+ 0.06456	 0.07212	1 3 7 11 
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	CFS Subset Evaluator
+	Including locally predictive attributes
+
+Selected attributes: 1,3,7,11 : 4
+                     NMETS_5_UTR
+                     LOST_METS_IN_5_UTR
+                     CODON_CHANGE
+                     PREMATURE_STOP_CODON
+
+WrapperSubsetEval(LibSVM)-BestFirst
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Best first.
+	Start set: no attributes
+	Search direction: forward
+	Stale search after 5 node expansions
+	Total number of subsets evaluated: 116
+	Merit of best subset found:    0.724
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.functions.LibSVM
+	Scheme options: -S 0 -K 2 -D 3 -G 0.0 -R 0.0 -N 0.5 -M 40.0 -C 1.0 -E 0.001 -P 0.1 -model /home/fabad/hemodonacionML -seed 1 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 4,5,8,9,13 : 5
+                     CONSERVED_METS_NO_STOP_IN_5_UTR
+                     CDS_COORDS
+                     MET_POSITION
+                     READING_FRAME_STATUS
+                     MUTATED_SEQUENCE_LENGTH
+
+WrapperSubsetEval(LibSVM)-GreedyStepwise
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Greedy Stepwise (forwards).
+	Start set: no attributes
+	Merit of best subset found:    0.723
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.functions.LibSVM
+	Scheme options: -S 0 -K 2 -D 3 -G 0.0 -R 0.0 -N 0.5 -M 40.0 -C 1.0 -E 0.001 -P 0.1 -model /home/fabad/hemodonacionML -seed 1 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 8,9,13 : 3
+                     MET_POSITION
+                     READING_FRAME_STATUS
+                     MUTATED_SEQUENCE_LENGTH
+
+WrapperSubsetEval(LibSVM)-MultiObjectiveEvolutionarySearch
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Multi-Objective Evolutionary Search.
+	Start set: no attributes
+
+	Number of generations: 10	Population size: 100
+	Seed: 1
+	Algorithm: ENORA
+	Report frequency: 10
+	Log file: /home/fabad/hemodonacionML
+
+	Initial population
+	Time: 0.0 ms
+	Current mean acc: 0.6222
+	Normalizated non-dominated space ratio: 0.3241
+
+	d -> dominated Individuals
+	nd -> Non-dominated Individuals
+	s -> Selected Individual
+	acc                      attribute set            
+	0.6473                   [8]                       nd
+	0.6473                   [8]                       nd
+	0.6855                   [8, 11, 12, 13]           nd s
+	0.5833                   [11]                      d
+	0.5952                   [1, 13]                   d
+	0.6124                   [5, 10, 12]               d
+	0.6694                   [4, 8, 11, 12]            d
+	0.6769                   [3, 4, 5, 8, 9, 13]       d
+	0.6774                   [1, 2, 4, 5, 8, 9, 11, 13] d
+	0.5306                   [7]                       d
+	0.5866                   [3, 5]                    d
+	0.6086                   [2, 4, 6, 8]              d
+	0.6527                   [7, 8, 9, 11, 12]         d
+	0.6599                   [2, 3, 6, 8, 11, 12, 13]  d
+	0.666                    [3, 4, 6, 7, 8, 10, 12, 13] d
+	0.6667                   [3, 4, 6, 7, 8, 9, 10, 12, 13] d
+	0.5043                   [6]                       d
+	0.5043                   [6]                       d
+	0.5309                   [2, 10]                   d
+	0.5586                   [10, 11, 13]              d
+	0.6027                   [2, 7, 8, 10]             d
+	0.6462                   [5, 6, 8, 11, 13]         d
+	0.6546                   [3, 5, 6, 7, 8, 9, 12]    d
+	0.664                    [2, 4, 5, 7, 8, 9, 12, 13] d
+	0.6653                   [3, 4, 6, 7, 8, 10, 11, 12, 13] d
+	0.4973                   [10]                      d
+	0.5161                   [4, 5]                    d
+	0.5551                   [1, 2, 3]                 d
+	0.5968                   [2, 10, 11, 12]           d
+	0.622                    [3, 6, 8, 10, 11]         d
+	0.6457                   [4, 5, 6, 8, 9, 13]       d
+	0.6519                   [1, 4, 5, 7, 8, 10, 13]   d
+	0.6653                   [3, 4, 5, 6, 7, 8, 10, 11, 12, 13] d
+	0.5952                   [2, 3, 9, 10]             d
+	0.6188                   [1, 4, 5, 7, 8]           d
+	0.6452                   [3, 6, 8, 9, 11, 13]      d
+	0.6492                   [3, 5, 7, 8, 9, 11, 13]   d
+	0.6511                   [1, 3, 4, 6, 7, 8, 9, 10, 12, 13] d
+	0.655                    [1, 2, 3, 5, 6, 7, 8, 10, 11, 12, 13] d
+	0.6559                   [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6559                   [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13] d
+	0.5833                   [7, 9, 10, 11]            d
+	0.6022                   [3, 4, 10, 11, 12]        d
+	0.6075                   [2, 3, 4, 7, 11, 12]      d
+	0.6457                   [1, 7, 8, 9, 10, 11, 13]  d
+	0.6478                   [3, 4, 5, 6, 8, 9, 10, 13] d
+	0.6492                   [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13] d
+	0.655                    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13] d
+	0.655                    [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13] d
+	0.6559                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6559                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6559                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6559                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6559                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6559                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6559                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6559                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6559                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6559                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6559                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6559                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5715                   [3, 5, 7, 9]              d
+	0.5866                   [1, 3, 4, 9, 10]          d
+	0.6038                   [1, 2, 3, 10, 11, 12]     d
+	0.643                    [5, 7, 8, 9, 10, 11, 13]  d
+	0.6478                   [1, 2, 3, 4, 5, 6, 8, 9, 10, 13] d
+	0.6478                   [1, 2, 4, 5, 6, 8, 9, 10, 12, 13] d
+	0.5694                   [2, 5, 9, 11]             d
+	0.5806                   [3, 6, 7, 10, 11]         d
+	0.5989                   [3, 5, 7, 11, 12, 13]     d
+	0.6371                   [1, 2, 4, 6, 8, 9, 12]    d
+	0.6425                   [1, 2, 3, 7, 8, 9, 11, 12, 13] d
+	0.6438                   [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13] d
+	0.5618                   [2, 6, 11, 12]            d
+	0.5634                   [4, 5, 6, 10, 12]         d
+	0.5978                   [1, 2, 4, 5, 10, 13]      d
+	0.628                    [3, 5, 7, 9, 10, 11, 13]  d
+	0.6425                   [1, 3, 4, 5, 7, 8, 10, 11, 12, 13] d
+	0.5645                   [2, 5, 6, 7, 10, 11]      d
+	0.6183                   [1, 2, 5, 9, 11, 12, 13]  d
+	0.6204                   [1, 2, 4, 6, 7, 9, 10, 13] d
+	0.6371                   [1, 2, 3, 4, 6, 7, 8, 10, 11, 12] d
+	0.6425                   [1, 2, 4, 5, 7, 8, 9, 10, 11, 12, 13] d
+	0.6142                   [1, 2, 4, 7, 10, 11, 12]  d
+	0.6199                   [1, 3, 4, 6, 7, 9, 11, 12] d
+	0.6277                   [1, 3, 4, 5, 7, 8, 9, 10, 11, 12] d
+	0.6371                   [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12] d
+	0.6102                   [2, 3, 6, 7, 9, 10, 12]   d
+	0.6167                   [1, 2, 3, 4, 5, 6, 8, 9, 11] d
+	0.6204                   [1, 2, 3, 4, 5, 6, 7, 9, 11, 12] d
+	0.6285                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 13] d
+	0.6285                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 13] d
+	0.6285                   [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13] d
+	0.6371                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] d
+	0.5989                   [1, 3, 5, 9, 10, 11, 13]  d
+	0.5989                   [1, 3, 5, 9, 10, 11, 13]  d
+	0.6038                   [2, 3, 4, 5, 6, 7, 11, 12] d
+	0.6097                   [1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13] d
+	0.629                    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13] d
+	0.5766                   [2, 5, 6, 7, 9, 11, 12]   d
+	
+	Generation number: 10
+	Time: 369765.0 ms
+	Current mean acc: 0.6258
+	Normalizated non-dominated space ratio: 0.2827
+
+	d -> dominated Individuals
+	nd -> Non-dominated Individuals
+	s -> Selected Individual
+	acc                      attribute set            
+	0.6473                   [8]                       nd
+	0.6473                   [8]                       nd
+	0.7199                   [8, 13]                   nd
+	0.7226                   [8, 9, 13]                nd
+	0.7245                   [4, 5, 8, 9, 13]          nd s
+	0.6355                   [12]                      d
+	0.6868                   [8, 12]                   d
+	0.7215                   [4, 8, 13]                d
+	0.5833                   [11]                      d
+	0.5833                   [11]                      d
+	0.6565                   [3, 8]                    d
+	0.7113                   [8, 11, 13]               d
+	0.7134                   [4, 5, 8, 13]             d
+	0.5806                   [9]                       d
+	0.6478                   [4, 8]                    d
+	0.6962                   [3, 8, 13]                d
+	0.707                    [8, 10, 11, 13]           d
+	0.7097                   [5, 8, 9, 11, 13]         d
+	0.5739                   [13]                      d
+	0.5739                   [13]                      d
+	0.6435                   [8, 9]                    d
+	0.6841                   [4, 8, 12]                d
+	0.7065                   [8, 9, 11, 13]            d
+	0.5565                   [1]                       d
+	0.5565                   [1]                       d
+	0.6398                   [8, 11]                   d
+	0.6774                   [5, 8, 12]                d
+	0.6909                   [3, 4, 8, 13]             d
+	0.6962                   [5, 8, 10, 11, 13]        d
+	0.547                    [3]                       d
+	0.547                    [3]                       d
+	0.6312                   [5, 8]                    d
+	0.6694                   [8, 11, 12]               d
+	0.672                    [4, 5, 8, 12]             d
+	0.6962                   [2, 5, 8, 9, 11, 13]      d
+	0.5306                   [7]                       d
+	0.5306                   [7]                       d
+	0.6274                   [5, 12]                   d
+	0.6624                   [2, 8, 12]                d
+	0.6774                   [1, 4, 5, 8, 11, 13]      d
+	0.6935                   [5, 8, 9, 10, 11, 12, 13] d
+	0.5108                   [5]                       d
+	0.5108                   [5]                       d
+	0.6194                   [2, 8]                    d
+	0.6559                   [3, 12, 13]               d
+	0.6855                   [2, 8, 9, 10, 11, 12, 13] d
+	0.5043                   [6]                       d
+	0.5043                   [6]                       d
+	0.6156                   [3, 12]                   d
+	0.6452                   [6, 8, 13]                d
+	0.6828                   [2, 5, 8, 9, 10, 11, 13]  d
+	0.4973                   [10]                      d
+	0.4973                   [10]                      d
+	0.6108                   [7, 8]                    d
+	0.6441                   [3, 8, 11]                d
+	0.6629                   [1, 2, 5, 8, 11, 12, 13]  d
+	0.6774                   [1, 2, 4, 5, 8, 9, 11, 13] d
+	0.6027                   [1, 5]                    d
+	0.6382                   [1, 8, 11]                d
+	0.6618                   [1, 5, 8, 9, 11, 12, 13]  d
+	0.666                    [3, 4, 6, 7, 8, 10, 12, 13] d
+	0.6667                   [3, 4, 6, 7, 8, 9, 10, 12, 13] d
+	0.5952                   [1, 13]                   d
+	0.622                    [3, 6, 8, 10, 11]         d
+	0.6371                   [1, 4, 6, 8, 10, 11, 12]  d
+	0.6478                   [1, 3, 4, 5, 7, 8, 9, 13] d
+	0.6573                   [3, 5, 7, 8, 9, 10, 11, 12, 13] d
+	0.6653                   [3, 4, 5, 6, 7, 8, 10, 11, 12, 13] d
+	0.5866                   [3, 5]                    d
+	0.5946                   [1, 4, 5]                 d
+	0.6027                   [2, 3, 6, 10, 11, 12]     d
+	0.6452                   [1, 2, 3, 5, 7, 8, 12, 13] d
+	0.6478                   [3, 4, 5, 6, 8, 9, 10, 11, 13] d
+	0.6613                   [1, 4, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5833                   [6, 11]                   d
+	0.5898                   [1, 2, 9]                 d
+	0.5989                   [1, 3, 5, 9, 10, 11, 13]  d
+	0.6511                   [1, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.655                    [1, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13] d
+	0.6586                   [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5806                   [9, 10]                   d
+	0.6411                   [1, 2, 3, 4, 5, 6, 7, 8, 11, 12] d
+	0.6546                   [1, 2, 3, 4, 6, 7, 8, 10, 11, 12, 13] d
+	0.6559                   [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5613                   [7, 12]                   d
+	0.5806                   [4, 9, 10]                d
+	0.6371                   [1, 2, 3, 4, 6, 7, 8, 10, 11, 12] d
+	0.6425                   [1, 2, 4, 5, 7, 8, 9, 10, 11, 12, 13] d
+	0.6438                   [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13] d
+	0.6559                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5309                   [2, 10]                   d
+	0.5645                   [3, 4, 6]                 d
+	0.6204                   [1, 2, 3, 4, 5, 6, 7, 9, 11, 12] d
+	0.6371                   [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12] d
+	0.5161                   [4, 5]                    d
+	0.5586                   [10, 11, 13]              d
+	0.5624                   [2, 4, 7, 11, 12]         d
+	0.6371                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] d
+	0.507                    [4, 6]                    d
+	0.5551                   [1, 2, 3]                 d
+	
+	Training statistics:
+	Evaluation criteria: acc
+	
+	Best Individual:
+
+	acc                      attribute set            
+	0.7245                   [4, 5, 8, 9, 13]         
+
+	 0.7244623655913979 5.0 0.0 1 0.7244623655913979 5.0 0.0 1 0 1 0 0 0 1 1 0 0 1 1 0 0 0 1
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.functions.LibSVM
+	Scheme options: -S 0 -K 2 -D 3 -G 0.0 -R 0.0 -N 0.5 -M 40.0 -C 1.0 -E 0.001 -P 0.1 -model /home/fabad/hemodonacionML -seed 1 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 4,5,8,9,13 : 5
+                     CONSERVED_METS_NO_STOP_IN_5_UTR
+                     CDS_COORDS
+                     MET_POSITION
+                     READING_FRAME_STATUS
+                     MUTATED_SEQUENCE_LENGTH
+
+WrapperSubsetEval(LibSVM)-PSOSearch
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	PSO Search.
+	Start set: no attributes
+	Population size: 20
+	Number of iterations: 20
+	Mutation type: bit-flip
+	Mutation probability: 0.01
+	Inertia weight: 0.33
+	Social weight: 0.33
+	Individual weight: 0.34
+	Report frequency: 20
+	Seed: 1
+	Log file: /home/fabad/hemodonacionML
+
+Initial population
+merit   	scaled  	subset
+ 0.59946	 0.52931	1 2 4 7 9 11 12 13 
+ 0.61022	 0.61201	1 4 5 6 9 11 12 
+ 0.56398	 0.25638	4 5 7 9 10 12 
+ 0.58065	 0.38458	9 
+ 0.64839	 0.90562	4 7 8 10 13 
+ 0.60215	 0.54999	1 9 10 11 12 
+ 0.65054	 0.92216	1 2 4 6 7 8 9 12 13 
+ 0.57742	 0.35976	3 6 7 11 
+ 0.57204	 0.31841	1 4 6 7 
+ 0.63548	 0.80637	12 
+ 0.63065	 0.76915	1 2 3 4 6 13 
+ 0.56855	 0.29153	6 10 13 
+ 0.65188	 0.93249	3 6 7 8 9 11 12 
+ 0.64086	 0.84772	3 4 8 11 
+ 0.66237	 1.01313	4 5 6 8 10 11 12 13 
+ 0.60484	 0.57066	2 3 4 5 7 9 12 
+ 0.65108	 0.92629	1 2 4 6 7 8 10 11 12 13 
+ 0.53065	 0      	7 
+ 0.64785	 0.90148	1 2 3 6 8 9 12 13 
+ 0.56989	 0.30187	4 7 9 10 13 
+
+Generation: 20
+merit   	scaled  	subset
+ 0.72258	 0.77425	8 9 13 
+ 0.5793 	 0      	5 9 13 
+ 0.72258	 0.77425	8 9 13 
+ 0.72258	 0.77425	8 9 13 
+ 0.72258	 0.77425	8 9 13 
+ 0.72258	 0.77425	8 9 13 
+ 0.71344	 0.72486	5 8 9 13 
+ 0.72258	 0.77425	8 9 13 
+ 0.72258	 0.77425	8 9 13 
+ 0.72258	 0.77425	8 9 13 
+ 0.6871 	 0.58251	2 8 9 13 
+ 0.72258	 0.77425	8 9 13 
+ 0.71344	 0.72486	5 8 9 13 
+ 0.72258	 0.77425	8 9 13 
+ 0.72258	 0.77425	8 9 13 
+ 0.72258	 0.77425	8 9 13 
+ 0.72258	 0.77425	8 9 13 
+ 0.68871	 0.59122	1 8 9 13 
+ 0.71882	 0.75392	4 8 9 13 
+ 0.72258	 0.77425	8 9 13 
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.functions.LibSVM
+	Scheme options: -S 0 -K 2 -D 3 -G 0.0 -R 0.0 -N 0.5 -M 40.0 -C 1.0 -E 0.001 -P 0.1 -model /home/fabad/hemodonacionML -seed 1 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 8,9,13 : 3
+                     MET_POSITION
+                     READING_FRAME_STATUS
+                     MUTATED_SEQUENCE_LENGTH
+
+WrapperSubsetEval(PART)-BestFirst
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Best first.
+	Start set: no attributes
+	Search direction: forward
+	Stale search after 5 node expansions
+	Total number of subsets evaluated: 83
+	Merit of best subset found:    0.611
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.rules.PART
+	Scheme options: -M 2 -C 0.25 -Q 1 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 1,2,12 : 3
+                     NMETS_5_UTR
+                     CONSERVED_METS_IN_5_UTR
+                     STOP_CODON_POSITION
+
+WrapperSubsetEval(PART)-GreedyStepwise
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Greedy Stepwise (forwards).
+	Start set: no attributes
+	Merit of best subset found:    0.611
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.rules.PART
+	Scheme options: -M 2 -C 0.25 -Q 1 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 1,2,12 : 3
+                     NMETS_5_UTR
+                     CONSERVED_METS_IN_5_UTR
+                     STOP_CODON_POSITION
+
+WrapperSubsetEval(PART)-MultiObjectiveEvolutionarySearch
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Multi-Objective Evolutionary Search.
+	Start set: no attributes
+
+	Number of generations: 10	Population size: 100
+	Seed: 1
+	Algorithm: ENORA
+	Report frequency: 10
+	Log file: /home/fabad/hemodonacionML
+
+	Initial population
+	Time: 0.0 ms
+	Current mean acc: 0.5749
+	Normalizated non-dominated space ratio: 0.3941
+
+	d -> dominated Individuals
+	nd -> Non-dominated Individuals
+	s -> Selected Individual
+	acc                      attribute set            
+	0.5253                   [2]                       nd
+	0.5253                   [2]                       nd
+	0.5667                   [2, 9]                    nd
+	0.6059                   [1, 10, 11]               nd
+	0.6226                   [3, 5, 6, 7, 9, 11]       nd
+	0.6226                   [3, 5, 6, 7, 9, 11]       nd
+	0.6237                   [1, 2, 4, 5, 6, 7, 8, 11, 12, 13] nd s
+	0.5108                   [5]                       d
+	0.5409                   [5, 12]                   d
+	0.5914                   [8, 10, 11]               d
+	0.5957                   [2, 7, 8, 11]             d
+	0.6                      [1, 2, 3, 4, 11]          d
+	0.6065                   [2, 3, 5, 6, 7, 12, 13]   d
+	0.6113                   [1, 3, 4, 8, 9, 10, 11, 12, 13] d
+	0.4973                   [10]                      d
+	0.4973                   [10]                      d
+	0.4973                   [4]                       d
+	0.5371                   [4, 12]                   d
+	0.5887                   [3, 11, 13]               d
+	0.5941                   [3, 4, 8, 9, 12]          d
+	0.6086                   [1, 2, 3, 4, 5, 6, 7, 9, 11] d
+	0.5349                   [2, 13]                   d
+	0.5887                   [1, 2, 7]                 d
+	0.593                    [3, 5, 6, 7, 12]          d
+	0.6066                   [2, 3, 4, 5, 8, 9, 11, 12, 13] d
+	0.5339                   [10, 13]                  d
+	0.5683                   [6, 7, 13]                d
+	0.5844                   [1, 2, 5, 12]             d
+	0.5925                   [1, 3, 4, 9, 10, 11]      d
+	0.593                    [1, 3, 5, 7, 11, 12, 13]  d
+	0.6038                   [1, 2, 3, 4, 5, 9, 11, 12, 13] d
+	0.6066                   [2, 3, 4, 5, 8, 9, 10, 11, 12, 13] d
+	0.5108                   [4, 5]                    d
+	0.5651                   [7, 8, 9]                 d
+	0.579                    [4, 6, 7, 9]              d
+	0.5833                   [5, 6, 9, 10, 12]         d
+	0.5898                   [1, 5, 8, 9, 11, 12]      d
+	0.5909                   [1, 2, 5, 8, 10, 11, 13]  d
+	0.6005                   [1, 3, 4, 5, 7, 9, 10, 11, 12] d
+	0.5063                   [5, 8]                    d
+	0.5333                   [2, 4, 13]                d
+	0.578                    [5, 7, 9, 10]             d
+	0.5892                   [3, 6, 8, 10, 12, 13]     d
+	0.5903                   [1, 3, 6, 7, 9, 12, 13]   d
+	0.5941                   [1, 2, 3, 4, 5, 6, 9, 11, 12] d
+	0.5968                   [1, 2, 3, 5, 6, 7, 9, 10, 11, 12] d
+	0.5258                   [4, 8, 12]                d
+	0.5769                   [1, 3, 7, 10]             d
+	0.5866                   [1, 4, 7, 10, 12, 13]     d
+	0.5927                   [3, 5, 7, 8, 9, 10, 11, 12, 13] d
+	0.5968                   [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13] d
+	0.5145                   [6, 7, 10]                d
+	0.539                    [2, 5, 8, 12]             d
+	0.5753                   [1, 3, 6, 10, 13]         d
+	0.5812                   [1, 2, 5, 6, 11, 13]      d
+	0.5833                   [2, 3, 5, 7, 8, 10, 11, 12] d
+	0.5874                   [1, 3, 4, 6, 8, 9, 10, 11, 12] d
+	0.5914                   [1, 4, 5, 6, 7, 8, 10, 11, 12, 13] d
+	0.5108                   [5, 6, 7]                 d
+	0.5312                   [8, 10, 12, 13]           d
+	0.5715                   [3, 4, 5, 7, 8]           d
+	0.578                    [1, 7, 8, 10, 12, 13]     d
+	0.579                    [1, 3, 4, 7, 8, 10, 12]   d
+	0.5833                   [2, 3, 4, 6, 7, 8, 9, 12, 13] d
+	0.5898                   [2, 3, 4, 5, 6, 7, 9, 10, 11, 13] d
+	0.5731                   [1, 5, 6, 8, 11, 12]      d
+	0.5763                   [2, 3, 6, 9, 11, 12, 13]  d
+	0.578                    [1, 3, 5, 6, 8, 10, 12, 13] d
+	0.5817                   [1, 3, 6, 8, 9, 10, 11, 12, 13] d
+	0.5892                   [3, 4, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5898                   [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 13] d
+	0.5898                   [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 13] d
+	0.5685                   [1, 3, 4, 5, 8, 10]       d
+	0.5699                   [2, 4, 5, 6, 7, 12, 13]   d
+	0.5758                   [1, 3, 5, 6, 8, 9, 10, 11, 12] d
+	0.5823                   [1, 3, 4, 5, 6, 7, 8, 9, 10, 12] d
+	0.5823                   [1, 3, 5, 6, 7, 8, 9, 10, 11, 12] d
+	0.5892                   [1, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13] d
+	0.5892                   [1, 2, 4, 5, 7, 8, 9, 10, 11, 12, 13] d
+	0.5591                   [2, 4, 6, 9, 11, 13]      d
+	0.5688                   [1, 4, 5, 6, 9, 11, 13]   d
+	0.5833                   [1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13] d
+	0.5887                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13] d
+	0.5618                   [2, 4, 5, 6, 9, 11, 12]   d
+	0.5793                   [2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5855                   [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5887                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5887                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5887                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5887                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5887                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5887                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5887                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.578                    [1, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.578                    [1, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5833                   [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13] d
+	0.582                    [1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13] d
+	0.5694                   [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13] d
+	0.5694                   [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13] d
+	0.5694                   [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13] d
+	
+	Generation number: 10
+	Time: 27442.0 ms
+	Current mean acc: 0.5835
+	Normalizated non-dominated space ratio: 0.3727
+
+	d -> dominated Individuals
+	nd -> Non-dominated Individuals
+	s -> Selected Individual
+	acc                      attribute set            
+	0.5898                   [1]                       nd
+	0.5898                   [1]                       nd
+	0.6102                   [1, 12]                   nd
+	0.6274                   [1, 8, 11]                nd
+	0.6333                   [1, 2, 8, 9]              nd s
+	0.5833                   [11]                      d
+	0.5833                   [11]                      d
+	0.6059                   [1, 11]                   d
+	0.621                    [2, 8, 9]                 d
+	0.629                    [1, 8, 9, 10]             d
+	0.6333                   [1, 2, 8, 9, 10]          d
+	0.5806                   [9]                       d
+	0.6005                   [1, 2]                    d
+	0.6156                   [1, 7, 11]                d
+	0.6274                   [1, 8, 10, 11]            d
+	0.5618                   [3]                       d
+	0.5618                   [3]                       d
+	0.5957                   [1, 9]                    d
+	0.6108                   [1, 2, 12]                d
+	0.6242                   [3, 7, 9, 11]             d
+	0.625                    [3, 5, 6, 9, 11]          d
+	0.6253                   [1, 2, 8, 9, 10, 11]      d
+	0.5371                   [12]                      d
+	0.5371                   [12]                      d
+	0.5925                   [1, 13]                   d
+	0.6097                   [3, 6, 11]                d
+	0.6204                   [1, 8, 9, 11]             d
+	0.6237                   [1, 2, 8, 10, 11]         d
+	0.5339                   [13]                      d
+	0.5339                   [13]                      d
+	0.5909                   [7, 11]                   d
+	0.607                    [1, 2, 11]                d
+	0.6199                   [3, 7, 10, 11]            d
+	0.6201                   [1, 2, 3, 4, 5, 7, 9, 11] d
+	0.6237                   [1, 2, 4, 5, 6, 7, 8, 11, 12, 13] d
+	0.6237                   [1, 2, 4, 5, 6, 7, 8, 11, 12, 13] d
+	0.5253                   [2]                       d
+	0.5253                   [2]                       d
+	0.5876                   [3, 11]                   d
+	0.6027                   [3, 8, 11]                d
+	0.6108                   [1, 2, 11, 13]            d
+	0.6199                   [1, 8, 9, 11, 12, 13]     d
+	0.5145                   [7]                       d
+	0.5145                   [7]                       d
+	0.5806                   [9, 10]                   d
+	0.5887                   [3, 11, 13]               d
+	0.6108                   [1, 2, 10, 11, 13]        d
+	0.6199                   [1, 4, 8, 9, 11, 12, 13]  d
+	0.6199                   [1, 4, 8, 9, 11, 12, 13]  d
+	0.5121                   [8]                       d
+	0.5121                   [8]                       d
+	0.578                    [3, 12]                   d
+	0.586                    [7, 9, 11]                d
+	0.6011                   [1, 2, 7, 8, 9, 10]       d
+	0.6194                   [1, 2, 3, 7, 9, 10, 11]   d
+	0.4973                   [10]                      d
+	0.4973                   [10]                      d
+	0.5667                   [2, 9]                    d
+	0.6161                   [3, 4, 5, 6, 7, 9, 11]    d
+	0.6167                   [1, 2, 3, 6, 7, 9, 10, 11] d
+	0.6183                   [1, 4, 5, 6, 7, 10, 11, 12, 13] d
+	0.5661                   [2, 11]                   d
+	0.6151                   [2, 3, 4, 8, 9, 11, 13]   d
+	0.5618                   [3, 10]                   d
+	0.5651                   [7, 8, 9]                 d
+	0.6145                   [1, 2, 7, 8, 9, 10, 11]   d
+	0.5602                   [1, 7]                    d
+	0.5602                   [1, 7]                    d
+	0.6113                   [1, 3, 4, 7, 9, 10, 11]   d
+	0.6124                   [1, 2, 3, 8, 9, 11, 12, 13] d
+	0.5522                   [2, 3]                    d
+	0.5586                   [2, 11, 13]               d
+	0.6118                   [1, 3, 4, 5, 6, 7, 9, 11] d
+	0.5457                   [2, 6]                    d
+	0.6038                   [1, 3, 5, 6, 7, 9, 11, 13] d
+	0.6113                   [1, 3, 4, 8, 9, 10, 11, 12, 13] d
+	0.5409                   [5, 12]                   d
+	0.5452                   [2, 6, 13]                d
+	0.6086                   [1, 2, 3, 4, 5, 6, 7, 9, 11] d
+	0.5371                   [4, 12]                   d
+	0.6038                   [1, 2, 3, 4, 5, 9, 11, 12, 13] d
+	0.6066                   [2, 3, 4, 5, 8, 9, 10, 11, 12, 13] d
+	0.5253                   [2, 10]                   d
+	0.5349                   [2, 10, 13]               d
+	0.6011                   [1, 2, 3, 4, 5, 8, 9, 11, 13] d
+	0.5063                   [5, 8]                    d
+	0.5258                   [4, 8, 12]                d
+	0.5962                   [1, 3, 4, 5, 8, 9, 10, 11, 12] d
+	0.5995                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 11] d
+	0.6011                   [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 13] d
+	0.5175                   [4, 6, 7]                 d
+	0.5833                   [2, 3, 4, 6, 7, 8, 9, 12, 13] d
+	0.5914                   [1, 4, 5, 6, 7, 8, 10, 11, 12, 13] d
+	0.5968                   [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13] d
+	0.5145                   [6, 7, 10]                d
+	0.5753                   [1, 3, 4, 6, 8, 9, 10, 11, 12, 13] d
+	0.5898                   [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 13] d
+	0.5887                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13] d
+	0.5694                   [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13] d
+	0.5887                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	
+	Training statistics:
+	Evaluation criteria: acc
+	
+	Best Individual:
+
+	acc                      attribute set            
+	0.6333                   [1, 2, 8, 9]             
+
+	 0.6333333333333334 4.0 0.0 1 0.6333333333333334 4.0 0.0 1 0 1 1 1 0 0 0 0 0 1 1 0 0 0 0
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.rules.PART
+	Scheme options: -M 2 -C 0.25 -Q 1 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 1,2,8,9 : 4
+                     NMETS_5_UTR
+                     CONSERVED_METS_IN_5_UTR
+                     MET_POSITION
+                     READING_FRAME_STATUS
+
+WrapperSubsetEval(PART)-PSOSearch
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	PSO Search.
+	Start set: no attributes
+	Population size: 20
+	Number of iterations: 20
+	Mutation type: bit-flip
+	Mutation probability: 0.01
+	Inertia weight: 0.33
+	Social weight: 0.33
+	Individual weight: 0.34
+	Report frequency: 20
+	Seed: 1
+	Log file: /home/fabad/hemodonacionML
+
+Initial population
+merit   	scaled  	subset
+ 0.59677	 0.74225	1 2 4 7 9 11 12 13 
+ 0.58387	 0.62582	1 4 5 6 9 11 12 
+ 0.57903	 0.58216	4 5 7 9 10 12 
+ 0.58065	 0.59671	9 
+ 0.55161	 0.33474	4 7 8 10 13 
+ 0.59839	 0.75681	1 9 10 11 12 
+ 0.59301	 0.70829	1 2 4 6 7 8 9 12 13 
+ 0.60753	 0.83928	3 6 7 11 
+ 0.56559	 0.46088	1 4 6 7 
+ 0.5371 	 0.20376	12 
+ 0.58199	 0.60884	1 2 3 4 6 13 
+ 0.57097	 0.50939	6 10 13 
+ 0.5914 	 0.69374	3 6 7 8 9 11 12 
+ 0.60591	 0.82473	3 4 8 11 
+ 0.56613	 0.46573	4 5 6 8 10 11 12 13 
+ 0.59677	 0.74225	2 3 4 5 7 9 12 
+ 0.59677	 0.74225	1 2 4 6 7 8 10 11 12 13 
+ 0.51452	 0      	7 
+ 0.57796	 0.57246	1 2 3 6 8 9 12 13 
+ 0.57688	 0.56275	4 7 9 10 13 
+
+Generation: 20
+merit   	scaled  	subset
+ 0.62258	 0.74074	3 5 6 7 9 11 
+ 0.59892	 0      	3 6 7 8 9 11 
+ 0.62258	 0.74074	3 5 6 7 9 11 
+ 0.62258	 0.74074	3 5 6 7 9 11 
+ 0.62258	 0.74074	3 5 6 7 9 11 
+ 0.61613	 0.53872	1 3 6 7 11 
+ 0.61774	 0.58922	3 6 7 9 11 
+ 0.62258	 0.74074	3 5 6 7 9 11 
+ 0.62258	 0.74074	3 5 6 7 9 11 
+ 0.62258	 0.74074	3 5 6 7 9 11 
+ 0.59892	 0      	2 3 5 6 7 9 11 
+ 0.62258	 0.74074	3 5 6 7 9 11 
+ 0.62258	 0.74074	3 5 6 7 9 11 
+ 0.62258	 0.74074	3 5 6 7 9 11 
+ 0.62258	 0.74074	3 5 6 7 9 11 
+ 0.62258	 0.74074	3 5 6 7 9 11 
+ 0.62258	 0.74074	3 5 6 7 9 11 
+ 0.60968	 0.3367 	1 3 5 6 7 9 11 
+ 0.61613	 0.53872	3 4 5 6 7 9 11 
+ 0.62258	 0.74074	3 5 6 7 9 11 
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.rules.PART
+	Scheme options: -M 2 -C 0.25 -Q 1 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 3,5,6,7,9,11 : 6
+                     LOST_METS_IN_5_UTR
+                     CDS_COORDS
+                     AMINOACID_CHANGE
+                     CODON_CHANGE
+                     READING_FRAME_STATUS
+                     PREMATURE_STOP_CODON
+
+WrapperSubsetEval(J48)-BestFirst
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Best first.
+	Start set: no attributes
+	Search direction: forward
+	Stale search after 5 node expansions
+	Total number of subsets evaluated: 69
+	Merit of best subset found:    0.61 
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.trees.J48
+	Scheme options: -C 0.25 -M 2 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 1,12 : 2
+                     NMETS_5_UTR
+                     STOP_CODON_POSITION
+
+WrapperSubsetEval(J48)-GreedyStepwise
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Greedy Stepwise (forwards).
+	Start set: no attributes
+	Merit of best subset found:    0.61 
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.trees.J48
+	Scheme options: -C 0.25 -M 2 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 1,12 : 2
+                     NMETS_5_UTR
+                     STOP_CODON_POSITION
+
+WrapperSubsetEval(J48)-MultiObjectiveEvolutionarySearch
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Multi-Objective Evolutionary Search.
+	Start set: no attributes
+
+	Number of generations: 10	Population size: 100
+	Seed: 1
+	Algorithm: ENORA
+	Report frequency: 10
+	Log file: /home/fabad/hemodonacionML
+
+	Initial population
+	Time: 0.0 ms
+	Current mean acc: 0.5797
+	Normalizated non-dominated space ratio: 0.3867
+
+	d -> dominated Individuals
+	nd -> Non-dominated Individuals
+	s -> Selected Individual
+	acc                      attribute set            
+	0.5806                   [9]                       nd
+	0.607                    [8, 11]                   nd
+	0.6129                   [2, 3, 7]                 nd
+	0.6156                   [1, 3, 5, 7, 9, 10]       nd
+	0.6204                   [1, 2, 5, 8, 9, 10, 11, 12] nd s
+	0.5392                   [12]                      d
+	0.5618                   [1, 6]                    d
+	0.6097                   [8, 9, 10]                d
+	0.6124                   [2, 4, 8, 11]             d
+	0.6151                   [1, 2, 4, 7, 9, 11, 12]   d
+	0.5339                   [13]                      d
+	0.5565                   [3, 5]                    d
+	0.593                    [3, 9, 11]                d
+	0.6054                   [2, 3, 8, 9, 11]          d
+	0.6081                   [1, 4, 5, 8, 10, 11, 13]  d
+	0.6118                   [1, 2, 4, 5, 7, 9, 10, 11, 12] d
+	0.5113                   [6]                       d
+	0.5516                   [6, 13]                   d
+	0.5914                   [3, 7, 9]                 d
+	0.6016                   [1, 2, 11, 12, 13]        d
+	0.6048                   [1, 3, 4, 5, 6, 8, 10, 11] d
+	0.6102                   [1, 2, 4, 5, 6, 8, 9, 10, 11, 12, 13] d
+	0.5108                   [5]                       d
+	0.529                    [8, 12]                   d
+	0.5833                   [7, 11, 12]               d
+	0.5855                   [3, 10, 11, 12]           d
+	0.5962                   [2, 6, 7, 10, 11]         d
+	0.5989                   [1, 6, 7, 8, 9, 13]       d
+	0.6008                   [1, 3, 7, 8, 11, 12, 13]  d
+	0.6027                   [1, 5, 6, 7, 8, 9, 10, 12] d
+	0.5067                   [8]                       d
+	0.5242                   [2, 10]                   d
+	0.582                    [1, 7, 9]                 d
+	0.5954                   [2, 6, 8, 11, 13]         d
+	0.5957                   [1, 2, 3, 5, 9, 11, 13]   d
+	0.6022                   [3, 5, 6, 7, 9, 10, 11, 12, 13] d
+	0.5204                   [4, 6]                    d
+	0.5801                   [5, 8, 13]                d
+	0.582                    [1, 2, 4, 6]              d
+	0.5919                   [2, 3, 5, 9, 10]          d
+	0.5946                   [2, 3, 4, 5, 9, 10]       d
+	0.6008                   [1, 2, 3, 6, 7, 8, 9, 10, 11] d
+	0.5113                   [5, 6]                    d
+	0.5747                   [2, 11, 12]               d
+	0.5801                   [1, 6, 10, 11]            d
+	0.5901                   [2, 6, 7, 11, 12]         d
+	0.5995                   [1, 3, 4, 5, 7, 8, 9, 11, 13] d
+	0.5067                   [4, 8]                    d
+	0.5747                   [2, 10, 11, 12]           d
+	0.5839                   [1, 2, 6, 11, 13]         d
+	0.5849                   [1, 3, 4, 9, 10, 11]      d
+	0.5871                   [2, 3, 4, 6, 9, 11, 13]   d
+	0.5887                   [1, 3, 4, 5, 6, 8, 9, 12] d
+	0.5984                   [2, 3, 4, 5, 6, 7, 10, 11, 13] d
+	0.4973                   [4, 10]                   d
+	0.5699                   [2, 11, 12, 13]           d
+	0.578                    [2, 4, 7, 10, 12]         d
+	0.5839                   [1, 3, 5, 7, 8, 10, 12]   d
+	0.5871                   [2, 4, 5, 6, 7, 9, 10, 11] d
+	0.5962                   [1, 4, 6, 7, 8, 9, 10, 12, 13] d
+	0.5962                   [1, 2, 4, 5, 7, 8, 11, 12, 13] d
+	0.5968                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 13] d
+	0.5632                   [6, 9, 11, 13]            d
+	0.5683                   [6, 9, 11, 12, 13]        d
+	0.5753                   [2, 5, 6, 7, 9, 13]       d
+	0.579                    [2, 5, 6, 7, 9, 12, 13]   d
+	0.5839                   [2, 3, 5, 9, 10, 11, 12, 13] d
+	0.5954                   [1, 3, 5, 6, 7, 8, 9, 10, 13] d
+	0.5968                   [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.557                    [1, 3, 7, 8, 10]          d
+	0.5769                   [2, 5, 7, 8, 10, 11, 12]  d
+	0.5898                   [2, 3, 6, 7, 8, 10, 11, 12, 13] d
+	0.5925                   [1, 2, 3, 4, 5, 8, 9, 11, 12, 13] d
+	0.5659                   [1, 2, 3, 6, 9, 10, 12]   d
+	0.5667                   [2, 3, 4, 5, 6, 8, 12, 13] d
+	0.5887                   [2, 3, 5, 6, 7, 8, 9, 10, 11] d
+	0.5892                   [1, 2, 3, 4, 5, 7, 8, 10, 12, 13] d
+	0.5925                   [1, 2, 4, 5, 6, 7, 8, 9, 11, 12, 13] d
+	0.5737                   [4, 5, 6, 7, 9, 10, 11, 12, 13] d
+	0.5849                   [1, 2, 3, 5, 7, 8, 9, 10, 11, 12] d
+	0.5882                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] d
+	0.5925                   [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5624                   [1, 2, 3, 4, 5, 6, 9, 12, 13] d
+	0.5801                   [2, 3, 4, 6, 7, 8, 9, 11, 12, 13] d
+	0.5817                   [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13] d
+	0.5839                   [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.578                    [2, 3, 4, 5, 6, 8, 10, 11, 12, 13] d
+	0.5817                   [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5712                   [2, 4, 5, 6, 7, 8, 9, 10, 12, 13] d
+	0.578                    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12] d
+	0.5812                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13] d
+	0.5801                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] d
+	0.5812                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5812                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5812                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5812                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5812                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5812                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5812                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5766                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13] d
+	
+	Generation number: 10
+	Time: 13005.0 ms
+	Current mean acc: 0.59
+	Normalizated non-dominated space ratio: 0.3616
+
+	d -> dominated Individuals
+	nd -> Non-dominated Individuals
+	s -> Selected Individual
+	acc                      attribute set            
+	0.5898                   [1]                       nd
+	0.6102                   [1, 12]                   nd
+	0.6446                   [1, 8, 9]                 nd
+	0.6462                   [1, 2, 8, 9]              nd s
+	0.5833                   [11]                      d
+	0.6048                   [3, 13]                   d
+	0.6376                   [1, 8, 11]                d
+	0.6446                   [1, 8, 9, 10]             d
+	0.6462                   [1, 2, 8, 9, 10]          d
+	0.5806                   [9]                       d
+	0.5995                   [1, 2]                    d
+	0.6183                   [2, 8, 9]                 d
+	0.643                    [1, 2, 8, 11]             d
+	0.6446                   [1, 2, 4, 8, 9, 10]       d
+	0.5618                   [3]                       d
+	0.5618                   [3]                       d
+	0.5984                   [1, 9]                    d
+	0.6167                   [3, 8, 9]                 d
+	0.6403                   [1, 8, 9, 13]             d
+	0.6414                   [1, 2, 8, 9, 12]          d
+	0.6441                   [1, 2, 8, 9, 10, 11]      d
+	0.5392                   [12]                      d
+	0.5392                   [12]                      d
+	0.5962                   [3, 11]                   d
+	0.6129                   [2, 8, 11]                d
+	0.6344                   [1, 8, 11, 13]            d
+	0.6382                   [1, 4, 8, 9, 11]          d
+	0.6425                   [1, 2, 4, 8, 9, 11]       d
+	0.5339                   [13]                      d
+	0.5339                   [13]                      d
+	0.5903                   [3, 9]                    d
+	0.6102                   [1, 2, 9]                 d
+	0.625                    [1, 5, 8, 9]              d
+	0.6366                   [1, 8, 11, 12, 13]        d
+	0.6425                   [1, 2, 4, 8, 9, 10, 11]   d
+	0.5242                   [2]                       d
+	0.5242                   [2]                       d
+	0.5901                   [1, 5]                    d
+	0.6065                   [8, 9, 11]                d
+	0.6199                   [3, 5, 11, 12]            d
+	0.6333                   [1, 2, 4, 8, 11, 13]      d
+	0.6339                   [1, 2, 4, 8, 9, 10, 13]   d
+	0.6398                   [1, 2, 4, 5, 8, 9, 11, 12] d
+	0.5113                   [6]                       d
+	0.5113                   [6]                       d
+	0.5898                   [1, 10]                   d
+	0.6032                   [1, 10, 11]               d
+	0.6183                   [1, 5, 9, 11]             d
+	0.6306                   [1, 4, 8, 9, 10, 11, 12]  d
+	0.5067                   [8]                       d
+	0.5067                   [8]                       d
+	0.5849                   [5, 11]                   d
+	0.5935                   [3, 4, 11]                d
+	0.6161                   [3, 8, 11, 13]            d
+	0.629                    [1, 2, 4, 8, 9, 11, 12]   d
+	0.4973                   [4]                       d
+	0.4973                   [10]                      d
+	0.5847                   [1, 8]                    d
+	0.5866                   [1, 3, 9]                 d
+	0.6124                   [2, 4, 8, 11]             d
+	0.6177                   [1, 2, 5, 8, 9, 11, 13]   d
+	0.629                    [1, 2, 4, 8, 9, 10, 11, 12] d
+	0.5833                   [4, 11]                   d
+	0.6086                   [2, 8, 9, 11, 12]         d
+	0.6237                   [1, 2, 3, 5, 8, 9, 11, 12] d
+	0.6281                   [1, 2, 3, 8, 9, 10, 11, 12, 13] d
+	0.5793                   [11, 13]                  d
+	0.5833                   [10, 11, 12]              d
+	0.6016                   [1, 3, 4, 7, 8, 9]        d
+	0.6142                   [1, 2, 3, 5, 9, 10, 11, 12] d
+	0.6237                   [1, 2, 3, 5, 8, 9, 10, 11, 12] d
+	0.5766                   [9, 13]                   d
+	0.5774                   [1, 4, 5, 6, 8, 13]       d
+	0.6048                   [1, 3, 4, 5, 6, 8, 10, 11] d
+	0.6194                   [1, 2, 4, 5, 8, 9, 11, 12, 13] d
+	0.571                    [5, 13]                   d
+	0.6022                   [3, 5, 6, 7, 9, 10, 11, 12, 13] d
+	0.6102                   [1, 2, 4, 5, 6, 8, 9, 11, 12, 13] d
+	0.5704                   [2, 9]                    d
+	0.5968                   [1, 3, 4, 5, 6, 7, 8, 9, 10, 13] d
+	0.6102                   [1, 2, 4, 5, 6, 8, 9, 10, 11, 12, 13] d
+	0.564                    [1, 3]                    d
+	0.5672                   [2, 5, 6, 8, 9, 11]       d
+	0.5968                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 13] d
+	0.5618                   [3, 10]                   d
+	0.5882                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] d
+	0.5968                   [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5516                   [6, 13]                   d
+	0.5817                   [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13] d
+	0.5839                   [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5457                   [5, 12]                   d
+	0.5766                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13] d
+	0.5812                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.529                    [8, 12]                   d
+	0.5409                   [7, 8, 13]                d
+	0.5247                   [2, 13]                   d
+	0.5376                   [4, 8, 13]                d
+	0.5242                   [2, 10]                   d
+	0.5204                   [4, 6]                    d
+	0.5161                   [2, 8]                    d
+	
+	Training statistics:
+	Evaluation criteria: acc
+	
+	Best Individual:
+
+	acc                      attribute set            
+	0.6462                   [1, 2, 8, 9]             
+
+	 0.646236559139785 4.0 0.0 1 0.646236559139785 4.0 0.0 1 1 0 1 1 0 0 0 0 0 1 1 0 0 0 0
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.trees.J48
+	Scheme options: -C 0.25 -M 2 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 1,2,8,9 : 4
+                     NMETS_5_UTR
+                     CONSERVED_METS_IN_5_UTR
+                     MET_POSITION
+                     READING_FRAME_STATUS
+
+WrapperSubsetEval(J48)-PSOSearch
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	PSO Search.
+	Start set: no attributes
+	Population size: 20
+	Number of iterations: 20
+	Mutation type: bit-flip
+	Mutation probability: 0.01
+	Inertia weight: 0.33
+	Social weight: 0.33
+	Individual weight: 0.34
+	Report frequency: 20
+	Seed: 1
+	Log file: /home/fabad/hemodonacionML
+
+Initial population
+merit   	scaled  	subset
+ 0.61156	 0.96832	1 2 4 7 9 11 12 13 
+ 0.59677	 0.78467	1 4 5 6 9 11 12 
+ 0.55108	 0.21704	4 5 7 9 10 12 
+ 0.58065	 0.58433	9 
+ 0.55054	 0.21036	4 7 8 10 13 
+ 0.59516	 0.76464	1 9 10 11 12 
+ 0.60618	 0.90154	1 2 4 6 7 8 9 12 13 
+ 0.60081	 0.83476	3 6 7 11 
+ 0.55753	 0.29717	1 4 6 7 
+ 0.53925	 0.07012	12 
+ 0.58172	 0.59769	1 2 3 4 6 13 
+ 0.55161	 0.22371	6 10 13 
+ 0.6    	 0.82474	3 6 7 8 9 11 12 
+ 0.61452	 1.00505	3 4 8 11 
+ 0.58333	 0.61772	4 5 6 8 10 11 12 13 
+ 0.5914 	 0.71789	2 3 4 5 7 9 12 
+ 0.60753	 0.91823	1 2 4 6 7 8 10 11 12 13 
+ 0.5336 	 0      	7 
+ 0.5828 	 0.61104	1 2 3 6 8 9 12 13 
+ 0.57043	 0.45745	4 7 9 10 13 
+
+Generation: 20
+merit   	scaled  	subset
+ 0.64409	 0.7572 	1 2 8 9 11 
+ 0.61183	 0.26868	1 2 9 11 
+ 0.59409	 0      	2 5 8 11 
+ 0.64409	 0.7572 	1 2 8 9 11 
+ 0.61935	 0.38267	1 2 5 8 9 
+ 0.64919	 0.83455	1 2 5 8 9 11 
+ 0.64409	 0.7572 	1 2 8 9 11 
+ 0.61183	 0.26868	1 2 3 5 8 9 11 
+ 0.64919	 0.83455	1 2 5 8 9 11 
+ 0.64409	 0.7572 	1 2 8 9 11 
+ 0.63978	 0.69206	1 5 8 9 11 
+ 0.64919	 0.83455	1 2 5 8 9 11 
+ 0.64919	 0.83455	1 2 5 8 9 11 
+ 0.62312	 0.43966	1 2 5 8 11 
+ 0.64919	 0.83455	1 2 5 8 9 11 
+ 0.64919	 0.83455	1 2 5 8 9 11 
+ 0.64409	 0.7572 	1 2 8 9 11 
+ 0.61452	 0.30939	2 8 9 11 
+ 0.64247	 0.73277	1 2 4 8 9 11 
+ 0.64919	 0.83455	1 2 5 8 9 11 
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.trees.J48
+	Scheme options: -C 0.25 -M 2 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 1,2,5,8,9,11 : 6
+                     NMETS_5_UTR
+                     CONSERVED_METS_IN_5_UTR
+                     CDS_COORDS
+                     MET_POSITION
+                     READING_FRAME_STATUS
+                     PREMATURE_STOP_CODON
+
+WrapperSubsetEval(KStar)-BestFirst
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Best first.
+	Start set: no attributes
+	Search direction: forward
+	Stale search after 5 node expansions
+	Total number of subsets evaluated: 82
+	Merit of best subset found:    0.674
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.lazy.KStar
+	Scheme options: -B 20 -M a 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 3,7,12,13 : 4
+                     LOST_METS_IN_5_UTR
+                     CODON_CHANGE
+                     STOP_CODON_POSITION
+                     MUTATED_SEQUENCE_LENGTH
+
+WrapperSubsetEval(KStar)-GreedyStepwise
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Greedy Stepwise (forwards).
+	Start set: no attributes
+	Merit of best subset found:    0.674
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.lazy.KStar
+	Scheme options: -B 20 -M a 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 3,7,12,13 : 4
+                     LOST_METS_IN_5_UTR
+                     CODON_CHANGE
+                     STOP_CODON_POSITION
+                     MUTATED_SEQUENCE_LENGTH
+
+WrapperSubsetEval(KStar)-MultiObjectiveEvolutionarySearch
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Multi-Objective Evolutionary Search.
+	Start set: no attributes
+
+	Number of generations: 10	Population size: 100
+	Seed: 1
+	Algorithm: ENORA
+	Report frequency: 10
+	Log file: /home/fabad/hemodonacionML
+
+	Initial population
+	Time: 0.0 ms
+	Current mean acc: 0.6101
+	Normalizated non-dominated space ratio: 0.3513
+
+	d -> dominated Individuals
+	nd -> Non-dominated Individuals
+	s -> Selected Individual
+	acc                      attribute set            
+	0.5833                   [11]                      nd
+	0.6                      [3, 8]                    nd
+	0.6102                   [8, 12, 13]               nd
+	0.6358                   [1, 2, 8, 12]             nd
+	0.6694                   [1, 3, 10, 12, 13]        nd s
+	0.5828                   [8]                       d
+	0.5962                   [1, 12]                   d
+	0.6075                   [1, 8, 10]                d
+	0.6317                   [3, 6, 8, 13]             d
+	0.643                    [1, 3, 4, 8, 12]          d
+	0.6495                   [3, 4, 6, 9, 12, 13]      d
+	0.6546                   [1, 3, 5, 7, 9, 10, 12, 13] d
+	0.6597                   [1, 2, 3, 4, 8, 9, 10, 12, 13] d
+	0.5806                   [9]                       d
+	0.6038                   [5, 7, 9]                 d
+	0.621                    [1, 5, 11, 12]            d
+	0.6344                   [2, 6, 9, 12, 13]         d
+	0.6492                   [3, 6, 8, 11, 12, 13]     d
+	0.6565                   [1, 2, 3, 5, 6, 8, 9, 10, 13] d
+	0.5269                   [7]                       d
+	0.5269                   [7]                       d
+	0.5269                   [7]                       d
+	0.5747                   [8, 9]                    d
+	0.5919                   [9, 11, 13]               d
+	0.6129                   [2, 3, 7, 9]              d
+	0.6296                   [2, 3, 4, 5, 8]           d
+	0.6387                   [1, 6, 9, 10, 12, 13]     d
+	0.6468                   [1, 2, 3, 4, 5, 7, 8, 11] d
+	0.6492                   [2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13] d
+	0.5242                   [2]                       d
+	0.5323                   [6, 10]                   d
+	0.5806                   [4, 5, 11]                d
+	0.6113                   [2, 3, 5, 9]              d
+	0.6274                   [3, 4, 7, 8, 11]          d
+	0.6323                   [1, 2, 3, 10, 11, 12, 13] d
+	0.6411                   [1, 3, 4, 5, 6, 8, 11, 12] d
+	0.6441                   [1, 2, 3, 4, 6, 8, 10, 12, 13] d
+	0.6489                   [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13] d
+	0.504                    [4]                       d
+	0.5108                   [5, 10]                   d
+	0.5793                   [4, 11, 13]               d
+	0.5927                   [5, 6, 8, 11]             d
+	0.6161                   [3, 4, 5, 7, 8]           d
+	0.6263                   [2, 3, 7, 9, 10, 12]      d
+	0.6366                   [1, 4, 5, 7, 8, 11, 12, 13] d
+	0.6371                   [1, 2, 3, 6, 7, 8, 10, 11, 13] d
+	0.6465                   [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13] d
+	0.5715                   [9, 10, 12]               d
+	0.5847                   [2, 4, 5, 8]              d
+	0.6102                   [2, 5, 10, 12, 13]        d
+	0.6172                   [2, 3, 5, 9, 11, 13]      d
+	0.6237                   [1, 2, 3, 5, 7, 9, 10]    d
+	0.636                    [3, 4, 5, 6, 8, 9, 11, 12, 13] d
+	0.5605                   [5, 7, 8]                 d
+	0.5946                   [1, 5, 6, 7, 13]          d
+	0.5954                   [1, 3, 4, 6, 10, 11]      d
+	0.6231                   [2, 3, 4, 6, 7, 12, 13]   d
+	0.6349                   [3, 4, 6, 7, 8, 9, 10, 12, 13] d
+	0.6355                   [2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6355                   [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12] d
+	0.5565                   [1, 2, 10]                d
+	0.5901                   [2, 7, 8, 9, 10, 11]      d
+	0.6093                   [1, 2, 4, 7, 9, 11, 13]   d
+	0.622                    [1, 2, 3, 4, 6, 10, 11, 13] d
+	0.6237                   [1, 2, 5, 7, 9, 10, 11, 12, 13] d
+	0.6331                   [1, 2, 4, 5, 7, 8, 9, 10, 11, 13] d
+	0.6349                   [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5444                   [4, 7, 10]                d
+	0.607                    [1, 2, 5, 6, 10, 11, 13]  d
+	0.6172                   [1, 2, 3, 4, 6, 7, 9, 12] d
+	0.622                    [1, 2, 3, 4, 6, 7, 9, 11, 12] d
+	0.6285                   [1, 3, 4, 5, 7, 8, 9, 10, 11, 12] d
+	0.6331                   [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5253                   [5, 10, 12]               d
+	0.5914                   [2, 7, 8, 9, 10, 12, 13]  d
+	0.6194                   [1, 3, 5, 6, 7, 10, 11, 12, 13] d
+	0.628                    [1, 3, 4, 5, 6, 7, 8, 9, 10, 11] d
+	0.6304                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13] d
+	0.6304                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13] d
+	0.6304                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13] d
+	0.522                    [4, 5, 6, 12]             d
+	0.5876                   [1, 4, 6, 9, 10, 11, 12]  d
+	0.6151                   [1, 2, 4, 5, 6, 7, 9, 10, 11] d
+	0.6263                   [1, 2, 3, 4, 5, 6, 7, 9, 10, 12, 13] d
+	0.6277                   [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13] d
+	0.6304                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6304                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6304                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6304                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6304                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6304                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6304                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6304                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.6102                   [3, 4, 5, 6, 7, 8, 9, 10, 12] d
+	0.6231                   [1, 2, 4, 5, 6, 7, 8, 9, 11, 12, 13] d
+	0.6253                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] d
+	0.6253                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] d
+	0.6253                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] d
+	0.5914                   [2, 4, 5, 7, 8, 9, 11, 12, 13] d
+	0.6059                   [1, 2, 4, 5, 6, 7, 9, 10, 11, 12, 13] d
+	
+	Generation number: 10
+	Time: 1401986.0 ms
+	Current mean acc: 0.6126
+	Normalizated non-dominated space ratio: 0.3371
+
+	d -> dominated Individuals
+	nd -> Non-dominated Individuals
+	s -> Selected Individual
+	acc                      attribute set            
+	0.5978                   [13]                      nd
+	0.6237                   [3, 13]                   nd
+	0.6656                   [3, 12, 13]               nd
+	0.6742                   [3, 7, 12, 13]            nd s
+	0.5833                   [11]                      d
+	0.6183                   [1, 13]                   d
+	0.6559                   [1, 8, 12]                d
+	0.6694                   [1, 3, 12, 13]            d
+	0.6742                   [3, 7, 10, 12, 13]        d
+	0.5806                   [9]                       d
+	0.6118                   [2, 13]                   d
+	0.6548                   [3, 8, 13]                d
+	0.6667                   [1, 8, 9, 12]             d
+	0.6699                   [1, 3, 7, 12, 13]         d
+	0.6737                   [1, 3, 9, 10, 12, 13]     d
+	0.5753                   [1]                       d
+	0.6075                   [1, 8]                    d
+	0.6414                   [1, 8, 9]                 d
+	0.6629                   [3, 9, 12, 13]            d
+	0.6653                   [1, 9, 10, 12, 13]        d
+	0.6707                   [1, 3, 8, 9, 12, 13]      d
+	0.6726                   [1, 3, 9, 10, 11, 12, 13] d
+	0.5694                   [3]                       d
+	0.6059                   [7, 13]                   d
+	0.6344                   [3, 7, 13]                d
+	0.657                    [1, 4, 12, 13]            d
+	0.6651                   [1, 3, 4, 7, 12, 13]      d
+	0.6707                   [1, 3, 8, 9, 10, 12, 13]  d
+	0.5565                   [12]                      d
+	0.6008                   [6, 11]                   d
+	0.6285                   [3, 5, 13]                d
+	0.6559                   [1, 8, 10, 12]            d
+	0.664                    [3, 7, 9, 10, 12, 13]     d
+	0.6707                   [1, 3, 8, 9, 10, 11, 12, 13] d
+	0.5323                   [6]                       d
+	0.5323                   [6]                       d
+	0.6                      [3, 8]                    d
+	0.6242                   [7, 12, 13]               d
+	0.6484                   [3, 8, 11, 13]            d
+	0.6586                   [3, 4, 9, 11, 12, 13]     d
+	0.6602                   [3, 7, 9, 10, 11, 12, 13] d
+	0.6667                   [1, 3, 4, 8, 9, 10, 12, 13] d
+	0.5269                   [7]                       d
+	0.5269                   [7]                       d
+	0.5978                   [10, 13]                  d
+	0.6215                   [3, 4, 13]                d
+	0.6349                   [2, 3, 5, 8]              d
+	0.6586                   [3, 4, 9, 10, 11, 12, 13] d
+	0.6602                   [1, 3, 6, 8, 9, 10, 12, 13] d
+	0.6667                   [1, 3, 4, 8, 9, 10, 11, 12, 13] d
+	0.5242                   [2]                       d
+	0.5242                   [2]                       d
+	0.5962                   [1, 12]                   d
+	0.621                    [1, 3, 13]                d
+	0.6333                   [6, 11, 12, 13]           d
+	0.6546                   [1, 3, 5, 7, 9, 10, 12, 13] d
+	0.6602                   [1, 3, 6, 8, 9, 10, 11, 12, 13] d
+	0.5108                   [5]                       d
+	0.5108                   [5]                       d
+	0.5874                   [2, 7]                    d
+	0.6038                   [5, 7, 9]                 d
+	0.6196                   [1, 3, 6, 11, 12]         d
+	0.6285                   [1, 5, 6, 10, 11, 12, 13] d
+	0.6484                   [1, 3, 4, 5, 8, 10, 11, 12] d
+	0.6505                   [1, 2, 3, 6, 8, 9, 10, 12, 13] d
+	0.504                    [4]                       d
+	0.504                    [4]                       d
+	0.5847                   [9, 13]                   d
+	0.5962                   [6, 11, 13]               d
+	0.6371                   [1, 5, 6, 7, 8, 11, 12, 13] d
+	0.6441                   [1, 2, 3, 4, 5, 6, 8, 10, 11] d
+	0.6505                   [1, 2, 3, 5, 7, 8, 10, 11, 12, 13] d
+	0.5833                   [8, 12]                   d
+	0.5919                   [9, 11, 13]               d
+	0.6263                   [1, 2, 4, 5, 6, 8, 9, 13] d
+	0.6452                   [1, 2, 3, 5, 6, 7, 8, 9, 10, 11] d
+	0.6495                   [1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 13] d
+	0.5793                   [2, 12]                   d
+	0.5901                   [1, 6, 11, 12]            d
+	0.6172                   [1, 2, 3, 4, 6, 7, 9, 12] d
+	0.6425                   [1, 2, 3, 4, 5, 8, 9, 10, 11, 13] d
+	0.6465                   [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13] d
+	0.5715                   [9, 12]                   d
+	0.6331                   [1, 2, 4, 5, 7, 8, 9, 10, 11, 13] d
+	0.6355                   [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12] d
+	0.5677                   [7, 8]                    d
+	0.6285                   [1, 3, 4, 5, 7, 8, 9, 10, 11, 12] d
+	0.6304                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5672                   [5, 9]                    d
+	0.6263                   [1, 2, 3, 4, 5, 6, 7, 9, 10, 12, 13] d
+	0.6277                   [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13] d
+	0.5632                   [2, 8]                    d
+	0.6059                   [1, 2, 4, 5, 6, 7, 9, 10, 11, 12, 13] d
+	0.5575                   [2, 9]                    d
+	0.5323                   [6, 10]                   d
+	0.557                    [2, 5, 10]                d
+	0.5565                   [1, 2, 10]                d
+	0.5538                   [1, 5, 6]                 d
+	0.5444                   [4, 7, 10]                d
+	0.5253                   [5, 10, 12]               d
+	
+	Training statistics:
+	Evaluation criteria: acc
+	
+	Best Individual:
+
+	acc                      attribute set            
+	0.6742                   [3, 7, 12, 13]           
+
+	 0.6741935483870968 4.0 0.0 1 0.6741935483870968 4.0 0.0 1 1 0 0 0 1 0 0 0 1 0 0 0 0 1 1
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.lazy.KStar
+	Scheme options: -B 20 -M a 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 3,7,12,13 : 4
+                     LOST_METS_IN_5_UTR
+                     CODON_CHANGE
+                     STOP_CODON_POSITION
+                     MUTATED_SEQUENCE_LENGTH
+
+WrapperSubsetEval(KStar)-PSOSearch
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	PSO Search.
+	Start set: no attributes
+	Population size: 20
+	Number of iterations: 20
+	Mutation type: bit-flip
+	Mutation probability: 0.01
+	Inertia weight: 0.33
+	Social weight: 0.33
+	Individual weight: 0.34
+	Report frequency: 20
+	Seed: 1
+	Log file: /home/fabad/hemodonacionML
+
+Initial population
+merit   	scaled  	subset
+ 0.64516	 0.88364	1 2 4 7 9 11 12 13 
+ 0.59301	 0.49404	1 4 5 6 9 11 12 
+ 0.57258	 0.34141	4 5 7 9 10 12 
+ 0.58065	 0.40165	9 
+ 0.62634	 0.74306	4 7 8 10 13 
+ 0.60645	 0.59445	1 9 10 11 12 
+ 0.63065	 0.77519	1 2 4 6 7 8 9 12 13 
+ 0.625  	 0.73302	3 6 7 11 
+ 0.58333	 0.42174	1 4 6 7 
+ 0.55645	 0.22091	12 
+ 0.63575	 0.81335	1 2 3 4 6 13 
+ 0.60108	 0.55428	6 10 13 
+ 0.6172 	 0.67478	3 6 7 8 9 11 12 
+ 0.63118	 0.77921	3 4 8 11 
+ 0.62366	 0.72298	4 5 6 8 10 11 12 13 
+ 0.62366	 0.72298	2 3 4 5 7 9 12 
+ 0.63172	 0.78323	1 2 4 6 7 8 10 11 12 13 
+ 0.52688	 0      	7 
+ 0.65054	 0.92381	1 2 3 6 8 9 12 13 
+ 0.60484	 0.5824 	4 7 9 10 13 
+
+Generation: 20
+merit   	scaled  	subset
+ 0.67742	 0.77808	1 3 4 9 12 13 
+ 0.66935	 0.68471	1 3 4 5 8 9 12 13 
+ 0.6629 	 0.61001	3 9 12 13 
+ 0.67742	 0.77808	1 3 4 9 12 13 
+ 0.67742	 0.77808	1 3 4 9 12 13 
+ 0.67742	 0.77808	1 3 4 9 12 13 
+ 0.65108	 0.47307	1 3 4 5 9 12 13 
+ 0.67742	 0.77808	1 3 4 9 12 13 
+ 0.67742	 0.77808	1 3 4 9 12 13 
+ 0.67742	 0.77808	1 3 4 9 12 13 
+ 0.65968	 0.57267	1 2 3 4 8 9 12 13 
+ 0.67742	 0.77808	1 3 4 9 12 13 
+ 0.65108	 0.47307	1 3 4 5 9 12 13 
+ 0.67742	 0.77808	1 3 4 9 12 13 
+ 0.67742	 0.77808	1 3 4 9 12 13 
+ 0.67742	 0.77808	1 3 4 9 12 13 
+ 0.66667	 0.65359	1 4 8 9 11 12 
+ 0.66183	 0.59756	3 4 9 12 13 
+ 0.67366	 0.73451	1 3 9 12 13 
+ 0.61022	 0      	1 3 4 9 12 
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.lazy.KStar
+	Scheme options: -B 20 -M a 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 1,3,4,9,12,13 : 6
+                     NMETS_5_UTR
+                     LOST_METS_IN_5_UTR
+                     CONSERVED_METS_NO_STOP_IN_5_UTR
+                     READING_FRAME_STATUS
+                     STOP_CODON_POSITION
+                     MUTATED_SEQUENCE_LENGTH
+
+WrapperSubsetEval(BayesNet)-BestFirst
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Best first.
+	Start set: no attributes
+	Search direction: forward
+	Stale search after 5 node expansions
+	Total number of subsets evaluated: 74
+	Merit of best subset found:    0.61 
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.bayes.BayesNet
+	Scheme options: -D -Q weka.classifiers.bayes.net.search.local.K2 -- -P 1 -S BAYES -E weka.classifiers.bayes.net.estimate.SimpleEstimator -- -A 0.5 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 7,11 : 2
+                     CODON_CHANGE
+                     PREMATURE_STOP_CODON
+
+WrapperSubsetEval(BayesNet)-GreedyStepwise
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Greedy Stepwise (forwards).
+	Start set: no attributes
+	Merit of best subset found:    0.61 
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.bayes.BayesNet
+	Scheme options: -D -Q weka.classifiers.bayes.net.search.local.K2 -- -P 1 -S BAYES -E weka.classifiers.bayes.net.estimate.SimpleEstimator -- -A 0.5 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 7,11 : 2
+                     CODON_CHANGE
+                     PREMATURE_STOP_CODON
+
+WrapperSubsetEval(BayesNet)-MultiObjectiveEvolutionarySearch
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Multi-Objective Evolutionary Search.
+	Start set: no attributes
+
+	Number of generations: 10	Population size: 100
+	Seed: 1
+	Algorithm: ENORA
+	Report frequency: 10
+	Log file: /home/fabad/hemodonacionML
+
+	Initial population
+	Time: 0.0 ms
+	Current mean acc: 0.5707
+	Normalizated non-dominated space ratio: 0.3963
+
+	d -> dominated Individuals
+	nd -> Non-dominated Individuals
+	s -> Selected Individual
+	acc                      attribute set            
+	0.5323                   [6]                       nd
+	0.6102                   [7, 11]                   nd s
+	0.5301                   [3]                       d
+	0.5806                   [9, 12]                   d
+	0.5984                   [1, 7, 11]                d
+	0.6027                   [5, 7, 8, 9, 11, 12]      d
+	0.6059                   [2, 3, 6, 7, 8, 9, 10, 11] d
+	0.5194                   [1]                       d
+	0.5511                   [6, 7]                    d
+	0.5876                   [1, 5, 11]                d
+	0.5978                   [4, 6, 7, 9, 10, 11]      d
+	0.5995                   [3, 4, 7, 8, 10, 11, 12]  d
+	0.6013                   [1, 3, 5, 7, 9, 11, 12, 13] d
+	0.6016                   [1, 2, 3, 5, 6, 7, 9, 10, 11] d
+	0.5323                   [6, 10]                   d
+	0.582                    [8, 10, 11]               d
+	0.5855                   [2, 4, 5, 7, 9]           d
+	0.5925                   [3, 4, 8, 9, 11, 12]      d
+	0.593                    [2, 4, 7, 8, 9, 12, 13]   d
+	0.5952                   [1, 2, 5, 6, 7, 9, 11, 13] d
+	0.5981                   [1, 3, 4, 5, 6, 7, 9, 10, 11, 13] d
+	0.5269                   [3, 13]                   d
+	0.5806                   [2, 3, 9]                 d
+	0.5817                   [3, 10, 11, 12, 13]       d
+	0.586                    [1, 5, 8, 10, 11, 12]     d
+	0.5892                   [3, 5, 6, 7, 8, 9, 10, 13] d
+	0.5892                   [1, 2, 3, 5, 6, 7, 9, 10] d
+	0.5927                   [1, 3, 4, 5, 6, 7, 8, 9, 10, 12] d
+	0.5954                   [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 13] d
+	0.5968                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13] d
+	0.5968                   [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5215                   [7, 8]                    d
+	0.5306                   [5, 6, 13]                d
+	0.5793                   [2, 8, 9, 10]             d
+	0.5812                   [3, 8, 11, 12, 13]        d
+	0.582                    [1, 4, 5, 6, 7, 9, 12]    d
+	0.5887                   [1, 2, 3, 4, 5, 7, 8, 9, 10] d
+	0.5914                   [1, 4, 5, 6, 7, 8, 9, 10, 11, 12] d
+	0.5941                   [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13] d
+	0.5952                   [1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13] d
+	0.5968                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5968                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5968                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5968                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5968                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5968                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5968                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5968                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5968                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5968                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5968                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5194                   [1, 2]                    d
+	0.5194                   [1, 4]                    d
+	0.529                    [1, 7, 12]                d
+	0.5659                   [6, 10, 11, 13]           d
+	0.5806                   [3, 4, 8, 9, 13]          d
+	0.5871                   [1, 2, 3, 4, 5, 6, 7, 9, 13] d
+	0.5892                   [1, 3, 4, 6, 7, 9, 10, 11, 12, 13] d
+	0.5892                   [1, 2, 3, 4, 6, 7, 9, 11, 12, 13] d
+	0.5935                   [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 13] d
+	0.5067                   [5, 8]                    d
+	0.5457                   [1, 3, 7, 10]             d
+	0.5726                   [2, 4, 5, 11, 13]         d
+	0.5793                   [1, 2, 3, 11, 12, 13]     d
+	0.5828                   [1, 2, 4, 5, 8, 9, 10, 11, 13] d
+	0.5887                   [1, 2, 3, 5, 6, 7, 8, 9, 12, 13] d
+	0.5909                   [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13] d
+	0.494                    [4, 13]                   d
+	0.543                    [5, 6, 7, 8]              d
+	0.5685                   [1, 6, 7, 9, 13]          d
+	0.5793                   [1, 3, 4, 7, 8, 11, 13]   d
+	0.5806                   [1, 2, 3, 4, 5, 6, 9, 10, 12] d
+	0.5855                   [1, 3, 4, 5, 6, 7, 8, 9, 10, 13] d
+	0.5887                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13] d
+	0.4933                   [4, 12]                   d
+	0.4933                   [2, 12]                   d
+	0.5376                   [3, 7, 12, 13]            d
+	0.5683                   [1, 2, 6, 9, 12]          d
+	0.5694                   [1, 2, 4, 6, 11, 12, 13]  d
+	0.5737                   [4, 6, 7, 8, 10, 11, 12, 13] d
+	0.5753                   [1, 2, 4, 6, 9, 10, 11, 12, 13] d
+	0.5796                   [1, 2, 3, 4, 5, 7, 8, 9, 10, 13] d
+	0.5366                   [3, 7, 8, 10]             d
+	0.5634                   [1, 2, 3, 8, 9]           d
+	0.5659                   [1, 2, 4, 5, 6, 9, 11, 13] d
+	0.5793                   [1, 2, 3, 4, 5, 6, 9, 11, 12, 13] d
+	0.5323                   [2, 4, 6, 10]             d
+	0.5511                   [1, 6, 7, 8, 13]          d
+	0.5634                   [1, 2, 3, 4, 8, 9, 13]    d
+	0.5683                   [1, 2, 3, 5, 6, 8, 10, 11, 12, 13] d
+	0.5793                   [1, 2, 3, 5, 6, 8, 9, 10, 11, 12, 13] d
+	0.528                    [5, 6, 8, 13]             d
+	0.5511                   [1, 2, 4, 6, 7, 8, 13]    d
+	0.5629                   [1, 2, 3, 4, 8, 10, 11, 12, 13] d
+	0.5672                   [1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 13] d
+	0.5274                   [1, 2, 3, 12]             d
+	0.5457                   [1, 2, 4, 5, 6, 7, 10]    d
+	0.5605                   [1, 2, 3, 4, 6, 7, 8, 10, 13] d
+	0.5194                   [4, 7, 10, 12, 13]        d
+	0.5409                   [1, 3, 4, 5, 6, 10, 12]   d
+	
+	Generation number: 10
+	Time: 7704.0 ms
+	Current mean acc: 0.5746
+	Normalizated non-dominated space ratio: 0.3871
+
+	d -> dominated Individuals
+	nd -> Non-dominated Individuals
+	s -> Selected Individual
+	acc                      attribute set            
+	0.5833                   [11]                      nd
+	0.5833                   [11]                      nd
+	0.6102                   [7, 11]                   nd
+	0.6129                   [3, 7, 9, 11]             nd
+	0.6172                   [3, 5, 7, 9, 11]          nd s
+	0.5323                   [6]                       d
+	0.5323                   [7]                       d
+	0.586                    [11, 13]                  d
+	0.6102                   [2, 7, 11]                d
+	0.6129                   [3, 7, 9, 10, 11]         d
+	0.6172                   [3, 5, 7, 9, 10, 11]      d
+	0.5301                   [3]                       d
+	0.5301                   [3]                       d
+	0.5833                   [2, 11]                   d
+	0.6048                   [3, 7, 11]                d
+	0.6075                   [2, 4, 7, 9]              d
+	0.6089                   [3, 7, 8, 9, 11]          d
+	0.6129                   [2, 3, 7, 9, 10, 11]      d
+	0.6172                   [2, 3, 5, 7, 9, 10, 11]   d
+	0.5194                   [1]                       d
+	0.5194                   [1]                       d
+	0.5806                   [3, 9]                    d
+	0.6027                   [3, 7, 9]                 d
+	0.6048                   [3, 4, 7, 11]             d
+	0.607                    [3, 7, 9, 11, 12]         d
+	0.6102                   [3, 5, 7, 9, 11, 12]      d
+	0.6113                   [1, 3, 5, 7, 9, 10, 11]   d
+	0.6172                   [2, 3, 4, 5, 7, 9, 10, 11] d
+	0.5108                   [5]                       d
+	0.5108                   [5]                       d
+	0.5712                   [5, 11]                   d
+	0.5941                   [3, 9, 11]                d
+	0.6016                   [2, 7, 11, 13]            d
+	0.6032                   [3, 7, 8, 10, 11]         d
+	0.607                    [2, 3, 7, 9, 11, 12]      d
+	0.6102                   [1, 3, 5, 7, 8, 9, 11]    d
+	0.6161                   [2, 3, 4, 5, 7, 8, 9, 11] d
+	0.4973                   [8]                       d
+	0.4973                   [10]                      d
+	0.5688                   [1, 11]                   d
+	0.5887                   [5, 7, 11]                d
+	0.6059                   [3, 6, 7, 8, 9, 10, 11]   d
+	0.6113                   [1, 2, 3, 5, 7, 9, 10, 11] d
+	0.6161                   [2, 3, 4, 5, 7, 8, 9, 10, 11] d
+	0.494                    [13]                      d
+	0.494                    [13]                      d
+	0.5683                   [5, 9]                    d
+	0.586                    [3, 6, 9]                 d
+	0.6008                   [2, 3, 5, 7, 8, 9, 10]    d
+	0.6059                   [2, 3, 6, 7, 8, 9, 10, 11] d
+	0.6113                   [2, 3, 5, 7, 8, 9, 10, 11, 13] d
+	0.5667                   [1, 9]                    d
+	0.5833                   [9, 11, 13]               d
+	0.5855                   [5, 7, 11, 12]            d
+	0.5968                   [4, 6, 7, 8, 9, 10, 11]   d
+	0.6048                   [1, 2, 3, 4, 7, 9, 10, 11] d
+	0.5645                   [6, 11]                   d
+	0.5806                   [5, 9, 11]                d
+	0.582                    [1, 4, 5, 6, 7, 9, 12]    d
+	0.6013                   [1, 3, 5, 7, 9, 11, 12, 13] d
+	0.6035                   [1, 3, 4, 5, 7, 9, 10, 11, 13] d
+	0.6048                   [2, 3, 4, 5, 7, 8, 9, 10, 11, 12] d
+	0.5524                   [5, 7]                    d
+	0.5793                   [8, 9, 12]                d
+	0.5978                   [1, 4, 7, 8, 9, 10, 11, 12] d
+	0.6013                   [1, 2, 3, 5, 7, 9, 11, 12, 13] d
+	0.5511                   [6, 7]                    d
+	0.5511                   [6, 7]                    d
+	0.5605                   [4, 6, 9]                 d
+	0.5726                   [2, 4, 5, 11, 13]         d
+	0.5763                   [1, 4, 6, 7, 10, 11, 13]  d
+	0.5941                   [1, 2, 3, 4, 7, 8, 9, 11, 12] d
+	0.6013                   [1, 3, 4, 5, 7, 9, 10, 11, 12, 13] d
+	0.5457                   [5, 6]                    d
+	0.5667                   [1, 8, 10, 11, 12]        d
+	0.5737                   [4, 6, 7, 8, 10, 11, 12, 13] d
+	0.5981                   [1, 2, 3, 5, 6, 7, 9, 10, 11, 13] d
+	0.5387                   [3, 6]                    d
+	0.5457                   [1, 3, 7, 10]             d
+	0.5659                   [1, 2, 5, 6, 9, 11, 13]   d
+	0.5927                   [1, 2, 3, 4, 5, 6, 7, 9, 12, 13] d
+	0.5981                   [1, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13] d
+	0.5376                   [3, 7]                    d
+	0.543                    [5, 6, 7, 8]              d
+	0.5903                   [1, 2, 3, 4, 6, 7, 8, 9, 11, 12] d
+	0.5968                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13] d
+	0.5349                   [1, 7]                    d
+	0.5382                   [1, 4, 5, 7]              d
+	0.543                    [2, 5, 6, 7, 8]           d
+	0.5796                   [1, 2, 3, 4, 5, 7, 8, 9, 10, 13] d
+	0.5968                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] d
+	0.5323                   [6, 10]                   d
+	0.5403                   [1, 2, 3, 5, 6]           d
+	0.5793                   [1, 2, 3, 5, 6, 8, 9, 10, 11, 12, 13] d
+	0.5215                   [7, 8]                    d
+	0.5323                   [2, 4, 6, 10]             d
+	0.5793                   [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13] d
+	0.5194                   [1, 4]                    d
+	0.5067                   [5, 8]                    d
+	0.5188                   [2, 4, 6, 12]             d
+	
+	Training statistics:
+	Evaluation criteria: acc
+	
+	Best Individual:
+
+	acc                      attribute set            
+	0.6172                   [3, 5, 7, 9, 11]         
+
+	 0.6172043010752688 5.0 0.0 1 0.6172043010752688 5.0 0.0 1 1 0 0 0 1 0 1 0 1 0 1 0 1 0 0
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.bayes.BayesNet
+	Scheme options: -D -Q weka.classifiers.bayes.net.search.local.K2 -- -P 1 -S BAYES -E weka.classifiers.bayes.net.estimate.SimpleEstimator -- -A 0.5 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 3,5,7,9,11 : 5
+                     LOST_METS_IN_5_UTR
+                     CDS_COORDS
+                     CODON_CHANGE
+                     READING_FRAME_STATUS
+                     PREMATURE_STOP_CODON
+
+WrapperSubsetEval(BayesNet)-PSOSearch
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	PSO Search.
+	Start set: no attributes
+	Population size: 20
+	Number of iterations: 20
+	Mutation type: bit-flip
+	Mutation probability: 0.01
+	Inertia weight: 0.33
+	Social weight: 0.33
+	Individual weight: 0.34
+	Report frequency: 20
+	Seed: 1
+	Log file: /home/fabad/hemodonacionML
+
+Initial population
+merit   	scaled  	subset
+ 0.59677	 0.80402	1 2 4 7 9 11 12 13 
+ 0.5672 	 0.5743 	1 4 5 6 9 11 12 
+ 0.58226	 0.69125	4 5 7 9 10 12 
+ 0.58065	 0.67872	9 
+ 0.52258	 0.22763	4 7 8 10 13 
+ 0.58602	 0.72049	1 9 10 11 12 
+ 0.56828	 0.58265	1 2 4 6 7 8 9 12 13 
+ 0.59677	 0.80402	3 6 7 11 
+ 0.54731	 0.41976	1 4 6 7 
+ 0.49328	 0      	12 
+ 0.53871	 0.35293	1 2 3 4 6 13 
+ 0.52151	 0.21928	6 10 13 
+ 0.59892	 0.82073	3 6 7 8 9 11 12 
+ 0.58226	 0.69125	3 4 8 11 
+ 0.5629 	 0.54089	4 5 6 8 10 11 12 13 
+ 0.59839	 0.81655	2 3 4 5 7 9 12 
+ 0.57366	 0.62442	1 2 4 6 7 8 10 11 12 13 
+ 0.53226	 0.30281	7 
+ 0.56855	 0.58474	1 2 3 6 8 9 12 13 
+ 0.60484	 0.86667	4 7 9 10 13 
+
+Generation: 20
+merit   	scaled  	subset
+ 0.61022	 0.69186	7 11 
+ 0.5871 	 0      	5 7 8 11 
+ 0.61022	 0.69186	7 11 
+ 0.61022	 0.69186	7 11 
+ 0.61022	 0.69186	7 11 
+ 0.61022	 0.69186	7 11 
+ 0.58871	 0.04827	5 7 11 
+ 0.61022	 0.69186	7 11 
+ 0.61022	 0.69186	7 11 
+ 0.61022	 0.69186	7 11 
+ 0.61022	 0.69186	2 7 11 
+ 0.61022	 0.69186	2 7 11 
+ 0.61022	 0.69186	7 11 
+ 0.61022	 0.69186	7 11 
+ 0.61022	 0.69186	7 11 
+ 0.61022	 0.69186	7 11 
+ 0.61022	 0.69186	7 11 
+ 0.59839	 0.33789	1 7 11 
+ 0.61022	 0.69186	4 7 11 
+ 0.61022	 0.69186	7 11 
+
+Attribute Subset Evaluator (supervised, Class (nominal): 14 CLASS):
+	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.bayes.BayesNet
+	Scheme options: -D -Q weka.classifiers.bayes.net.search.local.K2 -- -P 1 -S BAYES -E weka.classifiers.bayes.net.estimate.SimpleEstimator -- -A 0.5 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
+Selected attributes: 7,11 : 2
+                     CODON_CHANGE
+                     PREMATURE_STOP_CODON
+
+SAVING SUBSETS INTO DISK
+TESTING CLASSIFIERS
