@@ -23,6 +23,26 @@ my %codon_translation = (
     "AGT" => "S",    "AGC" => "S",    "AGA" => "R",    "AGG" => "R",
     "GGT" => "G",    "GGC" => "G",    "GGA" => "G",    "GGG" => "G",
 );
+my %complement = (
+	"A" => "T",
+	"T" => "A",
+	"C" => "G",
+	"G" => "C",
+);
+
+sub getComplement {
+	my $seq = shift;
+	my $complementSeq = '';
+	foreach my $base (split //, $seq) {
+		$complementSeq = $complementSeq . $complement{$base};
+	}
+	return $complementSeq;
+}
+sub getReverseComplement{
+	my $seq = shift;
+	my $complementSeq = getComplement($seq);
+	return reverse $complementSeq;
+}
 
 # Get the aminoacid sequence from
 # dna orf sequence.
