@@ -178,7 +178,7 @@ sub read_predict {
 
 sub printLongN1{
   my $seqid = $_[1];
-  my $predstr;
+  my $predstr = '';
   my ($label,$start,$stop);
   my ($tm,$sp);
   my $hanger = 0;

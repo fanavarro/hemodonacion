@@ -213,6 +213,8 @@ sub get_met_mutation_info{
     $hash_seq_info->{'reading_frame'} = '';
     $hash_seq_info->{'stop_codon_position'} = '';
     $hash_seq_info->{'seq_length'} = '';
+    $hash_seq_info->{'premature_stop_codon'} = '';
+    
 
     
     my $cdna = $_[0];

@@ -78,7 +78,7 @@ sub writeEntry{
 	my $csv_separator = $this->{csv_separator};
 	
 	my $string = "";
-	for (my $i = 0; $i < scalar  keys  %entry; $i++){
+	for (my $i = 0; $i < scalar  @fieldNames; $i++){
 		my $fieldName = $fieldNames[$i];
 		my $value = defined($entry{$fieldName}) ? $entry{$fieldName} : '';
 		$string = $string . $value . $csv_separator;

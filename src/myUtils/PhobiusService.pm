@@ -60,7 +60,6 @@ sub get_info_signal_peptide_rest{
 sub get_info_signal_peptide_local{
 	my %seqs = %{shift()};
 	my $fasta = hash_to_fasta(\%seqs);
-	
 	# use qx to call local phobius program.
 	my $phobius_output = qx(echo "$fasta" |  $PHOBIUS_LOCAL_DIR -long);
 	chomp($phobius_output );

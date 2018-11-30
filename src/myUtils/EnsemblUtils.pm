@@ -420,8 +420,8 @@ sub get_cds_errors{
 	my $this = shift;
     my $transcript = $_[0];
     my $cds_errors="";
-    my $five_cds = get_attribute($transcript, 'cds_start_NF');
-    my $three_cds = get_attribute($transcript, 'cds_end_NF');
+    my $five_cds = $this->get_attribute($transcript, 'cds_start_NF');
+    my $three_cds = $this->get_attribute($transcript, 'cds_end_NF');
     if ($five_cds){
 	$cds_errors = $cds_errors . $five_cds . '-';
     }
@@ -622,47 +622,60 @@ sub get_atgpr_info{
 sub get_match_pwm_info{
 	my $this = shift;
     my $tva = $_[0];
-    my $hash_pwm_info = {};
+    
+
+    my $mutated_cdna = get_variation_cdna_seq($tva);
+    my $cdna = $tva->transcript->seq->seq;
+    my $cds = $tva->transcript->translateable_seq;
+    my $translation_start_pos = myUtils::SeqUtils::get_translation_start_pos($cdna, $cds);
+    my $five_prime_affected = !defined($tva->transcript_variation->cds_start); 
+    
+    return get_match_pwm_info_with_seqs($cdna, $mutated_cdna, $cds, $five_prime_affected);
+}
+
+sub get_match_pwm_info_with_seqs{
+	my $this = shift;
+	my $cdna = shift;
+	my $mutated_cdna = shift;
+	my $cds = shift;
+	my $five_prime_affected = shift;
+	my $translation_start_pos = myUtils::SeqUtils::get_translation_start_pos($cdna, $cds);
+	
+	my $hash_pwm_info = {};
     $hash_pwm_info->{'met_position'} = '';
     $hash_pwm_info->{'reading_frame'} = '';
     $hash_pwm_info->{'stop_codon_position'} = '';
     $hash_pwm_info->{'seq_length'} = '';
     $hash_pwm_info->{'init_codon'} = '';
     $hash_pwm_info->{'score'} = '';
-
-    my $mutated_cdna = get_variation_cdna_seq($tva);
-    if (defined($mutated_cdna)){
-        my $cdna = $tva->transcript->seq->seq;
-        my $cds = $tva->transcript->translateable_seq;
-        my $translation_start_pos = myUtils::SeqUtils::get_translation_start_pos($cdna, $cds);
-        my $five_prime_affected = !defined($tva->transcript_variation->cds_start);
-
-        my $matchpwm = myUtils::MatchPWM->instance();
-        my $hits = $matchpwm->myUtils::MatchPWM::get_kozak_matches($mutated_cdna);
-        my $n = 0;
-        if (defined $hits && defined $hits->{INIT_CODON_POS}){
-            $n = scalar @{$hits->{INIT_CODON_POS}};
-        }
-        my $index = 0;
-        # Buscamos un match que no este en 5' utr y que enga un ATG como codon de inicio
-        while ($index < $n){
-            if ($hits->{INIT_CODON_POS}->[$index] >= $translation_start_pos && substr($mutated_cdna, $hits->{INIT_CODON_POS}->[$index], 3) eq "ATG"){
-                last;
-            }
-            $index = $index + 1;
-        }
-        # If we have found a kozak sequence after original met
-        if($index < $n){
-           my $found_met_pos = $hits->{INIT_CODON_POS}->[$index];
-           #print "pwm met found at pos $found_met_pos (" . substr($cdna, $found_met_pos, 3) . ")\n";
-           my $hash_seq_info = myUtils::SeqUtils::get_met_mutation_info($cdna, $cds, $mutated_cdna, $five_prime_affected, $found_met_pos);
-           $hash_pwm_info->{'met_position'} = $hash_seq_info->{'met_position'};
-           $hash_pwm_info->{'reading_frame'} = $hash_seq_info->{'reading_frame'};
-           $hash_pwm_info->{'stop_codon_position'} = $hash_seq_info->{'stop_codon_position'};
-           $hash_pwm_info->{'seq_length'} = $hash_seq_info->{'seq_length'};
-           $hash_pwm_info->{'score'} = $hits->{SCORE}->[$index];
-           $hash_pwm_info->{'init_codon'} = substr($mutated_cdna, $found_met_pos, 3);
-        }
+    
+    if(defined($mutated_cdna)){
+		my $matchpwm = myUtils::MatchPWM->instance();
+		my $hits = $matchpwm->myUtils::MatchPWM::get_kozak_matches($mutated_cdna);
+		my $n = 0;
+		if (defined $hits && defined $hits->{INIT_CODON_POS}){
+		    $n = scalar @{$hits->{INIT_CODON_POS}};
+		}
+		my $index = 0;
+		# Buscamos un match que no este en 5' utr y que enga un ATG como codon de inicio
+		while ($index < $n){
+		    if ($hits->{INIT_CODON_POS}->[$index] >= $translation_start_pos && substr($mutated_cdna, $hits->{INIT_CODON_POS}->[$index], 3) eq "ATG"){
+		        last;
+		    }
+		    $index = $index + 1;
+		}
+		# If we have found a kozak sequence after original met
+		if($index < $n){
+		   my $found_met_pos = $hits->{INIT_CODON_POS}->[$index];
+		   #print "pwm met found at pos $found_met_pos (" . substr($cdna, $found_met_pos, 3) . ")\n";
+		   my $hash_seq_info = myUtils::SeqUtils::get_met_mutation_info($cdna, $cds, $mutated_cdna, $five_prime_affected, $found_met_pos);
+		   $hash_pwm_info->{'met_position'} = $hash_seq_info->{'met_position'};
+		   $hash_pwm_info->{'reading_frame'} = $hash_seq_info->{'reading_frame'};
+		   $hash_pwm_info->{'stop_codon_position'} = $hash_seq_info->{'stop_codon_position'};
+		   $hash_pwm_info->{'seq_length'} = $hash_seq_info->{'seq_length'};
+		   $hash_pwm_info->{'score'} = $hits->{SCORE}->[$index];
+		   $hash_pwm_info->{'init_codon'} = substr($mutated_cdna, $found_met_pos, 3);
+		}
     }
     return $hash_pwm_info;
 }
@@ -679,12 +692,31 @@ sub get_noderer_info {
     $hash_noderer_info->{'score'} = '';
 
     my $mutated_cdna = get_variation_cdna_seq($tva);
-    if (defined($mutated_cdna)){
-        my $cdna = $tva->transcript->seq->seq;
-        my $cds = $tva->transcript->translateable_seq;
-        my $translation_start_pos = myUtils::SeqUtils::get_translation_start_pos($cdna, $cds);
-        my $five_prime_affected = !defined($tva->transcript_variation->cds_start);
+    my $cdna = $tva->transcript->seq->seq;
+    my $cds = $tva->transcript->translateable_seq;
+    my $translation_start_pos = myUtils::SeqUtils::get_translation_start_pos($cdna, $cds);
+    my $five_prime_affected = !defined($tva->transcript_variation->cds_start);
+    
+    return get_noderer_info_with_seqs($cdna, $mutated_cdna, $cds, $five_prime_affected);
+}
 
+sub get_noderer_info_with_seqs{
+	my $this = shift;
+	my $cdna = shift;
+	my $mutated_cdna = shift;
+	my $cds = shift;
+	my $five_prime_affected = shift;
+	my $translation_start_pos = myUtils::SeqUtils::get_translation_start_pos($cdna, $cds);
+	
+	my $hash_noderer_info = {};
+    $hash_noderer_info->{'met_position'} = '';
+    $hash_noderer_info->{'reading_frame'} = '';
+    $hash_noderer_info->{'stop_codon_position'} = '';
+    $hash_noderer_info->{'seq_length'} = '';
+    $hash_noderer_info->{'init_codon'} = '';
+    $hash_noderer_info->{'score'} = '';
+    
+    if (defined($mutated_cdna)){
         my $noderer = myUtils::Noderer->instance();
         my $min_efficiency = 87; # Kozak sequence lower bound.
         my $hits = $noderer->myUtils::Noderer::get_kozak_matches($mutated_cdna, $min_efficiency);
@@ -712,6 +744,7 @@ sub get_noderer_info {
            $hash_noderer_info->{'init_codon'} = substr($mutated_cdna, $found_met_pos, 3);
         }
     }
+    
     return $hash_noderer_info;
 }
 
@@ -784,14 +817,24 @@ sub get_signal_peptide_conservarion{
 #   met_position1_conserved|lost met_position2_conserved|lost ...
 sub get_five_prime_utr_info{
 	my $this = shift;
-    my $formatted_result = '';
     my $tva = shift;
     my $transcript = $tva->transcript;
     my $mutated_seq = get_variation_cdna_seq($tva);
     my $wild_seq = $transcript->seq->seq;
-    if (defined ($transcript->five_prime_utr) && defined ($wild_seq) && defined ($mutated_seq)){
-        my $number_of_new_or_deleted_nucleotides = abs(length($wild_seq) - length($mutated_seq));
-        my $met_info_list = myUtils::SeqUtils::get_5_utr_mets_info($transcript->five_prime_utr->seq, $number_of_new_or_deleted_nucleotides);
+    my $five_utr_seq = $transcript->five_prime_utr->seq;
+    return get_five_prime_utr_info_with_seqs($wild_seq, $mutated_seq, $five_utr_seq);
+
+}
+
+sub get_five_prime_utr_info_with_seqs{
+	my $this = shift;
+	my $cdna = shift;
+	my $mutated_cdna = shift;
+	my $five_prime_seq = shift;
+	my $formatted_result = '';
+	if (defined ($five_prime_seq) && defined ($cdna) && defined ($mutated_cdna)){
+        my $number_of_new_or_deleted_nucleotides = abs(length($cdna) - length($mutated_cdna));
+        my $met_info_list = myUtils::SeqUtils::get_5_utr_mets_info($five_prime_seq, $number_of_new_or_deleted_nucleotides);
         foreach my $met_info (@{$met_info_list}){
             $formatted_result = $formatted_result . $met_info->{'met_position'} . '_';
             $formatted_result = $formatted_result . $met_info->{'reading_frame'} . '_';
@@ -801,5 +844,4 @@ sub get_five_prime_utr_info{
     }
     return $formatted_result;
 }
-
 1;
