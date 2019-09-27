@@ -23,6 +23,7 @@ sub _new_instance {
 	$this->{transcript_adaptor} = $this->{registry}->get_adaptor( 'homo_sapiens', 'core', 'transcript' );
 	$this->{slice_adaptor} = $this->{registry}->get_adaptor( 'Human', 'Core', 'Slice' );
 	$this->{trv_adaptor} = $this->{registry}->get_adaptor( 'homo_sapiens', 'variation', 'transcriptvariation' );
+	$this->{variation_adaptor} = $this->{registry}->get_adaptor( 'homo_sapiens', 'variation', 'variation' );
 	return $this;
 }
 
@@ -843,5 +844,16 @@ sub get_five_prime_utr_info_with_seqs{
         chop($formatted_result)
     }
     return $formatted_result;
+}
+
+sub getMAF {
+	my $this = shift;
+	my $variationID = shift;
+	my $variation = $this->{variation_adaptor}->fetch_by_name($variationID);
+	if (defined $variation){
+		return $variation->minor_allele_frequency ();
+	} else {
+		return undef;
+	}
 }
 1;

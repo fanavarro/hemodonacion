@@ -34,7 +34,7 @@ my %inputParams = (
 );
 my $inputCSV = myUtils::CsvManager->new (%inputParams);
 
-my @outputFields = qw(CHROMOSOME TRANSCRIPT_ID GENE_ID GENE_NAME PROTEIN_ID VARIATION_ID REF ALT SELECTED_ALT SIGNAL_PEPTIDE_START SIGNAL_PEPTIDE_END METS_IN_5_UTR APPROACH1_MET_POSITION APPROACH1_STOP_CODON_POSITION APPROACH1_MUTATED_SEQUENCE_LENGTH APPROACH1_READING_FRAME_STATUS APPROACH1_SIGNAL_PEPTIDE_CONSERVATION APPROACH2_MET_POSITION APPROACH2_INIT_CODON APPROACH2_STOP_CODON_POSITION APPROACH2_MUTATED_SEQUENCE_LENGTH APPROACH2_SCORE APPROACH2_READING_FRAME_STATUS APPROACH2_SIGNAL_PEPTIDE_CONSERVATION APPROACH3_MET_POSITION APPROACH3_INIT_CODON APPROACH3_STOP_CODON_POSITION APPROACH3_MUTATED_SEQUENCE_LENGTH APPROACH3_SCORE APPROACH3_READING_FRAME_STATUS APPROACH3_SIGNAL_PEPTIDE_CONSERVATION);
+my @outputFields = qw(CHROMOSOME TRANSCRIPT_ID GENE_ID GENE_NAME PROTEIN_ID VARIATION_ID MAF REF ALT SELECTED_ALT SIGNAL_PEPTIDE_START SIGNAL_PEPTIDE_END METS_IN_5_UTR APPROACH1_MET_POSITION APPROACH1_STOP_CODON_POSITION APPROACH1_MUTATED_SEQUENCE_LENGTH APPROACH1_READING_FRAME_STATUS APPROACH1_SIGNAL_PEPTIDE_CONSERVATION APPROACH2_MET_POSITION APPROACH2_INIT_CODON APPROACH2_STOP_CODON_POSITION APPROACH2_MUTATED_SEQUENCE_LENGTH APPROACH2_SCORE APPROACH2_READING_FRAME_STATUS APPROACH2_SIGNAL_PEPTIDE_CONSERVATION APPROACH3_MET_POSITION APPROACH3_INIT_CODON APPROACH3_STOP_CODON_POSITION APPROACH3_MUTATED_SEQUENCE_LENGTH APPROACH3_SCORE APPROACH3_READING_FRAME_STATUS APPROACH3_SIGNAL_PEPTIDE_CONSERVATION);
 my %outputParams = (
 	fields    => \@outputFields,
 	csv_separator   => "\t",
@@ -59,9 +59,14 @@ foreach my $row (@{$rows}){
 	}
 	my $variationGenomicPosition = $row->{'POS'};
 	
+	
 	# Get transcripts that overlaps with the variation position.
 	my $transcripts = getOverlappingTranscripts($chrom, $variationGenomicPosition);
-	
+	my $variationID = $row->{'ID'};
+	my $variationMAF = undef;
+	if(scalar @{$transcripts} > 0){
+		$variationMAF = $ensemblUtils->getMAF($variationID);
+	}
 	# For each transcript check
 	foreach my $transcript ( @{$transcripts} ){
 		# Skip transcript if there are error annotations in CDS.
@@ -91,6 +96,7 @@ foreach my $row (@{$rows}){
 						my $alleleInfo = generateAlleleInfo($cdna, $mutated_cdna, $cds, $five_prime_utr_seq, $signal_peptide_info, isFivePrimeAffected());
 						my %entry = (%{$alleleInfo}, %{$transcript_info});
 						$entry{'SELECTED_ALT'} = $allele;
+						$entry{'MAF'} = $variationMAF;
 						push(@outputEntries, \%entry);
 					}
 				}
@@ -101,7 +107,6 @@ foreach my $row (@{$rows}){
 $outputCSV->myUtils::CsvManager::writeEntries(\@outputEntries);
 $outputCSV->myUtils::CsvManager::close();
 $inputCSV->myUtils::CsvManager::close();
-
 
 sub generateTranscriptInfo {
 	my $transcript = shift;
