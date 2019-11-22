@@ -53,13 +53,18 @@ $registry->set_reconnect_when_lost();
 
 
 # Get the adaptor to get the Transcript, slices and transcript variation from the database
-my $transcript_adaptor = $registry->get_adaptor( 'homo_sapiens', 'core', 'transcript' );
-my $slice_adaptor = $registry->get_adaptor( 'Human', 'Core', 'Slice' );
-my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcriptvariation' );
+#my $transcript_adaptor = $registry->get_adaptor( 'homo_sapiens', 'core', 'transcript' );
+#my $slice_adaptor = $registry->get_adaptor( 'Human', 'Core', 'Slice' );
+#my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcriptvariation' );
+
+
+my $transcript_adaptor = $registry->get_adaptor( 'mus_musculus', 'core', 'transcript' );
+my $slice_adaptor = $registry->get_adaptor( 'mus_musculus', 'Core', 'Slice' );
+my $trv_adaptor = $registry->get_adaptor( 'mus_musculus', 'variation', 'transcriptvariation' );
 
 # Chromosomes to be treated
-my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
-#my @chromosomes = qw(Y);
+#my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
+my @chromosomes = qw(1);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes

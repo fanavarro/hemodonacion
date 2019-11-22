@@ -1,0 +1,79 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>dis.um.es</groupId>
+	<artifactId>hemodonacion-ml</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	<properties>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<fully.qualified.main.class>dis.um.es.hemodonacionML.main.Main</fully.qualified.main.class>
+	</properties>
+	<build>
+		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<archive>
+								<manifest>
+									<mainClass>${fully.qualified.main.class}</mainClass>
+								</manifest>
+							</archive>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<!-- https://mvnrepository.com/artifact/nz.ac.waikato.cms.weka/weka-stable -->
+		<dependency>
+			<groupId>nz.ac.waikato.cms.weka</groupId>
+			<artifactId>weka-stable</artifactId>
+			<version>3.8.3</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/nz.ac.waikato.cms.weka/LibSVM -->
+		<dependency>
+			<groupId>nz.ac.waikato.cms.weka</groupId>
+			<artifactId>LibSVM</artifactId>
+			<version>1.0.10</version>
+		</dependency>
+
+		<!-- Descargar de https://sourceforge.net/projects/moea/ e instalar manualmente -->
+		<dependency>
+			<groupId>dis.um.es.weka</groupId>
+			<artifactId>MultiObjectiveEvolutionarySearch</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
+		<!-- Descargar de https://github.com/sebastian-luna-valero/PSOSearch/releases/download/1.2.0/PSOSearch.zip 
+			e instalar manualmente -->
+		<dependency>
+			<groupId>dis.um.es.weka</groupId>
+			<artifactId>PSOSearch</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/args4j/args4j -->
+		<dependency>
+			<groupId>args4j</groupId>
+			<artifactId>args4j</artifactId>
+			<version>2.33</version>
+		</dependency>
+
+	</dependencies>
+
+</project>
