@@ -1,4 +1,4 @@
-setwd("~/hemodonacion/data/weka")
+setwd("~/hemodonacion/ML")
 library("RWeka")
 library("partykit")
 library(caret)
@@ -81,6 +81,8 @@ csv$CLASS = factor(csv$CLASS)
 summary(csv)
 # Eliminar NA
 csv = na.exclude(csv)
+write.table(csv, file = "/home/fabad/mutaciones.tsv", sep="\t", row.names = F)
+
 underSample = downSample(csv[, 1:length(csv)-1], csv[,length(csv)], yname='CLASS')
 test = setdiff(csv,underSample)
 ctrl <- trainControl(method = "repeatedcv", 

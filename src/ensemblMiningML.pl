@@ -11,7 +11,7 @@ use List::Util qw[min max];
 use DateTime;
 use myUtils::MatchPWM;
 use myUtils::Noderer;
-
+use myUtils::EVAService;
 
 my $MAX_KOZAK_RESULTS = 50000;
 # Needed to write to nohup.out in real time
@@ -57,14 +57,15 @@ $registry->set_reconnect_when_lost();
 #my $slice_adaptor = $registry->get_adaptor( 'Human', 'Core', 'Slice' );
 #my $trv_adaptor = $registry->get_adaptor( 'homo_sapiens', 'variation', 'transcriptvariation' );
 
-
+my $taxonomic_code = "mus_musculus";
+my $assembly_code = "grcm38";
 my $transcript_adaptor = $registry->get_adaptor( 'mus_musculus', 'core', 'transcript' );
 my $slice_adaptor = $registry->get_adaptor( 'mus_musculus', 'Core', 'Slice' );
 my $trv_adaptor = $registry->get_adaptor( 'mus_musculus', 'variation', 'transcriptvariation' );
 
 # Chromosomes to be treated
 #my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y);
-my @chromosomes = qw(1);
+my @chromosomes = qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 X Y);
 
 # Sequence Ontology terms
 # start_lost -> a codon variant that changes
@@ -206,8 +207,16 @@ sub get_transcript_variation_info{
         # If there exist errors in cds or variation does not have evidences, we skip the transcript_variation.
         if ($cds_errors ne ""){next};
         #if (scalar(@{$variation->get_all_evidence_values}) == 0){next};
-        my $minor_allele_frequency = $tv->variation_feature->minor_allele_frequency ? $tv->variation_feature->minor_allele_frequency : '';
-        if ($minor_allele_frequency eq ''){next};
+        my $minor_allele_frequency = undef;
+        if (defined $tv->variation_feature->minor_allele_frequency){
+        	$minor_allele_frequency = $tv->variation_feature->minor_allele_frequency
+        } else{
+        	$minor_allele_frequency = get_highest_population_maf_from_eva($tv);
+        }
+        if (!defined($minor_allele_frequency) || $minor_allele_frequency eq ''){
+        	print "Empty minor allele frequency. Skipping...\n";
+        	next;
+        };
         my $class = $minor_allele_frequency < 0.01 ? 'DELETERIOUS' : 'BENIGN';
         #my $phenotype_info = get_phenotype_info($variation);
         #my $publications_info = get_publications_info($variation);
@@ -805,6 +814,41 @@ sub get_five_prime_utr_info{
         chop($formatted_result)
     }
     return $formatted_result;
+}
+
+# Get the highest population MAF from the transcript variation passed as argument.
+# param 0 -> transcript variation object.
+# return highest population MAF
+sub get_highest_population_maf_from_eva {
+	my $tv = shift;
+	my $transcript = $tv->transcript;
+	my $ensembl_taxonomic_code = $tv->transcript->feature_Slice->coord_system->species;
+	my $eva_taxonomic_code = get_taxonomic_code_for_eva($ensembl_taxonomic_code);
+	my $ensembl_assembly_code = $tv->transcript->feature_Slice->coord_system->version;
+	my $eva_assembly_code = get_assembly_code_for_eva($ensembl_assembly_code);
+	my $variation_id = $tv->variation_feature->variation_name;
+	my $eva_service = myUtils::EVAService->instance();
+	my $highest_population_maf = $eva_service->get_highest_population_maf($eva_taxonomic_code, $eva_assembly_code, $variation_id);
+	return $highest_population_maf;
+}
+
+# Get a taxonomic code understandable by EVA services from an ensembl taxonomic code. E.g. "homo_spiens" -> "hsapiens".
+# param 0 -> Ensembl taxonomic code.
+# return EVA taxonomic code.
+sub get_taxonomic_code_for_eva {
+	my $ensembl_taxonomic_code = shift;
+	my $taxonomic_genera = (split ("_", $ensembl_taxonomic_code))[0];
+	my $taxonomic_species = (split ("_", $ensembl_taxonomic_code))[1];
+	my $eva_taxonomic_code = lc(substr($taxonomic_genera, 0, 1) . $taxonomic_species);
+	return $eva_taxonomic_code;	
+}
+
+# Get an assembly code understandable by EVA services from an ensembl assembly code. E.g. "GRCm38" -> "grcm38".
+# param 0 -> Ensembl assembly code.
+# return EVA assembly code.
+sub get_assembly_code_for_eva {
+	my $ensembl_assembly_code = shift;
+	return lc $ensembl_assembly_code;	
 }
 
 
