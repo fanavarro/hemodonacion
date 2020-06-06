@@ -6,6 +6,7 @@ set.seed(12345)
 # Leer el csv sin filtros
 # csv = read.csv("out.csv", sep="\t",stringsAsFactors=FALSE)
 csv = read.csv("out-no-filtro-transcripts.csv", sep="\t",stringsAsFactors=FALSE)
+csv = read.csv("/home/fabad/hemodonacion/src/homo_sapiens.tsv", sep="\t",stringsAsFactors=FALSE)
 
 
 # Nos quedamos solo con los SNPs que afectan a una sola posicion
@@ -17,11 +18,22 @@ for(i in 1:nrow(csv)){
   } else {
     str = csv$CDS_COORDS[i]
     range = as.numeric(trimws(strsplit(substr(str, 2, nchar(str)-1),',')[[1]]))
-    if(range[1] != range[2]){
+    if(range[1] != range[2] ){
+      rowsToDelete = c(rowsToDelete, i)
+    }
+  }
+  
+  # Eliminamos inserciones del tipo 'aTg/aGTg', y aquellas mutaciones cuyo primer codon no sea 'ATG'.
+  if(csv$CODON_CHANGE[i] == ''){
+    csv$CODON_CHANGE[i] = NA
+  } else {
+    codonChange = strsplit(csv$CODON_CHANGE[i], "/")
+    if(toupper(codonChange[[1]][1]) != 'ATG' || nchar(codonChange[[1]][1]) != nchar(codonChange[[1]][2])){
       rowsToDelete = c(rowsToDelete, i)
     }
   }
 }
+rowsToDelete = unique(rowsToDelete)
 csv = csv[-c(rowsToDelete), ]
 row.names(csv) = NULL
 nrow(csv[csv$CLASS=='BENIGN',])
@@ -81,7 +93,7 @@ csv$CLASS = factor(csv$CLASS)
 summary(csv)
 # Eliminar NA
 csv = na.exclude(csv)
-write.table(csv, file = "/home/fabad/mutaciones.tsv", sep="\t", row.names = F)
+write.table(csv, file = "/home/fabad/hemodonacion/src/homo_sapiens_filtered.tsv", sep="\t", row.names = F)
 
 underSample = downSample(csv[, 1:length(csv)-1], csv[,length(csv)], yname='CLASS')
 test = setdiff(csv,underSample)

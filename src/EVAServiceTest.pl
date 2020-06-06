@@ -6,7 +6,7 @@ use myUtils::EVAService;
 local $Data::Dumper::Terse = 1;
 local $Data::Dumper::Indent = 1;
 my $eva_service = myUtils::EVAService->instance();
-my $taxonomic_code = "mus_musculus";
+my $taxonomic_code = "mmusculus";
 my $assembly_code = "grcm38";
 my @so_terms = ("SO:0002012"); # start lost;
 my $pos = "X:73095000-73095100";
