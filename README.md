@@ -1,6 +1,6 @@
 # Lost in Translation
 ## Structure
-This repository contains the scripts developed for the Master Thesis in Bioinformatics by the University of Murcia 'Lost in Translation: Bioinformatic analysis of variations affecting the translation initiation codon in the Human Genome.
+This repository contains the scripts developed for the article *'Lost in translation: bioinformatic analysis of variations affecting the translation initiation codon in the human genome'* ([https://doi.org/10.1093/bioinformatics/bty453](https://doi.org/10.1093/bioinformatics/bty453))
 
 The repository contains the following folders:
   * src -> Contains Perl and R scripts. It also has folder called 'myUtils' with used utilities. The principal scripts are:
